@@ -822,7 +822,7 @@
 
         <button class="primary" id="startButton" type="button">Начать встречу</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.1.9.22</p>
+        <p class="app-version">Версия 0.1.9.23a</p>
       </div>
     </section>
 
@@ -915,7 +915,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "fttScore.match.v3";
+    const STORAGE_KEY = "ttScore.autorestore.v1";
 
     const defaultState = () => ({
       players: { A: "Спортсмен A", B: "Спортсмен B" },
@@ -1006,9 +1006,50 @@
 
     function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
 
+    function normalizeRestoredState(candidate) {
+      if (!candidate || typeof candidate !== "object") return null;
+      const restored = candidate.state && typeof candidate.state === "object" ? candidate.state : candidate;
+      if (!restored || restored.status !== "match") return null;
+      if (!restored.players || typeof restored.players.A !== "string" || typeof restored.players.B !== "string") return null;
+      if (!restored.score || typeof restored.score.A !== "number" || typeof restored.score.B !== "number") return null;
+      restored.format = [3, 5, 7].includes(Number(restored.format)) ? Number(restored.format) : 5;
+      restored.initialServer = restored.initialServer === "B" ? "B" : "A";
+      restored.currentFirstServer = restored.currentFirstServer === "B" ? "B" : restored.initialServer;
+      restored.leftPlayer = restored.leftPlayer === "B" ? "B" : "A";
+      restored.handicap = restored.handicap && typeof restored.handicap === "object"
+        ? restored.handicap
+        : { enabled: false, player: "A", points: 0 };
+      restored.handicap.enabled = !!restored.handicap.enabled;
+      restored.handicap.player = restored.handicap.player === "B" ? "B" : "A";
+      restored.handicap.points = Math.min(10, Math.max(0, Number(restored.handicap.points) || 0));
+      restored.gameIndex = Math.max(0, Number(restored.gameIndex) || 0);
+      restored.games = Array.isArray(restored.games) ? restored.games : [];
+      restored.pendingGame = typeof restored.pendingGame === "undefined" ? null : restored.pendingGame;
+      restored.sideChangeAcknowledgedForGame = !!restored.sideChangeAcknowledgedForGame;
+      restored.speechEnabled = typeof restored.speechEnabled === "boolean" ? restored.speechEnabled : false;
+      restored.speechRate = Number(restored.speechRate) || 1.05;
+      restored.history = [];
+      return restored;
+    }
+
+    function persistableState() {
+      const copy = clone(state);
+      copy.history = [];
+      return copy;
+    }
+
     function saveState() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (state.status !== "match") {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          app: "ttScore",
+          schema: 1,
+          savedAt: new Date().toISOString(),
+          state: persistableState()
+        }));
       } catch (_) {}
     }
 
@@ -1017,14 +1058,14 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        if (!parsed || !parsed.players || !parsed.score) return null;
-        if (typeof parsed.speechEnabled !== "boolean") parsed.speechEnabled = false;
-        if (!parsed.speechRate) parsed.speechRate = 1.05;
-        if (typeof parsed.pendingGame === "undefined") parsed.pendingGame = null;
-        return parsed;
+        return normalizeRestoredState(parsed);
       } catch {
         return null;
       }
+    }
+
+    function clearSavedState() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
     }
 
     function vibrate(pattern) {
@@ -1381,6 +1422,12 @@
       return b;
     }
 
+    function makeUndoButton() {
+      const b = makeButton("Undo", "secondary", undo);
+      b.disabled = !historyStack.length;
+      return b;
+    }
+
     function showModal(title, body, actions, summaryRows = []) {
       els.modalTitle.textContent = title;
       els.modalBody.textContent = body;
@@ -1479,7 +1526,7 @@
         `Выиграл(а) ${state.players[winner]} со счётом ${currentGameScoreText(winner)}.`,
         [
           makeButton("Начать следующую партию", "primary", startNextGame),
-          makeButton("Undo", "secondary", undo)
+          makeUndoButton()
         ]
       );
       els.modalBody.classList.add("modal-heading");
@@ -1498,7 +1545,7 @@
         [
           makeButton("Скопировать протокол", "primary", copyResult),
           makeButton("Новая встреча", "secondary", () => showNewMatchConfirm(showMatchOver)),
-          makeButton("Undo", "secondary", undo)
+          makeUndoButton()
         ],
         finalMatchRows(winner)
       );
@@ -1660,7 +1707,10 @@
       applyScoreboardSide();
 
       maybeHandleSideChange();
-      if (pendingGameEndsMatch() && activeModal !== "matchOver") showMatchOver();
+      if (state.pendingGame && activeModal !== "gameOver" && activeModal !== "matchOver") {
+        if (pendingGameEndsMatch()) showMatchOver();
+        else showGameOver(state.pendingGame.winner);
+      }
     }
 
     function render() {
@@ -1740,7 +1790,16 @@
       if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver") closeModal();
     });
 
+    window.addEventListener("pagehide", () => {
+      if (state.status === "match") saveState();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (state.status === "match") saveState();
+    });
+
     document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && state.status === "match") saveState();
       if (document.visibilityState === "visible" && state.status === "match") requestWakeLock();
     });
 
