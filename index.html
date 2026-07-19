@@ -822,7 +822,7 @@
 
         <button class="primary" id="startButton" type="button">Начать встречу</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.1.9.23b</p>
+        <p class="app-version">Версия 0.1.9.24a</p>
       </div>
     </section>
 
@@ -915,7 +915,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.1.9.23b:currentMeeting";
+    const STORAGE_KEY = "ttScore:0.1.9.24a:currentMeeting";
+    const RESTORE_CONFIRMATION_AGE_MS = 120_000;
 
     const defaultState = () => ({
       players: { A: "Спортсмен A", B: "Спортсмен B" },
@@ -939,7 +940,9 @@
       speechRate: 1.05
     });
 
-    let state = loadState() || defaultState();
+    const storedMeeting = loadStoredMeeting();
+    let pendingRestoreState = storedMeeting?.needsConfirmation ? storedMeeting.state : null;
+    let state = storedMeeting && !storedMeeting.needsConfirmation ? storedMeeting.state : defaultState();
     const MAX_UNDO = 50;
     let historyStack = [];
     let setupFormat = state.format || 5;
@@ -1053,12 +1056,22 @@
       } catch (_) {}
     }
 
-    function loadState() {
+    function loadStoredMeeting() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        return normalizeRestoredState(parsed);
+        const restoredState = normalizeRestoredState(parsed);
+        if (!restoredState) return null;
+
+        const savedAtMs = Date.parse(parsed?.savedAt);
+        const hasValidSavedAt = Number.isFinite(savedAtMs);
+        const ageMs = hasValidSavedAt ? Math.max(0, Date.now() - savedAtMs) : 0;
+
+        return {
+          state: restoredState,
+          needsConfirmation: hasValidSavedAt && ageMs >= RESTORE_CONFIRMATION_AGE_MS
+        };
       } catch {
         return null;
       }
@@ -1444,6 +1457,46 @@
       activeModal = null;
     }
 
+    function showRestoreChoice() {
+      if (!pendingRestoreState) return;
+      activeModal = "restoreChoice";
+      showModal(
+        "Найдена сохранённая встреча",
+        `${pendingRestoreState.players.A} — ${pendingRestoreState.players.B}`,
+        [
+          makeButton("Восстановить встречу", "primary", restoreSavedMeeting),
+          makeButton("Начать новую встречу", "danger", discardSavedMeeting)
+        ]
+      );
+      activeModal = "restoreChoice";
+    }
+
+    function restoreSavedMeeting() {
+      if (!pendingRestoreState) return;
+      state = pendingRestoreState;
+      pendingRestoreState = null;
+      historyStack = [];
+      closeModal();
+      render();
+    }
+
+    function discardSavedMeeting() {
+      pendingRestoreState = null;
+      clearSavedState();
+      state = defaultState();
+      historyStack = [];
+      setupFormat = state.format;
+      setupServer = state.initialServer;
+      setupLeft = state.leftPlayer;
+      setupHandicapPlayer = "none";
+      setupHandicapPoints = 0;
+      els.playerAInput.value = state.players.A;
+      els.playerBInput.value = state.players.B;
+      updateHandicapPlayerNames();
+      closeModal();
+      render();
+    }
+
     function matchScoreText() {
       return `${gamesWon("A")}:${gamesWon("B")}`;
     }
@@ -1787,7 +1840,7 @@
     els.copyProtocolButton.addEventListener("click", copyResult);
     els.newMatchButton.addEventListener("click", () => showNewMatchConfirm(showMatchOver));
     els.modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver") closeModal();
+      if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver" && activeModal !== "restoreChoice") closeModal();
     });
 
     window.addEventListener("pagehide", () => {
@@ -1808,6 +1861,7 @@
 
     updateHandicapPlayerNames();
     render();
+    if (pendingRestoreState) showRestoreChoice();
   </script>
 </body>
 </html>
