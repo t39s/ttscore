@@ -444,6 +444,388 @@
     .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
     .app-version { margin: -4px 0 0; text-align: center; font-size: 12px; color: rgba(170,178,200,.72); line-height: 1.35; }
 
+    body.stat-page .topbar { display: none; }
+    #statScreen.active {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 14px;
+      padding-bottom: 8px;
+    }
+    #statScreen.active::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .stat-header {
+      display: grid;
+      gap: 8px;
+      padding: 4px 2px 0;
+    }
+    .stat-title {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 38px);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+    .stat-export-button {
+      width: 100%;
+      min-height: 48px;
+      font-size: 15px;
+      font-weight: 850;
+    }
+    .stat-card {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(21,27,47,.84);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      padding: 16px;
+    }
+    .stat-card h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      letter-spacing: -.035em;
+    }
+    .stat-score-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .stat-score-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-score-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-score-table th,
+    .stat-score-table td {
+      height: 44px;
+      padding: 8px 6px;
+      border-right: 1px solid #303850;
+      border-bottom: 1px solid #303850;
+      background: #151b2f;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 850;
+    }
+    .stat-score-table thead th {
+      height: 38px;
+      background: #1b2238;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-score-table tr:last-child > * { border-bottom: 0; }
+    .stat-score-table tr > *:last-child { border-right: 0; }
+    .stat-score-table .stat-score-player {
+      color: var(--text);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .stat-score-table thead .stat-score-player {
+      color: var(--muted);
+    }
+    .stat-all-games-table .stat-match-current-game {
+      background: #20365e;
+      color: #f4f7ff;
+    }
+    .stat-all-games-table thead .stat-match-current-game {
+      background: #2c4e88;
+    }
+    .stat-all-games-table {
+      min-width: 0;
+      font-size: clamp(9px, 2.6vw, 12px);
+    }
+    .stat-all-games-table th,
+    .stat-all-games-table td {
+      height: 38px;
+      padding: 6px 2px;
+    }
+    .stat-all-games-table .stat-score-player {
+      line-height: 1.08;
+    }
+    .stat-all-games-table tbody .stat-score-player {
+      padding-left: 10px;
+      padding-right: 6px;
+    }
+    .stat-all-games-table .stat-match-total-score {
+      background: #2c4e88;
+      color: #fff;
+      font-size: 115%;
+      font-weight: 950;
+    }
+    .stat-all-games-table .stat-match-game-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-all-games-table .stat-match-future { color: var(--muted); }
+    .stat-status-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: clamp(12px, 3.5vw, 14px);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .stat-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px rgba(114,224,168,.11);
+    }
+    .stat-server-line {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .stat-empty {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .stat-content {
+      display: grid;
+      gap: 14px;
+    }
+    .stat-content[hidden],
+    .stat-empty[hidden] { display: none; }
+    .stat-tabs {
+      display: grid;
+      grid-template-columns: repeat(var(--stat-tab-count, 1), minmax(0, 1fr));
+      gap: 8px;
+      padding-bottom: 2px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .stat-tabs button {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      padding: 9px 4px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .stat-tabs button.selected {
+      background: #3379f6;
+      color: #fff;
+      border-color: transparent;
+    }
+    .stat-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .stat-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-table th,
+    .stat-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      vertical-align: top;
+    }
+    .stat-table tr:last-child th,
+    .stat-table tr:last-child td { border-bottom: 0; }
+    .stat-table th:first-child,
+    .stat-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 700;
+      background: #151b2f;
+      box-shadow: 8px 0 14px -12px rgba(0,0,0,.95);
+    }
+    .stat-table thead th {
+      color: var(--text);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    .stat-table thead th:first-child { z-index: 3; }
+    .stat-metric-main {
+      display: block;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-metric-detail {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .stat-performance-table th:first-child,
+    .stat-performance-table td:first-child {
+      width: 33.333%;
+      max-width: none;
+      white-space: pre-line;
+    }
+    .stat-performance-table th,
+    .stat-performance-table td {
+      width: 33.333%;
+      min-width: 0;
+    }
+    .stat-performance-player-name {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.15;
+      max-height: 2.3em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .stat-chart-wrap {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(5,9,18,.34);
+    }
+    .stat-chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 210px;
+    }
+    .stat-rally-table {
+      min-width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .stat-rally-wrap {
+      position: relative;
+      max-height: min(56vh, 520px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-rally-wrap::before {
+      content: "";
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 8;
+      display: block;
+      width: 100%;
+      height: 2px;
+      margin-bottom: -2px;
+      background: #151b2f;
+      pointer-events: none;
+    }
+    .stat-rally-serve-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .stat-rally-serve-swatch {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(75,134,255,.20);
+      border: 1px solid rgba(75,134,255,.62);
+    }
+    .stat-rally-table th,
+    .stat-rally-table td {
+      width: 33.333%;
+      text-align: center;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .stat-rally-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: #151b2f;
+    }
+    .stat-rally-table thead th {
+      position: static;
+      z-index: auto;
+      background: #151b2f;
+      border-color: #151b2f;
+      outline: 1px solid #151b2f;
+      outline-offset: -1px;
+      box-shadow: 0 -2px 0 #151b2f;
+    }
+    .stat-rally-table th:first-child,
+    .stat-rally-table td:first-child {
+      position: static;
+      width: 33.333%;
+      text-align: center;
+      background: transparent;
+      box-shadow: none;
+    }
+    .stat-rally-table thead th:first-child {
+      position: static;
+      background: #151b2f;
+      border-color: #151b2f;
+      box-shadow: none;
+    }
+    .stat-rally-table thead .stat-rally-legend-cell {
+      padding: 10px 12px;
+      text-align: left;
+      background: #151b2f;
+      border-color: #151b2f;
+    }
+    .stat-rally-table tbody tr.stat-rally-server-a > * {
+      background: rgba(75,134,255,.20);
+      color: #eaf1ff;
+    }
+    .stat-rally-table tbody td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-rally-table tbody tr.stat-rally-server-a td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+    }
+    .stat-rally-table .stat-rally-empty {
+      padding: 18px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .stat-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     
 
 
@@ -822,7 +1204,7 @@
 
         <button class="primary" id="startButton" type="button">Начать встречу</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.1.9.24a</p>
+        <p class="app-version">Версия 0.2.13</p>
       </div>
     </section>
 
@@ -903,6 +1285,62 @@
         <button id="menuButton" class="secondary" type="button" aria-label="Дополнительно">…</button>
       </div>
     </section>
+
+    <section id="statScreen" class="screen" aria-live="polite">
+      <header class="stat-header">
+        <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
+        <h1 class="stat-title" id="statTitle">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
+      </header>
+      <button class="secondary stat-export-button" id="exportReportButton" type="button" hidden>Поделиться</button>
+
+      <section class="stat-card" id="statStatusCard">
+        <div class="stat-score-heading">
+          <h2>Счёт</h2>
+          <div class="stat-status-line"><span class="stat-status-dot" id="statStatusDot"></span><span id="statStatusText">Ожидание данных</span></div>
+        </div>
+        <div class="stat-score-table-wrap" id="statScoreTableWrap" hidden><div id="statAllGamesScore"></div></div>
+        <p class="stat-server-line" id="statServerText" hidden></p>
+      </section>
+
+      <section class="stat-card stat-empty" id="statEmpty">
+        Начните встречу в основной вкладке ttScore. Статистика появится после первого сохранения состояния.
+      </section>
+
+      <div class="stat-content" id="statContent" hidden>
+        <section class="stat-card">
+          <h2>Выиграно розыгрышей (за встречу)</h2>
+          <div class="stat-table-wrap" id="statMatchPerformance"></div>
+          <p class="stat-note">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p>
+        </section>
+
+        <section class="stat-card">
+          <h2>Партии</h2>
+          <div class="stat-tabs" id="statGameTabs"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statGamePerformanceTitle">Выиграно розыгрышей (партия)</h2>
+          <div class="stat-table-wrap" id="statGamePerformance"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statChartTitle">Разница в счёте</h2>
+          <div class="stat-chart-wrap" id="statChart"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statLogTitle">Розыгрыши</h2>
+          <div class="stat-table-wrap stat-rally-wrap" id="statRallyLog"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2>Партии</h2>
+          <div class="stat-tabs" id="statGameTabsBeforeRallies"></div>
+        </section>
+      </div>
+
+      <p class="app-version">Версия 0.2.13</p>
+    </section>
   </main>
 
   <div class="modal-backdrop" id="modalBackdrop">
@@ -915,8 +1353,12 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.1.9.24a:currentMeeting";
+    const STORAGE_KEY = "ttScore:0.2.13:currentMeeting";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
+    const requestedPage = new URLSearchParams(location.search).get("page");
+    const PAGE_MODE = requestedPage === "report" ? "report" : "score";
+    const IS_REPORT_PAGE = PAGE_MODE === "report";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.13:meeting";
 
     const defaultState = () => ({
       players: { A: "Спортсмен A", B: "Спортсмен B" },
@@ -933,6 +1375,7 @@
       score: { A: 0, B: 0 },
       games: [],
       pendingGame: null,
+      rallies: [],
       history: [],
       status: "setup",
       sideChangeAcknowledgedForGame: false,
@@ -941,8 +1384,8 @@
     });
 
     const storedMeeting = loadStoredMeeting();
-    let pendingRestoreState = storedMeeting?.needsConfirmation ? storedMeeting.state : null;
-    let state = storedMeeting && !storedMeeting.needsConfirmation ? storedMeeting.state : defaultState();
+    let pendingRestoreState = !IS_REPORT_PAGE && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
+    let state = storedMeeting && (IS_REPORT_PAGE || !storedMeeting.needsConfirmation) ? storedMeeting.state : defaultState();
     const MAX_UNDO = 50;
     let historyStack = [];
     let setupFormat = state.format || 5;
@@ -950,12 +1393,19 @@
     let setupLeft = state.leftPlayer || "A";
     let setupHandicapPlayer = state.handicap?.enabled ? (state.handicap?.player || "A") : "none";
     let setupHandicapPoints = state.handicap?.enabled ? (state.handicap?.points || 0) : 0;
+    let statsSelectedGame = state.gameIndex || 0;
+    let statsFollowCurrentGame = true;
+    let syncChannel = null;
+    try {
+      if ("BroadcastChannel" in window) syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+    } catch (_) {}
 
     const $ = (id) => document.getElementById(id);
 
     const els = {
       setupScreen: $("setupScreen"),
       matchScreen: $("matchScreen"),
+      statScreen: $("statScreen"),
       subtitle: $("subtitle"),
       formatPill: $("formatPill"),
       playerAInput: $("playerAInput"),
@@ -1004,7 +1454,26 @@
       modalTitle: $("modalTitle"),
       modalBody: $("modalBody"),
       modalSummary: $("modalSummary"),
-      modalActions: $("modalActions")
+      modalActions: $("modalActions"),
+      statTitle: $("statTitle"),
+      exportReportButton: $("exportReportButton"),
+      statStatusCard: $("statStatusCard"),
+      statScoreTableWrap: $("statScoreTableWrap"),
+      statAllGamesScore: $("statAllGamesScore"),
+      statStatusDot: $("statStatusDot"),
+      statStatusText: $("statStatusText"),
+      statServerText: $("statServerText"),
+      statEmpty: $("statEmpty"),
+      statContent: $("statContent"),
+      statMatchPerformance: $("statMatchPerformance"),
+      statGameTabs: $("statGameTabs"),
+      statGameTabsBeforeRallies: $("statGameTabsBeforeRallies"),
+      statChartTitle: $("statChartTitle"),
+      statChart: $("statChart"),
+      statGamePerformanceTitle: $("statGamePerformanceTitle"),
+      statGamePerformance: $("statGamePerformance"),
+      statLogTitle: $("statLogTitle"),
+      statRallyLog: $("statRallyLog")
     };
 
     function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -1028,6 +1497,9 @@
       restored.gameIndex = Math.max(0, Number(restored.gameIndex) || 0);
       restored.games = Array.isArray(restored.games) ? restored.games : [];
       restored.pendingGame = typeof restored.pendingGame === "undefined" ? null : restored.pendingGame;
+      restored.rallies = Array.isArray(restored.rallies)
+        ? restored.rallies.filter(rally => rally && typeof rally === "object")
+        : [];
       restored.sideChangeAcknowledgedForGame = !!restored.sideChangeAcknowledgedForGame;
       restored.speechEnabled = typeof restored.speechEnabled === "boolean" ? restored.speechEnabled : false;
       restored.speechRate = Number(restored.speechRate) || 1.05;
@@ -1045,15 +1517,21 @@
       try {
         if (state.status !== "match") {
           localStorage.removeItem(STORAGE_KEY);
+          notifyStateChanged();
           return;
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           app: "ttScore",
-          schema: 1,
+          schema: 2,
           savedAt: new Date().toISOString(),
           state: persistableState()
         }));
+        notifyStateChanged();
       } catch (_) {}
+    }
+
+    function notifyStateChanged() {
+      try { syncChannel?.postMessage({ type: "state-updated" }); } catch (_) {}
     }
 
     function loadStoredMeeting() {
@@ -1078,7 +1556,10 @@
     }
 
     function clearSavedState() {
-      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        notifyStateChanged();
+      } catch (_) {}
     }
 
     function vibrate(pattern) {
@@ -1236,8 +1717,20 @@
 
     function addPoint(player) {
       if (isMatchOver() || isGameOver()) return;
+      const server = currentServer();
+      const scoreBefore = { A: state.score.A, B: state.score.B };
       pushHistory();
       state.score[player] += 1;
+      const gameRallies = state.rallies.filter(rally => Number(rally.gameIndex) === state.gameIndex);
+      state.rallies.push({
+        gameIndex: state.gameIndex,
+        rallyNumber: gameRallies.length + 1,
+        server,
+        receiver: other(server),
+        winner: player,
+        scoreBefore,
+        scoreAfter: { A: state.score.A, B: state.score.B }
+      });
       vibrate(12);
 
       if (isGameOver()) {
@@ -1596,7 +2089,7 @@
 Выиграл(а) ${state.players[winner]} со счётом ${finalMatchScoreText(winner)}.`,
         "",
         [
-          makeButton("Скопировать протокол", "primary", copyResult),
+          makeShareReportButton("Поделиться отчётом о встрече"),
           makeButton("Новая встреча", "secondary", () => showNewMatchConfirm(showMatchOver)),
           makeUndoButton()
         ],
@@ -1658,11 +2151,19 @@
         "Дополнительно",
         "",
         [
+          makeButton("Открыть отчёт о встрече", "primary", openStatistics),
           makeButton("Новая встреча", "secondary", showNewMatchConfirm),
-          makeButton("Закрыть", "primary", closeModal)
+          makeButton("Закрыть", "secondary", closeModal)
         ]
       );
       activeModal = "overflowMenu";
+    }
+
+    function openStatistics() {
+      const statUrl = new URL(location.href);
+      statUrl.search = "?page=report";
+      window.open(statUrl.toString(), "_blank", "noopener");
+      closeModal();
     }
 
     function showNewMatchConfirm(returnTo = showMenu) {
@@ -1716,6 +2217,664 @@
       syncHandicapPointsOptions();
     }
 
+    function ralliesForGame(gameIndex) {
+      return state.rallies
+        .filter(rally => Number(rally.gameIndex) === gameIndex)
+        .sort((a, b) => Number(a.rallyNumber) - Number(b.rallyNumber));
+    }
+
+    function startScoreForGame() {
+      const score = { A: 0, B: 0 };
+      if (state.handicap?.enabled) score[state.handicap.player] = state.handicap.points;
+      return score;
+    }
+
+    function calculatePerformance(rallies) {
+      const result = {
+        A: { serveWon: 0, serveTotal: 0, receiveWon: 0, receiveTotal: 0, pointsWon: 0 },
+        B: { serveWon: 0, serveTotal: 0, receiveWon: 0, receiveTotal: 0, pointsWon: 0 }
+      };
+      rallies.forEach(rally => {
+        const server = rally.server === "B" ? "B" : "A";
+        const receiver = rally.receiver === "A" || rally.receiver === "B" ? rally.receiver : other(server);
+        const winner = rally.winner === "B" ? "B" : "A";
+        result[server].serveTotal += 1;
+        result[receiver].receiveTotal += 1;
+        result[winner].pointsWon += 1;
+        if (winner === server) result[server].serveWon += 1;
+        if (winner === receiver) result[receiver].receiveWon += 1;
+      });
+      return result;
+    }
+
+    function statPercent(won, total) {
+      return total ? `${Math.round((won / total) * 100)}%` : "—";
+    }
+
+    function statMetricCell(main, detail = "") {
+      const td = document.createElement("td");
+      const mainLine = document.createElement("span");
+      mainLine.className = "stat-metric-main";
+      mainLine.textContent = main;
+      td.append(mainLine);
+      if (detail) {
+        const detailLine = document.createElement("span");
+        detailLine.className = "stat-metric-detail";
+        detailLine.textContent = detail;
+        td.append(detailLine);
+      }
+      return td;
+    }
+
+    function renderPerformanceTable(container, rallies) {
+      container.replaceChildren();
+      const performance = calculatePerformance(rallies);
+      const table = document.createElement("table");
+      table.className = "stat-table stat-performance-table";
+
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      ["", state.players.A, state.players.B].forEach((label, index) => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        if (index === 0) {
+          th.textContent = label;
+        } else {
+          const name = document.createElement("span");
+          name.className = "stat-performance-player-name";
+          name.textContent = label;
+          th.append(name);
+        }
+        headerRow.append(th);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      const rows = [
+        {
+          label: "На своей\nподаче",
+          value: player => [statPercent(performance[player].serveWon, performance[player].serveTotal), `${performance[player].serveWon} из ${performance[player].serveTotal}`]
+        },
+        {
+          label: "На приёме\nподачи",
+          value: player => [statPercent(performance[player].receiveWon, performance[player].receiveTotal), `${performance[player].receiveWon} из ${performance[player].receiveTotal}`]
+        },
+        {
+          label: "Всего",
+          value: player => [String(performance[player].pointsWon), ""]
+        }
+      ];
+
+      rows.forEach(definition => {
+        const row = document.createElement("tr");
+        const th = document.createElement("th");
+        th.scope = "row";
+        th.textContent = definition.label;
+        row.append(th);
+        ["A", "B"].forEach(player => {
+          const [main, detail] = definition.value(player);
+          row.append(statMetricCell(main, detail));
+        });
+        tbody.append(row);
+      });
+      table.append(tbody);
+      container.append(table);
+    }
+
+    function svgElement(tag, attributes = {}) {
+      const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, String(value)));
+      return element;
+    }
+
+    function renderScoreChart(container, gameIndex, rallies) {
+      container.replaceChildren();
+      const start = startScoreForGame();
+      const points = [start, ...rallies.map(rally => rally.scoreAfter)];
+      const differences = points.map(point => (Number(point.A) || 0) - (Number(point.B) || 0));
+      const width = 640;
+      const height = 280;
+      const padding = { left: 42, right: 24, top: 22, bottom: 34 };
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const maxAbsoluteDifference = Math.max(1, ...differences.map(value => Math.abs(value)));
+      const tickStep = Math.max(1, Math.ceil(maxAbsoluteDifference / 4));
+      const scaleLimit = Math.max(tickStep, Math.ceil(maxAbsoluteDifference / tickStep) * tickStep);
+      const xFor = index => padding.left + (points.length > 1 ? (index / (points.length - 1)) * plotWidth : 0);
+      const yFor = value => padding.top + ((scaleLimit - Number(value)) / (scaleLimit * 2)) * plotHeight;
+
+      const svg = svgElement("svg", {
+        class: "stat-chart",
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": `Разница в счёте спортсмена ${state.players.A} в партии ${gameIndex + 1}`
+      });
+
+      for (let value = -scaleLimit; value <= scaleLimit; value += tickStep) {
+        const y = yFor(value);
+        svg.append(svgElement("line", {
+          x1: padding.left,
+          y1: y,
+          x2: width - padding.right,
+          y2: y,
+          stroke: value === 0 ? "rgba(255,255,255,.42)" : "rgba(255,255,255,.10)",
+          "stroke-width": value === 0 ? 2 : 1
+        }));
+        const label = svgElement("text", {
+          x: padding.left - 10,
+          y: y + 4,
+          fill: "#aab2c8",
+          "font-size": 12,
+          "text-anchor": "end"
+        });
+        label.textContent = value > 0 ? `+${value}` : String(value);
+        svg.append(label);
+      }
+
+      let pathData = `M ${xFor(0)} ${yFor(differences[0])}`;
+      for (let index = 1; index < differences.length; index += 1) {
+        pathData += ` L ${xFor(index)} ${yFor(differences[index])}`;
+      }
+      svg.append(svgElement("path", {
+        d: pathData,
+        fill: "none",
+        stroke: "#4b86ff",
+        "stroke-width": 5,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      }));
+      differences.forEach((difference, index) => {
+        svg.append(svgElement("circle", {
+          cx: xFor(index),
+          cy: yFor(difference),
+          r: 6,
+          fill: "#4b86ff",
+          stroke: "#0b1020",
+          "stroke-width": 3
+        }));
+      });
+      container.append(svg);
+    }
+
+    function renderRallyLog(container, gameIndex, rallies) {
+      container.replaceChildren();
+      const table = document.createElement("table");
+      table.className = "stat-table stat-rally-table";
+      const colgroup = document.createElement("colgroup");
+      ["№", "A", "B"].forEach(() => {
+        const column = document.createElement("col");
+        column.style.width = "33.333%";
+        colgroup.append(column);
+      });
+      table.append(colgroup);
+      const thead = document.createElement("thead");
+      const legendRow = document.createElement("tr");
+      const legendCell = document.createElement("th");
+      legendCell.colSpan = 3;
+      legendCell.className = "stat-rally-legend-cell";
+      const legend = document.createElement("div");
+      legend.className = "stat-rally-serve-legend";
+      const swatch = document.createElement("span");
+      swatch.className = "stat-rally-serve-swatch";
+      swatch.setAttribute("aria-hidden", "true");
+      const legendText = document.createElement("span");
+      legendText.textContent = `Подающий: ${state.players.A}`;
+      legend.append(swatch, legendText);
+      legendCell.append(legend);
+      legendRow.append(legendCell);
+      thead.append(legendRow);
+
+      const headerRow = document.createElement("tr");
+      ["№", state.players.A, state.players.B].forEach(label => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = label;
+        headerRow.append(th);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      if (!rallies.length) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 3;
+        cell.className = "stat-rally-empty";
+        cell.textContent = "Розыгрышей пока нет";
+        row.append(cell);
+        tbody.append(row);
+      } else {
+        rallies.forEach((rally, index) => {
+          const row = document.createElement("tr");
+          const rallyNumber = rally.rallyNumber || index + 1;
+          const server = rally.server === "B" ? "B" : "A";
+          const winner = rally.winner === "B" ? "B" : "A";
+          row.classList.toggle("stat-rally-server-a", server === "A");
+          row.setAttribute(
+            "aria-label",
+            `Розыгрыш ${rallyNumber}. Подаёт ${state.players[server]}. Очко выиграл(а) ${state.players[winner]}.`
+          );
+
+          const numberCell = document.createElement("td");
+          numberCell.textContent = String(rallyNumber);
+          row.append(numberCell);
+          ["A", "B"].forEach(player => {
+            const scoreCell = document.createElement("td");
+            scoreCell.textContent = String(rally.scoreAfter[player]);
+            scoreCell.classList.toggle("stat-rally-winner", winner === player);
+            row.append(scoreCell);
+          });
+          tbody.append(row);
+        });
+      }
+      table.append(tbody);
+      container.append(table);
+    }
+
+    const CYRILLIC_INITIALS = {
+      А: "A", Б: "B", В: "V", Г: "G", Д: "D", Е: "E", Ё: "E",
+      Ж: "Z", З: "Z", И: "I", Й: "I", К: "K", Л: "L", М: "M",
+      Н: "N", О: "O", П: "P", Р: "R", С: "S", Т: "T", У: "U",
+      Ф: "F", Х: "K", Ц: "T", Ч: "C", Ш: "S", Щ: "S", Ъ: "X",
+      Ы: "Y", Ь: "X", Э: "E", Ю: "Y", Я: "Y"
+    };
+
+    function latinInitial(value) {
+      const firstLetter = String(value || "").normalize("NFKC").match(/\p{L}/u)?.[0];
+      if (!firstLetter) return "X";
+      const upper = firstLetter.toUpperCase();
+      if (CYRILLIC_INITIALS[upper]) return CYRILLIC_INITIALS[upper];
+      const latin = upper.normalize("NFD").replace(/\p{M}/gu, "").match(/[A-Z]/)?.[0];
+      return latin || "X";
+    }
+
+    function exportDateStamp(date) {
+      const pad = value => String(value).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function standaloneReportFilename(date = new Date()) {
+      const initials = `${latinInitial(state.players.A)}-${latinInitial(state.players.B)}`;
+      return `ttScore_report_${exportDateStamp(date)}_${initials}.html`;
+    }
+
+    function snapshotCard(title) {
+      const card = document.createElement("section");
+      card.className = "stat-card";
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+      card.append(heading);
+      return card;
+    }
+
+    function buildStandaloneReportRoot(createdAt = new Date()) {
+      const root = document.createElement("main");
+      root.className = "app export-report";
+      const screen = document.createElement("section");
+      screen.id = "statScreen";
+      screen.className = "screen active";
+
+      const header = document.querySelector("#statScreen .stat-header").cloneNode(true);
+      screen.append(header, els.statStatusCard.cloneNode(true));
+
+      const content = document.createElement("div");
+      content.className = "stat-content";
+      content.append(els.statMatchPerformance.closest(".stat-card").cloneNode(true));
+
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      const selectedGame = gameIndexes.includes(statsSelectedGame) ? statsSelectedGame : state.gameIndex;
+      const createExportGameTabs = () => {
+        const tabs = document.createElement("div");
+        tabs.className = "stat-tabs";
+        tabs.style.setProperty("--stat-tab-count", String(gameIndexes.length));
+        tabs.setAttribute("role", "group");
+        tabs.setAttribute("aria-label", "Выбор партии");
+        gameIndexes.forEach(gameIndex => {
+          const selected = gameIndex === selectedGame;
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.classList.toggle("selected", selected);
+          tab.dataset.exportGameTab = String(gameIndex);
+          tab.setAttribute("aria-pressed", String(selected));
+          tab.setAttribute("aria-controls", `exportGameContent${gameIndex + 1}`);
+          tab.textContent = String(gameIndex + 1);
+          tabs.append(tab);
+        });
+        return tabs;
+      };
+
+      const gamesCard = snapshotCard("Партии");
+      gamesCard.append(createExportGameTabs());
+      content.append(gamesCard);
+
+      gameIndexes.forEach(gameIndex => {
+        const selected = gameIndex === selectedGame;
+        const gameContent = document.createElement("div");
+        gameContent.id = `exportGameContent${gameIndex + 1}`;
+        gameContent.className = "export-game-content";
+        gameContent.dataset.exportGameContent = String(gameIndex);
+        gameContent.hidden = !selected;
+
+        const gameRallies = ralliesForGame(gameIndex);
+        const performanceCard = snapshotCard(
+          `Выиграно розыгрышей (партия ${gameIndex + 1})`
+        );
+        const performanceContainer = document.createElement("div");
+        performanceContainer.className = "stat-table-wrap";
+        performanceCard.append(performanceContainer);
+        renderPerformanceTable(performanceContainer, gameRallies);
+
+        const chartCard = snapshotCard(
+          `Разница в счёте для спортсмена ${state.players.A} (партия ${gameIndex + 1})`
+        );
+        const chartContainer = document.createElement("div");
+        chartContainer.className = "stat-chart-wrap";
+        chartCard.append(chartContainer);
+        renderScoreChart(chartContainer, gameIndex, gameRallies);
+
+        const ralliesCard = snapshotCard(`Розыгрыши (партия ${gameIndex + 1})`);
+        const ralliesContainer = document.createElement("div");
+        ralliesContainer.className = "stat-table-wrap stat-rally-wrap";
+        ralliesCard.append(ralliesContainer);
+        renderRallyLog(ralliesContainer, gameIndex, gameRallies);
+
+        gameContent.append(performanceCard, chartCard, ralliesCard);
+        content.append(gameContent);
+      });
+
+      const bottomGamesCard = snapshotCard("Партии");
+      bottomGamesCard.append(createExportGameTabs());
+      content.append(bottomGamesCard);
+      screen.append(content);
+
+      const savedAt = document.createElement("p");
+      savedAt.className = "stat-snapshot-time";
+      savedAt.textContent = `Отчёт сохранён: ${createdAt.toLocaleString("ru-RU")}`;
+      const version = document.createElement("p");
+      version.className = "app-version";
+      version.textContent = "Версия 0.2.13";
+      screen.append(savedAt, version);
+      root.append(screen);
+      return root;
+    }
+
+    function escapeDocumentText(value) {
+      const span = document.createElement("span");
+      span.textContent = String(value);
+      return span.innerHTML;
+    }
+
+    function buildStandaloneReportHtml(createdAt = new Date()) {
+      const reportTitle = `Отчёт о встрече «${state.players.A} — ${state.players.B}»`;
+      const sourceCss = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
+      const standaloneCss = `
+        html, body { height: auto; min-height: 100%; overflow: visible; }
+        body { user-select: text; }
+        .export-report { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+        .export-report #statScreen.active { overflow: visible; }
+        .export-game-content { display: grid; gap: 14px; }
+        .export-game-content[hidden] { display: none; }
+        .stat-snapshot-time { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
+        @media print {
+          html, body, .export-report, .export-report #statScreen.active { height: auto; overflow: visible; }
+          .stat-card { break-inside: avoid; box-shadow: none; }
+        }
+      `;
+      const standaloneScript = `
+        (() => {
+          const tabs = [...document.querySelectorAll('[data-export-game-tab]')];
+          const contents = [...document.querySelectorAll('[data-export-game-content]')];
+          tabs.forEach(tab => tab.addEventListener('click', () => {
+            const selected = tab.dataset.exportGameTab;
+            tabs.forEach(candidate => {
+              const active = candidate.dataset.exportGameTab === selected;
+              candidate.classList.toggle('selected', active);
+              candidate.setAttribute('aria-pressed', String(active));
+            });
+            contents.forEach(content => {
+              content.hidden = content.dataset.exportGameContent !== selected;
+            });
+          }));
+        })();
+      `;
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>${escapeDocumentText(reportTitle)}</title>
+  <style>${sourceCss}\n${standaloneCss}</style>
+</head>
+<body class="stat-page">
+${buildStandaloneReportRoot(createdAt).outerHTML}
+<script>${standaloneScript}<\/script>
+</body>
+</html>`;
+    }
+
+    function createStandaloneReportArtifact(createdAt = new Date()) {
+      const html = buildStandaloneReportHtml(createdAt);
+      const filename = standaloneReportFilename(createdAt);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const file = typeof File === "function"
+        ? new File([blob], filename, { type: "text/html;charset=utf-8" })
+        : null;
+      return { html, filename, blob, file };
+    }
+
+    function canShareStandaloneReport() {
+      if (typeof navigator.share !== "function" || typeof navigator.canShare !== "function" || typeof File !== "function") return false;
+      try {
+        const probe = new File([""], "ttScore_report.html", { type: "text/html" });
+        return navigator.canShare({ files: [probe] });
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function configureShareButton(button, availableLabel) {
+      const sharingAvailable = state.status === "match" && canShareStandaloneReport();
+      button.disabled = !sharingAvailable;
+      button.title = sharingAvailable ? "" : "Передача HTML-файлов не поддерживается этим браузером";
+      button.setAttribute(
+        "aria-label",
+        sharingAvailable ? availableLabel : "Передача HTML-файлов не поддерживается этим браузером"
+      );
+      return button;
+    }
+
+    function makeShareReportButton(label) {
+      return configureShareButton(
+        makeButton(label, "primary", shareStandaloneReport),
+        label
+      );
+    }
+
+    function createCurrentStandaloneReportArtifact() {
+      const originalTitle = document.title;
+      try {
+        if (!IS_REPORT_PAGE) renderStats();
+        return createStandaloneReportArtifact();
+      } finally {
+        if (!IS_REPORT_PAGE) document.title = originalTitle;
+      }
+    }
+
+    async function shareStandaloneReport() {
+      if (state.status !== "match" || !canShareStandaloneReport()) return;
+      const artifact = createCurrentStandaloneReportArtifact();
+      if (!artifact.file) return;
+      try {
+        await navigator.share({ files: [artifact.file] });
+      } catch (error) {
+        if (error?.name !== "AbortError") alert("Не удалось поделиться отчётом.");
+      }
+    }
+
+    function statsStatusText() {
+      if (state.pendingGame && pendingGameEndsMatch()) return "Встреча завершена";
+      if (state.pendingGame) return "Партия завершена";
+      return "Встреча идёт";
+    }
+
+    function scoreForStatusGame(gameIndex, player) {
+      const completedGame = resultGames()[gameIndex];
+      if (completedGame) return String(player === "A" ? completedGame.scoreA : completedGame.scoreB);
+      if (gameIndex === state.gameIndex && !state.pendingGame) return String(state.score[player]);
+      return "—";
+    }
+
+    function statsMeetingCompleted() {
+      return resultGamesWon("A") >= requiredGames() || resultGamesWon("B") >= requiredGames();
+    }
+
+    function renderAllGamesScoreTable() {
+      els.statAllGamesScore.replaceChildren();
+      const table = document.createElement("table");
+      table.className = "stat-score-table stat-all-games-table";
+      table.setAttribute("aria-label", `Счёт по всем партиям: ${state.players.A} — ${state.players.B}`);
+
+      const playerPercent = state.format >= 7 ? 26 : 30;
+      const totalPercent = state.format >= 7 ? 10 : 12;
+      const gamePercent = (100 - playerPercent - totalPercent) / state.format;
+      const colgroup = document.createElement("colgroup");
+      [playerPercent, ...Array(state.format).fill(gamePercent), totalPercent].forEach(width => {
+        const column = document.createElement("col");
+        column.style.width = `${width}%`;
+        colgroup.append(column);
+      });
+      table.append(colgroup);
+
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      const playerHeader = document.createElement("th");
+      playerHeader.scope = "col";
+      playerHeader.className = "stat-score-player";
+      playerHeader.setAttribute("aria-label", "Спортсмен");
+      headerRow.append(playerHeader);
+      const meetingCompleted = statsMeetingCompleted();
+      for (let gameIndex = 0; gameIndex < state.format; gameIndex += 1) {
+        const gameHeader = document.createElement("th");
+        gameHeader.scope = "col";
+        gameHeader.textContent = String(gameIndex + 1);
+        gameHeader.classList.toggle("stat-match-current-game", !meetingCompleted && gameIndex === state.gameIndex);
+        headerRow.append(gameHeader);
+      }
+      const totalHeader = document.createElement("th");
+      totalHeader.scope = "col";
+      totalHeader.setAttribute("aria-label", "Счёт встречи");
+      headerRow.append(totalHeader);
+      thead.append(headerRow);
+      table.append(thead);
+
+      const games = resultGames();
+      const tbody = document.createElement("tbody");
+      ["A", "B"].forEach(player => {
+        const row = document.createElement("tr");
+        const playerCell = document.createElement("th");
+        playerCell.scope = "row";
+        playerCell.className = "stat-score-player";
+        playerCell.textContent = state.players[player];
+        row.append(playerCell);
+
+        for (let gameIndex = 0; gameIndex < state.format; gameIndex += 1) {
+          const scoreCell = document.createElement("td");
+          const completedGame = games[gameIndex];
+          scoreCell.classList.toggle("stat-match-current-game", !meetingCompleted && gameIndex === state.gameIndex);
+          scoreCell.textContent = scoreForStatusGame(gameIndex, player);
+          if (completedGame) {
+            scoreCell.classList.toggle("stat-match-game-winner", completedGame.winner === player);
+          } else if (gameIndex !== state.gameIndex || state.pendingGame) {
+            scoreCell.classList.add("stat-match-future");
+          }
+          row.append(scoreCell);
+        }
+
+        const totalCell = document.createElement("td");
+        totalCell.className = "stat-match-total-score";
+        totalCell.textContent = String(resultGamesWon(player));
+        row.append(totalCell);
+        tbody.append(row);
+      });
+      table.append(tbody);
+      els.statAllGamesScore.append(table);
+    }
+
+    function renderGameTabSet(container, gameIndexes) {
+      container.replaceChildren();
+      container.style.setProperty("--stat-tab-count", String(gameIndexes.length));
+      container.setAttribute("role", "group");
+      container.setAttribute("aria-label", "Выбор партии");
+      gameIndexes.forEach(gameIndex => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.classList.toggle("selected", gameIndex === statsSelectedGame);
+        button.setAttribute("aria-pressed", String(gameIndex === statsSelectedGame));
+        button.textContent = String(gameIndex + 1);
+        button.addEventListener("click", () => {
+          statsSelectedGame = gameIndex;
+          statsFollowCurrentGame = gameIndex === state.gameIndex;
+          renderStats();
+        });
+        container.append(button);
+      });
+    }
+
+    function renderGameTabs() {
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      if (!gameIndexes.includes(statsSelectedGame)) statsSelectedGame = state.gameIndex;
+      renderGameTabSet(els.statGameTabs, gameIndexes);
+      renderGameTabSet(els.statGameTabsBeforeRallies, gameIndexes);
+    }
+
+    function renderStats() {
+      const hasMeeting = state.status === "match";
+      const reportTitle = `Отчёт о встрече «${state.players.A} — ${state.players.B}»`;
+      els.statTitle.textContent = reportTitle;
+      document.title = reportTitle;
+      els.statEmpty.hidden = hasMeeting;
+      els.statContent.hidden = !hasMeeting;
+      els.statScoreTableWrap.hidden = !hasMeeting;
+      els.exportReportButton.hidden = !hasMeeting;
+      configureShareButton(els.exportReportButton, "Поделиться автономным HTML-отчётом");
+      els.statStatusDot.style.background = hasMeeting ? "var(--accent)" : "var(--muted)";
+
+      if (!hasMeeting) {
+        els.statAllGamesScore.replaceChildren();
+        els.statStatusText.textContent = "Ожидание данных";
+        els.statServerText.hidden = true;
+        els.statServerText.textContent = "";
+        return;
+      }
+
+      renderAllGamesScoreTable();
+      els.statStatusText.textContent = statsStatusText();
+      const showServer = !state.pendingGame && !statsMeetingCompleted();
+      els.statServerText.hidden = !showServer;
+      els.statServerText.textContent = showServer ? `Подающий: ${state.players[currentServer()]}` : "";
+      renderPerformanceTable(els.statMatchPerformance, state.rallies);
+      renderGameTabs();
+
+      const gameRallies = ralliesForGame(statsSelectedGame);
+      els.statChartTitle.textContent = `Разница в счёте для спортсмена ${state.players.A} (партия ${statsSelectedGame + 1})`;
+      renderScoreChart(els.statChart, statsSelectedGame, gameRallies);
+      els.statGamePerformanceTitle.textContent = `Выиграно розыгрышей (партия ${statsSelectedGame + 1})`;
+      renderPerformanceTable(els.statGamePerformance, gameRallies);
+      els.statLogTitle.textContent = `Розыгрыши (партия ${statsSelectedGame + 1})`;
+      renderRallyLog(els.statRallyLog, statsSelectedGame, gameRallies);
+    }
+
+    function refreshStatsFromStorage() {
+      if (!IS_REPORT_PAGE) return;
+      const freshMeeting = loadStoredMeeting();
+      state = freshMeeting?.state || defaultState();
+      statsSelectedGame = statsFollowCurrentGame
+        ? (state.gameIndex || 0)
+        : Math.min(statsSelectedGame, state.gameIndex || 0);
+      render();
+    }
+
     function renderMatch() {
       els.formatPill.textContent = `Из ${state.format} партий`;
       els.subtitle.textContent = `${state.players.A} ${gamesWon("A")} — ${gamesWon("B")} ${state.players.B}`;
@@ -1767,10 +2926,21 @@
     }
 
     function render() {
+      document.body.classList.toggle("stat-page", IS_REPORT_PAGE);
+      if (IS_REPORT_PAGE) {
+        document.body.classList.remove("in-match");
+        els.setupScreen.classList.remove("active");
+        els.matchScreen.classList.remove("active");
+        els.statScreen.classList.add("active");
+        renderStats();
+        return;
+      }
+
       const inMatch = state.status === "match";
       document.body.classList.toggle("in-match", inMatch);
       els.setupScreen.classList.toggle("active", !inMatch);
       els.matchScreen.classList.toggle("active", inMatch);
+      els.statScreen.classList.remove("active");
       els.formatPill.textContent = `Из ${inMatch ? state.format : setupFormat} партий`;
       if (inMatch) renderMatch();
       else {
@@ -1839,29 +3009,40 @@
     els.nextGameButton.addEventListener("click", startNextGame);
     els.copyProtocolButton.addEventListener("click", copyResult);
     els.newMatchButton.addEventListener("click", () => showNewMatchConfirm(showMatchOver));
+    els.exportReportButton.addEventListener("click", shareStandaloneReport);
     els.modalBackdrop.addEventListener("click", (e) => {
       if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver" && activeModal !== "restoreChoice") closeModal();
     });
 
     window.addEventListener("pagehide", () => {
-      if (state.status === "match") saveState();
+      if (!IS_REPORT_PAGE && state.status === "match") saveState();
     });
 
     window.addEventListener("beforeunload", () => {
-      if (state.status === "match") saveState();
+      if (!IS_REPORT_PAGE && state.status === "match") saveState();
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden" && state.status === "match") saveState();
-      if (document.visibilityState === "visible" && state.status === "match") requestWakeLock();
+      if (!IS_REPORT_PAGE && document.visibilityState === "hidden" && state.status === "match") saveState();
+      if (!IS_REPORT_PAGE && document.visibilityState === "visible" && state.status === "match") requestWakeLock();
     });
+
+    window.addEventListener("storage", event => {
+      if (IS_REPORT_PAGE && event.key === STORAGE_KEY) refreshStatsFromStorage();
+    });
+
+    if (syncChannel) {
+      syncChannel.addEventListener("message", event => {
+        if (IS_REPORT_PAGE && event.data?.type === "state-updated") refreshStatsFromStorage();
+      });
+    }
 
     els.playerAInput.value = state.players?.A || "Спортсмен A";
     els.playerBInput.value = state.players?.B || "Спортсмен B";
 
     updateHandicapPlayerNames();
     render();
-    if (pendingRestoreState) showRestoreChoice();
+    if (!IS_REPORT_PAGE && pendingRestoreState) showRestoreChoice();
   </script>
 </body>
 </html>
