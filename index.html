@@ -469,10 +469,45 @@
       letter-spacing: -.05em;
     }
     .stat-export-button {
-      width: 100%;
+      flex: 0 0 auto;
+      min-width: 0;
       min-height: 48px;
+      padding: 10px 12px;
       font-size: 15px;
       font-weight: 850;
+    }
+    .stat-report-controls {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .stat-perspective-label {
+      flex: 0 1 auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      color: var(--muted);
+      font-size: clamp(10px, 3vw, 13px);
+      font-weight: 800;
+      line-height: 1.08;
+      white-space: nowrap;
+    }
+    .stat-perspective-select {
+      flex: 1 1 90px;
+      width: auto;
+      min-width: 0;
+      height: 48px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      text-overflow: ellipsis;
     }
     .stat-card {
       display: grid;
@@ -800,7 +835,7 @@
       background: #151b2f;
       border-color: #151b2f;
     }
-    .stat-rally-table tbody tr.stat-rally-server-a > * {
+    .stat-rally-table tbody tr.stat-rally-selected-server > * {
       background: rgba(75,134,255,.20);
       color: #eaf1ff;
     }
@@ -810,7 +845,7 @@
       font-weight: 950;
       box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
     }
-    .stat-rally-table tbody tr.stat-rally-server-a td.stat-rally-winner {
+    .stat-rally-table tbody tr.stat-rally-selected-server td.stat-rally-winner {
       background: #ffd166;
       color: #251900;
     }
@@ -1204,7 +1239,7 @@
 
         <button class="primary" id="startButton" type="button">Начать встречу</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.2.13</p>
+        <p class="app-version">Версия 0.2.16</p>
       </div>
     </section>
 
@@ -1291,7 +1326,14 @@
         <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
         <h1 class="stat-title" id="statTitle">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
       </header>
-      <button class="secondary stat-export-button" id="exportReportButton" type="button" hidden>Поделиться</button>
+      <div class="stat-report-controls" id="statReportControls">
+        <label class="stat-perspective-label" for="statPerspectiveSelect"><span>С позиции</span><span>спортсмена:</span></label>
+        <select class="stat-perspective-select" id="statPerspectiveSelect" aria-label="С позиции спортсмена">
+          <option value="A">Спортсмен A</option>
+          <option value="B">Спортсмен B</option>
+        </select>
+        <button class="secondary stat-export-button" id="exportReportButton" type="button">Поделиться</button>
+      </div>
 
       <section class="stat-card" id="statStatusCard">
         <div class="stat-score-heading">
@@ -1299,6 +1341,7 @@
           <div class="stat-status-line"><span class="stat-status-dot" id="statStatusDot"></span><span id="statStatusText">Ожидание данных</span></div>
         </div>
         <div class="stat-score-table-wrap" id="statScoreTableWrap" hidden><div id="statAllGamesScore"></div></div>
+        <p class="stat-note" id="statScoreHandicap" hidden></p>
         <p class="stat-server-line" id="statServerText" hidden></p>
       </section>
 
@@ -1310,7 +1353,7 @@
         <section class="stat-card">
           <h2>Выиграно розыгрышей (за встречу)</h2>
           <div class="stat-table-wrap" id="statMatchPerformance"></div>
-          <p class="stat-note">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p>
+          <p class="stat-note" id="statHandicapNote">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p>
         </section>
 
         <section class="stat-card">
@@ -1339,7 +1382,7 @@
         </section>
       </div>
 
-      <p class="app-version">Версия 0.2.13</p>
+      <p class="app-version">Версия 0.2.16</p>
     </section>
   </main>
 
@@ -1353,12 +1396,12 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.2.13:currentMeeting";
+    const STORAGE_KEY = "ttScore:0.2.16:currentMeeting";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
     const requestedPage = new URLSearchParams(location.search).get("page");
     const PAGE_MODE = requestedPage === "report" ? "report" : "score";
     const IS_REPORT_PAGE = PAGE_MODE === "report";
-    const SYNC_CHANNEL_NAME = "ttScore:0.2.13:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.16:meeting";
 
     const defaultState = () => ({
       players: { A: "Спортсмен A", B: "Спортсмен B" },
@@ -1395,6 +1438,7 @@
     let setupHandicapPoints = state.handicap?.enabled ? (state.handicap?.points || 0) : 0;
     let statsSelectedGame = state.gameIndex || 0;
     let statsFollowCurrentGame = true;
+    let reportPerspectivePlayer = "A";
     let syncChannel = null;
     try {
       if ("BroadcastChannel" in window) syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
@@ -1456,16 +1500,20 @@
       modalSummary: $("modalSummary"),
       modalActions: $("modalActions"),
       statTitle: $("statTitle"),
+      statReportControls: $("statReportControls"),
+      statPerspectiveSelect: $("statPerspectiveSelect"),
       exportReportButton: $("exportReportButton"),
       statStatusCard: $("statStatusCard"),
       statScoreTableWrap: $("statScoreTableWrap"),
       statAllGamesScore: $("statAllGamesScore"),
+      statScoreHandicap: $("statScoreHandicap"),
       statStatusDot: $("statStatusDot"),
       statStatusText: $("statStatusText"),
       statServerText: $("statServerText"),
       statEmpty: $("statEmpty"),
       statContent: $("statContent"),
       statMatchPerformance: $("statMatchPerformance"),
+      statHandicapNote: $("statHandicapNote"),
       statGameTabs: $("statGameTabs"),
       statGameTabsBeforeRallies: $("statGameTabsBeforeRallies"),
       statChartTitle: $("statChartTitle"),
@@ -2229,6 +2277,27 @@
       return score;
     }
 
+    function reportPlayerOrder(perspective = reportPerspectivePlayer) {
+      const first = perspective === "B" ? "B" : "A";
+      return [first, other(first)];
+    }
+
+    function scorePointWord(value) {
+      const points = Math.abs(Number(value) || 0);
+      const lastTwoDigits = points % 100;
+      const lastDigit = points % 10;
+      if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return "очков";
+      if (lastDigit === 1) return "очко";
+      if (lastDigit >= 2 && lastDigit <= 4) return "очка";
+      return "очков";
+    }
+
+    function scoreHandicapText() {
+      const points = Number(state.handicap?.points) || 0;
+      const player = state.handicap?.player === "B" ? "B" : "A";
+      return `${state.players[player]} получает фору ${points} ${scorePointWord(points)}`;
+    }
+
     function calculatePerformance(rallies) {
       const result = {
         A: { serveWon: 0, serveTotal: 0, receiveWon: 0, receiveTotal: 0, pointsWon: 0 },
@@ -2266,15 +2335,16 @@
       return td;
     }
 
-    function renderPerformanceTable(container, rallies) {
+    function renderPerformanceTable(container, rallies, perspective = reportPerspectivePlayer) {
       container.replaceChildren();
       const performance = calculatePerformance(rallies);
+      const playerOrder = reportPlayerOrder(perspective);
       const table = document.createElement("table");
       table.className = "stat-table stat-performance-table";
 
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
-      ["", state.players.A, state.players.B].forEach((label, index) => {
+      ["", ...playerOrder.map(player => state.players[player])].forEach((label, index) => {
         const th = document.createElement("th");
         th.scope = "col";
         if (index === 0) {
@@ -2312,7 +2382,7 @@
         th.scope = "row";
         th.textContent = definition.label;
         row.append(th);
-        ["A", "B"].forEach(player => {
+        playerOrder.forEach(player => {
           const [main, detail] = definition.value(player);
           row.append(statMetricCell(main, detail));
         });
@@ -2328,11 +2398,12 @@
       return element;
     }
 
-    function renderScoreChart(container, gameIndex, rallies) {
+    function renderScoreChart(container, gameIndex, rallies, perspective = reportPerspectivePlayer) {
       container.replaceChildren();
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
       const start = startScoreForGame();
       const points = [start, ...rallies.map(rally => rally.scoreAfter)];
-      const differences = points.map(point => (Number(point.A) || 0) - (Number(point.B) || 0));
+      const differences = points.map(point => (Number(point[selectedPlayer]) || 0) - (Number(point[otherPlayer]) || 0));
       const width = 640;
       const height = 280;
       const padding = { left: 42, right: 24, top: 22, bottom: 34 };
@@ -2348,7 +2419,7 @@
         class: "stat-chart",
         viewBox: `0 0 ${width} ${height}`,
         role: "img",
-        "aria-label": `Разница в счёте спортсмена ${state.players.A} в партии ${gameIndex + 1}`
+        "aria-label": `Разница в счёте спортсмена ${state.players[selectedPlayer]} в партии ${gameIndex + 1}`
       });
 
       for (let value = -scaleLimit; value <= scaleLimit; value += tickStep) {
@@ -2397,8 +2468,10 @@
       container.append(svg);
     }
 
-    function renderRallyLog(container, gameIndex, rallies) {
+    function renderRallyLog(container, gameIndex, rallies, perspective = reportPerspectivePlayer) {
       container.replaceChildren();
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
+      const playerOrder = [selectedPlayer, otherPlayer];
       const table = document.createElement("table");
       table.className = "stat-table stat-rally-table";
       const colgroup = document.createElement("colgroup");
@@ -2419,14 +2492,14 @@
       swatch.className = "stat-rally-serve-swatch";
       swatch.setAttribute("aria-hidden", "true");
       const legendText = document.createElement("span");
-      legendText.textContent = `Подающий: ${state.players.A}`;
+      legendText.textContent = `Подающий: ${state.players[selectedPlayer]}`;
       legend.append(swatch, legendText);
       legendCell.append(legend);
       legendRow.append(legendCell);
       thead.append(legendRow);
 
       const headerRow = document.createElement("tr");
-      ["№", state.players.A, state.players.B].forEach(label => {
+      ["№", ...playerOrder.map(player => state.players[player])].forEach(label => {
         const th = document.createElement("th");
         th.scope = "col";
         th.textContent = label;
@@ -2450,7 +2523,7 @@
           const rallyNumber = rally.rallyNumber || index + 1;
           const server = rally.server === "B" ? "B" : "A";
           const winner = rally.winner === "B" ? "B" : "A";
-          row.classList.toggle("stat-rally-server-a", server === "A");
+          row.classList.toggle("stat-rally-selected-server", server === selectedPlayer);
           row.setAttribute(
             "aria-label",
             `Розыгрыш ${rallyNumber}. Подаёт ${state.players[server]}. Очко выиграл(а) ${state.players[winner]}.`
@@ -2459,7 +2532,7 @@
           const numberCell = document.createElement("td");
           numberCell.textContent = String(rallyNumber);
           row.append(numberCell);
-          ["A", "B"].forEach(player => {
+          playerOrder.forEach(player => {
             const scoreCell = document.createElement("td");
             scoreCell.textContent = String(rally.scoreAfter[player]);
             scoreCell.classList.toggle("stat-rally-winner", winner === player);
@@ -2472,31 +2545,13 @@
       container.append(table);
     }
 
-    const CYRILLIC_INITIALS = {
-      А: "A", Б: "B", В: "V", Г: "G", Д: "D", Е: "E", Ё: "E",
-      Ж: "Z", З: "Z", И: "I", Й: "I", К: "K", Л: "L", М: "M",
-      Н: "N", О: "O", П: "P", Р: "R", С: "S", Т: "T", У: "U",
-      Ф: "F", Х: "K", Ц: "T", Ч: "C", Ш: "S", Щ: "S", Ъ: "X",
-      Ы: "Y", Ь: "X", Э: "E", Ю: "Y", Я: "Y"
-    };
-
-    function latinInitial(value) {
-      const firstLetter = String(value || "").normalize("NFKC").match(/\p{L}/u)?.[0];
-      if (!firstLetter) return "X";
-      const upper = firstLetter.toUpperCase();
-      if (CYRILLIC_INITIALS[upper]) return CYRILLIC_INITIALS[upper];
-      const latin = upper.normalize("NFD").replace(/\p{M}/gu, "").match(/[A-Z]/)?.[0];
-      return latin || "X";
-    }
-
     function exportDateStamp(date) {
       const pad = value => String(value).padStart(2, "0");
-      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
     }
 
     function standaloneReportFilename(date = new Date()) {
-      const initials = `${latinInitial(state.players.A)}-${latinInitial(state.players.B)}`;
-      return `ttScore_report_${exportDateStamp(date)}_${initials}.html`;
+      return `tts_${exportDateStamp(date)}.html`;
     }
 
     function snapshotCard(title) {
@@ -2508,22 +2563,41 @@
       return card;
     }
 
-    function buildStandaloneReportRoot(createdAt = new Date()) {
-      const root = document.createElement("main");
-      root.className = "app export-report";
-      const screen = document.createElement("section");
-      screen.id = "statScreen";
-      screen.className = "screen active";
+    function stripElementIds(root) {
+      if (root.id) root.removeAttribute("id");
+      root.querySelectorAll("[id]").forEach(element => element.removeAttribute("id"));
+      return root;
+    }
 
-      const header = document.querySelector("#statScreen .stat-header").cloneNode(true);
-      screen.append(header, els.statStatusCard.cloneNode(true));
+    function buildStandalonePerspectiveView(perspective, selectedGame) {
+      const [selectedPlayer] = reportPlayerOrder(perspective);
+      const view = document.createElement("div");
+      view.className = "export-perspective-view";
+      view.dataset.exportPerspectiveView = perspective;
+      view.hidden = perspective !== reportPerspectivePlayer;
+
+      const statusCard = els.statStatusCard.cloneNode(true);
+      const statusScore = statusCard.querySelector("#statAllGamesScore");
+      renderAllGamesScoreTable(perspective, statusScore);
+      view.append(stripElementIds(statusCard));
 
       const content = document.createElement("div");
       content.className = "stat-content";
-      content.append(els.statMatchPerformance.closest(".stat-card").cloneNode(true));
+
+      const matchPerformanceCard = snapshotCard("Выиграно розыгрышей (за встречу)");
+      const matchPerformanceContainer = document.createElement("div");
+      matchPerformanceContainer.className = "stat-table-wrap";
+      renderPerformanceTable(matchPerformanceContainer, state.rallies, perspective);
+      matchPerformanceCard.append(matchPerformanceContainer);
+      if (state.handicap?.enabled) {
+        const handicapNote = document.createElement("p");
+        handicapNote.className = "stat-note";
+        handicapNote.textContent = "Фора входит в счёт партии, но не считается выигранным розыгрышем.";
+        matchPerformanceCard.append(handicapNote);
+      }
+      content.append(matchPerformanceCard);
 
       const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
-      const selectedGame = gameIndexes.includes(statsSelectedGame) ? statsSelectedGame : state.gameIndex;
       const createExportGameTabs = () => {
         const tabs = document.createElement("div");
         tabs.className = "stat-tabs";
@@ -2537,7 +2611,7 @@
           tab.classList.toggle("selected", selected);
           tab.dataset.exportGameTab = String(gameIndex);
           tab.setAttribute("aria-pressed", String(selected));
-          tab.setAttribute("aria-controls", `exportGameContent${gameIndex + 1}`);
+          tab.setAttribute("aria-controls", `export${perspective}GameContent${gameIndex + 1}`);
           tab.textContent = String(gameIndex + 1);
           tabs.append(tab);
         });
@@ -2551,33 +2625,31 @@
       gameIndexes.forEach(gameIndex => {
         const selected = gameIndex === selectedGame;
         const gameContent = document.createElement("div");
-        gameContent.id = `exportGameContent${gameIndex + 1}`;
+        gameContent.id = `export${perspective}GameContent${gameIndex + 1}`;
         gameContent.className = "export-game-content";
         gameContent.dataset.exportGameContent = String(gameIndex);
         gameContent.hidden = !selected;
 
         const gameRallies = ralliesForGame(gameIndex);
-        const performanceCard = snapshotCard(
-          `Выиграно розыгрышей (партия ${gameIndex + 1})`
-        );
+        const performanceCard = snapshotCard(`Выиграно розыгрышей (партия ${gameIndex + 1})`);
         const performanceContainer = document.createElement("div");
         performanceContainer.className = "stat-table-wrap";
         performanceCard.append(performanceContainer);
-        renderPerformanceTable(performanceContainer, gameRallies);
+        renderPerformanceTable(performanceContainer, gameRallies, perspective);
 
         const chartCard = snapshotCard(
-          `Разница в счёте для спортсмена ${state.players.A} (партия ${gameIndex + 1})`
+          `Разница в счёте для спортсмена ${state.players[selectedPlayer]} (партия ${gameIndex + 1})`
         );
         const chartContainer = document.createElement("div");
         chartContainer.className = "stat-chart-wrap";
         chartCard.append(chartContainer);
-        renderScoreChart(chartContainer, gameIndex, gameRallies);
+        renderScoreChart(chartContainer, gameIndex, gameRallies, perspective);
 
         const ralliesCard = snapshotCard(`Розыгрыши (партия ${gameIndex + 1})`);
         const ralliesContainer = document.createElement("div");
         ralliesContainer.className = "stat-table-wrap stat-rally-wrap";
         ralliesCard.append(ralliesContainer);
-        renderRallyLog(ralliesContainer, gameIndex, gameRallies);
+        renderRallyLog(ralliesContainer, gameIndex, gameRallies, perspective);
 
         gameContent.append(performanceCard, chartCard, ralliesCard);
         content.append(gameContent);
@@ -2586,14 +2658,65 @@
       const bottomGamesCard = snapshotCard("Партии");
       bottomGamesCard.append(createExportGameTabs());
       content.append(bottomGamesCard);
-      screen.append(content);
+      view.append(content);
+      return view;
+    }
+
+    function buildStandaloneReportRoot(createdAt = new Date()) {
+      const root = document.createElement("main");
+      root.className = "app export-report";
+      root.dataset.playerA = state.players.A;
+      root.dataset.playerB = state.players.B;
+      const screen = document.createElement("section");
+      screen.id = "statScreen";
+      screen.className = "screen active";
+
+      const header = document.querySelector("#statScreen .stat-header").cloneNode(true);
+      const headerTitle = header.querySelector("#statTitle");
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      headerTitle.dataset.exportPerspectiveTitle = "";
+      headerTitle.textContent = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
+      stripElementIds(header);
+      screen.append(header);
+
+      const controls = document.createElement("div");
+      controls.className = "stat-report-controls export-report-controls";
+      const label = document.createElement("label");
+      label.className = "stat-perspective-label";
+      label.htmlFor = "exportPerspectiveSelect";
+      const labelFirstLine = document.createElement("span");
+      labelFirstLine.textContent = "С позиции";
+      const labelSecondLine = document.createElement("span");
+      labelSecondLine.textContent = "спортсмена:";
+      label.append(labelFirstLine, labelSecondLine);
+      const select = document.createElement("select");
+      select.className = "stat-perspective-select";
+      select.id = "exportPerspectiveSelect";
+      select.dataset.exportPerspectiveSelect = "";
+      select.setAttribute("aria-label", "С позиции спортсмена");
+      ["A", "B"].forEach(player => {
+        const option = document.createElement("option");
+        option.value = player;
+        option.textContent = state.players[player];
+        if (player === reportPerspectivePlayer) option.setAttribute("selected", "");
+        select.append(option);
+      });
+      controls.append(label, select);
+      screen.append(controls);
+
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      const selectedGame = gameIndexes.includes(statsSelectedGame) ? statsSelectedGame : state.gameIndex;
+      screen.append(
+        buildStandalonePerspectiveView("A", selectedGame),
+        buildStandalonePerspectiveView("B", selectedGame)
+      );
 
       const savedAt = document.createElement("p");
       savedAt.className = "stat-snapshot-time";
       savedAt.textContent = `Отчёт сохранён: ${createdAt.toLocaleString("ru-RU")}`;
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.2.13";
+      version.textContent = "Версия 0.2.16";
       screen.append(savedAt, version);
       root.append(screen);
       return root;
@@ -2606,13 +2729,17 @@
     }
 
     function buildStandaloneReportHtml(createdAt = new Date()) {
-      const reportTitle = `Отчёт о встрече «${state.players.A} — ${state.players.B}»`;
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
       const sourceCss = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
       const standaloneCss = `
         html, body { height: auto; min-height: 100%; overflow: visible; }
         body { user-select: text; }
         .export-report { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
         .export-report #statScreen.active { overflow: visible; }
+        .export-report-controls .stat-perspective-select { flex-basis: 0; }
+        .export-perspective-view { display: grid; gap: 14px; }
+        .export-perspective-view[hidden] { display: none; }
         .export-game-content { display: grid; gap: 14px; }
         .export-game-content[hidden] { display: none; }
         .stat-snapshot-time { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
@@ -2623,6 +2750,24 @@
       `;
       const standaloneScript = `
         (() => {
+          const report = document.querySelector('.export-report');
+          const perspectiveSelect = document.querySelector('[data-export-perspective-select]');
+          const perspectiveTitle = document.querySelector('[data-export-perspective-title]');
+          const perspectiveViews = [...document.querySelectorAll('[data-export-perspective-view]')];
+          const applyPerspective = player => {
+            const selected = player === 'B' ? 'B' : 'A';
+            const firstName = report.dataset['player' + selected];
+            const secondName = report.dataset['player' + (selected === 'A' ? 'B' : 'A')];
+            const title = \`Отчёт о встрече «\${firstName} — \${secondName}»\`;
+            perspectiveViews.forEach(view => {
+              view.hidden = view.dataset.exportPerspectiveView !== selected;
+            });
+            perspectiveTitle.textContent = title;
+            document.title = title;
+          };
+          perspectiveSelect.addEventListener('change', () => applyPerspective(perspectiveSelect.value));
+          applyPerspective(perspectiveSelect.value);
+
           const tabs = [...document.querySelectorAll('[data-export-game-tab]')];
           const contents = [...document.querySelectorAll('[data-export-game-content]')];
           tabs.forEach(tab => tab.addEventListener('click', () => {
@@ -2666,7 +2811,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
     function canShareStandaloneReport() {
       if (typeof navigator.share !== "function" || typeof navigator.canShare !== "function" || typeof File !== "function") return false;
       try {
-        const probe = new File([""], "ttScore_report.html", { type: "text/html" });
+        const probe = new File([""], "tts_report.html", { type: "text/html" });
         return navigator.canShare({ files: [probe] });
       } catch (_) {
         return false;
@@ -2729,11 +2874,15 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       return resultGamesWon("A") >= requiredGames() || resultGamesWon("B") >= requiredGames();
     }
 
-    function renderAllGamesScoreTable() {
-      els.statAllGamesScore.replaceChildren();
+    function renderAllGamesScoreTable(perspective = reportPerspectivePlayer, container = els.statAllGamesScore) {
+      container.replaceChildren();
+      const playerOrder = reportPlayerOrder(perspective);
       const table = document.createElement("table");
       table.className = "stat-score-table stat-all-games-table";
-      table.setAttribute("aria-label", `Счёт по всем партиям: ${state.players.A} — ${state.players.B}`);
+      table.setAttribute(
+        "aria-label",
+        `Счёт по всем партиям: ${state.players[playerOrder[0]]} — ${state.players[playerOrder[1]]}`
+      );
 
       const playerPercent = state.format >= 7 ? 26 : 30;
       const totalPercent = state.format >= 7 ? 10 : 12;
@@ -2770,7 +2919,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
 
       const games = resultGames();
       const tbody = document.createElement("tbody");
-      ["A", "B"].forEach(player => {
+      playerOrder.forEach(player => {
         const row = document.createElement("tr");
         const playerCell = document.createElement("th");
         playerCell.scope = "row";
@@ -2798,7 +2947,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
         tbody.append(row);
       });
       table.append(tbody);
-      els.statAllGamesScore.append(table);
+      container.append(table);
     }
 
     function renderGameTabSet(container, gameIndexes) {
@@ -2830,15 +2979,23 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
 
     function renderStats() {
       const hasMeeting = state.status === "match";
-      const reportTitle = `Отчёт о встрече «${state.players.A} — ${state.players.B}»`;
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
       els.statTitle.textContent = reportTitle;
       document.title = reportTitle;
       els.statEmpty.hidden = hasMeeting;
       els.statContent.hidden = !hasMeeting;
       els.statScoreTableWrap.hidden = !hasMeeting;
-      els.exportReportButton.hidden = !hasMeeting;
+      els.statPerspectiveSelect.options[0].textContent = state.players.A;
+      els.statPerspectiveSelect.options[1].textContent = state.players.B;
+      els.statPerspectiveSelect.value = reportPerspectivePlayer;
+      els.statPerspectiveSelect.disabled = !hasMeeting;
       configureShareButton(els.exportReportButton, "Поделиться автономным HTML-отчётом");
       els.statStatusDot.style.background = hasMeeting ? "var(--accent)" : "var(--muted)";
+      els.statHandicapNote.hidden = !state.handicap?.enabled;
+      const showHandicap = hasMeeting && state.handicap?.enabled && Number(state.handicap?.points) > 0;
+      els.statScoreHandicap.hidden = !showHandicap;
+      els.statScoreHandicap.textContent = showHandicap ? scoreHandicapText() : "";
 
       if (!hasMeeting) {
         els.statAllGamesScore.replaceChildren();
@@ -2848,7 +3005,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
         return;
       }
 
-      renderAllGamesScoreTable();
+      renderAllGamesScoreTable(reportPerspectivePlayer);
       els.statStatusText.textContent = statsStatusText();
       const showServer = !state.pendingGame && !statsMeetingCompleted();
       els.statServerText.hidden = !showServer;
@@ -2857,8 +3014,8 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       renderGameTabs();
 
       const gameRallies = ralliesForGame(statsSelectedGame);
-      els.statChartTitle.textContent = `Разница в счёте для спортсмена ${state.players.A} (партия ${statsSelectedGame + 1})`;
-      renderScoreChart(els.statChart, statsSelectedGame, gameRallies);
+      els.statChartTitle.textContent = `Разница в счёте для спортсмена ${state.players[selectedPlayer]} (партия ${statsSelectedGame + 1})`;
+      renderScoreChart(els.statChart, statsSelectedGame, gameRallies, reportPerspectivePlayer);
       els.statGamePerformanceTitle.textContent = `Выиграно розыгрышей (партия ${statsSelectedGame + 1})`;
       renderPerformanceTable(els.statGamePerformance, gameRallies);
       els.statLogTitle.textContent = `Розыгрыши (партия ${statsSelectedGame + 1})`;
@@ -3009,6 +3166,10 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
     els.nextGameButton.addEventListener("click", startNextGame);
     els.copyProtocolButton.addEventListener("click", copyResult);
     els.newMatchButton.addEventListener("click", () => showNewMatchConfirm(showMatchOver));
+    els.statPerspectiveSelect.addEventListener("change", () => {
+      reportPerspectivePlayer = els.statPerspectiveSelect.value === "B" ? "B" : "A";
+      renderStats();
+    });
     els.exportReportButton.addEventListener("click", shareStandaloneReport);
     els.modalBackdrop.addEventListener("click", (e) => {
       if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver" && activeModal !== "restoreChoice") closeModal();
