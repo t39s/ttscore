@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Отчёт о встрече «Спортсмен A — Спортсмен B»</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #151b2f;
+      --panel-2: #1d2540;
+      --text: #f7f8fb;
+      --muted: #aab2c8;
+      --line: rgba(255,255,255,.12);
+      --accent: #72e0a8;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --shadow: 0 16px 44px rgba(0,0,0,.28);
+      --radius: 24px;
+      --game-badge-height: 74px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #192140 0, var(--bg) 46%, #070b16 100%);
+      overscroll-behavior: none;
+      user-select: none;
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 18px;
+      background: var(--panel-2);
+      min-height: 48px;
+      padding: 12px 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:active { transform: scale(.985); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    select:disabled { opacity: .45; cursor: not-allowed; }
+
+    .app {
+      height: 100vh;
+      min-height: 100vh;
+      height: 100dvh;
+      min-height: 100dvh;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+      max-width: 560px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    body.in-match .topbar { display: none; }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: -.03em;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pill {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
+    #setupScreen.active { overflow: auto; -webkit-overflow-scrolling: touch; }
+    #matchScreen.active { overflow: hidden; }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(21,27,47,.84);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(18px);
+    }
+
+    .setup-grid { display: grid; gap: 14px; }
+    .field { display: grid; gap: 7px; }
+    label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      min-height: 48px;
+    }
+    input:focus, select:focus { border-color: rgba(114,224,168,.65); }
+
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .segmented.two { grid-template-columns: repeat(2, 1fr); }
+    .segmented button { color: var(--muted); font-weight: 800; }
+    .segmented button.selected { background: var(--accent); color: #082115; }
+
+    .primary {
+      background: var(--accent);
+      color: #082115;
+      font-weight: 900;
+      min-height: 58px;
+      font-size: 17px;
+    }
+    .secondary { color: var(--text); border: 1px solid var(--line); }
+    .danger { background: rgba(255,107,107,.16); color: #ffd0d0; }
+
+    .status-card { display: none; }
+    .status-title { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .status-main { font-size: 18px; font-weight: 900; margin-top: 2px; }
+    .server-dot {
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 999px;
+      box-shadow: 0 0 0 7px rgba(114,224,168,.12);
+    }
+
+    .match-compact-header {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 8px;
+      row-gap: 8px;
+      flex: 0 0 auto;
+    }
+    .match-compact-names,
+    .match-compact-games {
+      display: contents;
+    }
+    .match-compact-name,
+    .match-compact-game {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius: 18px;
+      min-width: 0;
+      text-align: center;
+    }
+    .match-compact-name {
+      padding: 10px 10px 8px;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .match-compact-game {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--game-badge-height);
+      padding: 10px 10px;
+      color: var(--text);
+      font-size: clamp(44px, 7.4vh, 68px);
+      font-size: clamp(44px, 7.4dvh, 68px);
+      font-weight: 950;
+      line-height: .9;
+      letter-spacing: -.06em;
+      box-shadow: none;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: minmax(0, 1fr);
+      gap: 10px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .player-zone {
+      position: relative;
+      min-height: 0;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      display: grid;
+      grid-template-rows: 1fr;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .player-zone.server {
+      border-color: rgba(114,224,168,.72);
+      box-shadow: inset 0 0 0 2px rgba(114,224,168,.18), var(--shadow);
+    }
+
+    .player-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 1;
+    }
+    .player-name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .games-won { color: var(--muted); font-size: 14px; font-weight: 800; }
+    .score {
+      align-self: center;
+      justify-self: center;
+      font-size: clamp(72px, 18vh, 156px);
+      font-size: clamp(72px, 18dvh, 156px);
+      font-weight: 950;
+      letter-spacing: -.08em;
+      line-height: .88;
+      z-index: 1;
+    }
+    .tap-hint { display: none; color: var(--muted); font-size: 13px; font-weight: 700; z-index: 1; }
+    .plus {
+      position: absolute;
+      right: 18px;
+      bottom: 10px;
+      font-size: 68px;
+      font-weight: 900;
+      opacity: .08;
+      display: none;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 0.72fr 1.28fr 1.28fr 0.72fr;
+      gap: 8px;
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .toolbar button {
+      min-height: var(--game-badge-height);
+      padding: 10px 12px;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+    .sound-toggle {
+      white-space: normal;
+      padding-left: 8px;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      line-height: 1.06;
+      text-align: center;
+    }
+    .sound-toggle span {
+      display: block;
+      white-space: nowrap;
+    }
+    .sound-toggle.sound-off span {
+      color: var(--danger);
+    }
+    .sound-toggle:disabled {
+      box-shadow: none;
+    }
+
+    .sound-repeat-button {
+      white-space: normal;
+      padding-left: 8px;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      line-height: 1.06;
+      text-align: center;
+    }
+    .sound-repeat-button span {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .notice {
+      border: 1px solid rgba(255,209,102,.34);
+      background: rgba(255,209,102,.12);
+      color: #ffecb8;
+      border-radius: 20px;
+      padding: 12px 14px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .notice.show { display: flex; }
+    .notice strong { display: block; font-size: 14px; }
+    .notice span { display: block; font-size: 12px; color: #f8d98c; margin-top: 2px; }
+    .notice button { min-height: 38px; padding: 8px 10px; background: rgba(255,255,255,.12); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: end;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(0,0,0,.52);
+      z-index: 20;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(560px, 100%);
+      max-height: calc(100vh - 28px);
+      max-height: calc(100dvh - 28px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      background: #12182a;
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+      display: grid;
+      gap: 12px;
+    }
+    .modal h2 { margin: 0; font-size: 24px; letter-spacing: -.04em; white-space: pre-line; }
+    .modal p { margin: 0; color: var(--muted); line-height: 1.45; white-space: pre-line; }
+    .modal p.modal-heading {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.28;
+    }
+    .modal-actions { display: grid; gap: 10px; }
+    .modal-actions button {
+      min-height: 66px;
+      border-radius: 18px;
+      padding: 0 18px;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.18);
+    }
+    .modal-actions .primary {
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 24px rgba(51,121,246,.23);
+    }
+    .modal-actions .secondary {
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .modal-actions .danger {
+      background: linear-gradient(180deg, #ee6469 0%, #dd4f57 100%);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 10px 24px rgba(221,79,87,.22);
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .result-card {
+      display: none;
+      gap: 14px;
+    }
+    .result-card.show { display: grid; }
+    .result-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+    }
+    .result-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .result-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .app-version { margin: -4px 0 0; text-align: center; font-size: 12px; color: rgba(170,178,200,.72); line-height: 1.35; }
+
+    body.stat-page .topbar { display: none; }
+    #statScreen.active {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 14px;
+      padding-bottom: 8px;
+    }
+    #statScreen.active::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .stat-header {
+      display: grid;
+      gap: 8px;
+      padding: 4px 2px 0;
+    }
+    .stat-title {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 38px);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+    .stat-export-button {
+      flex: 0 0 auto;
+      min-width: 0;
+      min-height: 48px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 850;
+    }
+    .stat-report-controls {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .stat-perspective-label {
+      flex: 0 1 auto;
+      min-width: 0;
+      color: var(--muted);
+      font-size: clamp(10px, 3vw, 13px);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .stat-perspective-select {
+      flex: 1 1 90px;
+      width: auto;
+      min-width: 0;
+      height: 48px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+    }
+    .stat-card {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(21,27,47,.84);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      padding: 16px;
+    }
+    .stat-card h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      letter-spacing: -.035em;
+    }
+    .stat-score-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .stat-score-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-score-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-score-table th,
+    .stat-score-table td {
+      height: 44px;
+      padding: 8px 6px;
+      border-right: 1px solid #303850;
+      border-bottom: 1px solid #303850;
+      background: #151b2f;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 850;
+    }
+    .stat-score-table thead th {
+      height: 38px;
+      background: #1b2238;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-score-table tr:last-child > * { border-bottom: 0; }
+    .stat-score-table tr > *:last-child { border-right: 0; }
+    .stat-score-table .stat-score-player {
+      color: var(--text);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .stat-score-table thead .stat-score-player {
+      color: var(--muted);
+    }
+    .stat-all-games-table .stat-match-current-game {
+      background: #20365e;
+      color: #f4f7ff;
+    }
+    .stat-all-games-table thead .stat-match-current-game {
+      background: #2c4e88;
+    }
+    .stat-all-games-table {
+      min-width: 0;
+      font-size: clamp(9px, 2.6vw, 12px);
+    }
+    .stat-all-games-table th,
+    .stat-all-games-table td {
+      height: 38px;
+      padding: 6px 2px;
+    }
+    .stat-all-games-table .stat-score-player {
+      line-height: 1.08;
+    }
+    .stat-all-games-table tbody .stat-score-player {
+      padding-left: 10px;
+      padding-right: 6px;
+    }
+    .stat-all-games-table .stat-match-total-score {
+      background: #2c4e88;
+      color: #fff;
+      font-size: 115%;
+      font-weight: 950;
+    }
+    .stat-all-games-table .stat-match-game-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-all-games-table .stat-match-future { color: var(--muted); }
+    .stat-status-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: clamp(12px, 3.5vw, 14px);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .stat-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px rgba(114,224,168,.11);
+    }
+    .stat-server-line {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .stat-empty {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .stat-content {
+      display: grid;
+      gap: 14px;
+    }
+    .stat-content[hidden],
+    .stat-empty[hidden] { display: none; }
+    .stat-tabs {
+      display: grid;
+      grid-template-columns: repeat(var(--stat-tab-count, 1), minmax(0, 1fr));
+      gap: 8px;
+      padding-bottom: 2px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .stat-tabs button {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      padding: 9px 4px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .stat-tabs button.selected {
+      background: #3379f6;
+      color: #fff;
+      border-color: transparent;
+    }
+    .stat-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .stat-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-table th,
+    .stat-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      vertical-align: top;
+    }
+    .stat-table tr:last-child th,
+    .stat-table tr:last-child td { border-bottom: 0; }
+    .stat-table th:first-child,
+    .stat-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 700;
+      background: #151b2f;
+      box-shadow: 8px 0 14px -12px rgba(0,0,0,.95);
+    }
+    .stat-table thead th {
+      color: var(--text);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    .stat-table thead th:first-child { z-index: 3; }
+    .stat-metric-main {
+      display: block;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-metric-detail {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .stat-performance-table th:first-child,
+    .stat-performance-table td:first-child {
+      width: 33.333%;
+      max-width: none;
+      white-space: pre-line;
+    }
+    .stat-performance-table th,
+    .stat-performance-table td {
+      width: 33.333%;
+      min-width: 0;
+    }
+    .stat-performance-player-name {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.15;
+      max-height: 2.3em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .stat-chart-wrap {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(5,9,18,.34);
+    }
+    .stat-chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 210px;
+    }
+    .stat-rally-table {
+      min-width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .stat-rally-wrap {
+      position: relative;
+      max-height: min(56vh, 520px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-rally-wrap::before {
+      content: "";
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 8;
+      display: block;
+      width: 100%;
+      height: 2px;
+      margin-bottom: -2px;
+      background: #151b2f;
+      pointer-events: none;
+    }
+    .stat-rally-serve-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .stat-rally-serve-swatch {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(75,134,255,.20);
+      border: 1px solid rgba(75,134,255,.62);
+    }
+    .stat-rally-table th,
+    .stat-rally-table td {
+      width: 33.333%;
+      text-align: center;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .stat-rally-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: #151b2f;
+    }
+    .stat-rally-table thead th {
+      position: static;
+      z-index: auto;
+      background: #151b2f;
+      border-color: #151b2f;
+      outline: 1px solid #151b2f;
+      outline-offset: -1px;
+      box-shadow: 0 -2px 0 #151b2f;
+    }
+    .stat-rally-table th:first-child,
+    .stat-rally-table td:first-child {
+      position: static;
+      width: 33.333%;
+      text-align: center;
+      background: transparent;
+      box-shadow: none;
+    }
+    .stat-rally-table thead th:first-child {
+      position: static;
+      background: #151b2f;
+      border-color: #151b2f;
+      box-shadow: none;
+    }
+    .stat-rally-table thead .stat-rally-legend-cell {
+      padding: 10px 12px;
+      text-align: left;
+      background: #151b2f;
+      border-color: #151b2f;
+    }
+    .stat-rally-table tbody tr.stat-rally-selected-server > * {
+      background: rgba(75,134,255,.20);
+      color: #eaf1ff;
+    }
+    .stat-rally-table tbody td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-rally-table tbody tr.stat-rally-selected-server td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+    }
+    .stat-rally-table .stat-rally-empty {
+      padding: 18px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .stat-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    
+
+
+
+    .match-brand-line {
+      flex: 0 0 auto;
+      min-width: 0;
+      font-size: clamp(13px, 4vw, 18px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+      padding: 2px 2px 0;
+    }
+    .match-brand-name {
+      color: #4b86ff;
+      font-weight: 800;
+    }
+    .match-brand-description {
+      color: rgba(255,255,255,.94);
+    }
+    body.in-match #matchScreen.active {
+      gap: 8px;
+    }
+    body.in-match .scoreboard {
+      gap: 8px;
+    }
+    body.in-match .player-zone {
+      border-radius: 26px;
+      padding: 14px;
+    }
+    body.in-match .score {
+      font-size: clamp(68px, 16.5vh, 138px);
+      font-size: clamp(68px, 16.5dvh, 138px);
+    }
+
+    /* Settings screen style from reference + grouped settings */
+    .topbar {
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 6px 2px 0;
+    }
+    .brand {
+      gap: 12px;
+      width: 100%;
+    }
+    .brand-title {
+      display: block;
+      min-width: 0;
+      font-size: clamp(13px, 4vw, 18px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+    }
+    .brand-name {
+      color: #4b86ff;
+      font-weight: 800;
+    }
+    .brand-description {
+      color: rgba(255,255,255,.94);
+    }
+    .brand-subtitle {
+      color: rgba(255,255,255,.95);
+      font-size: clamp(24px, 5.7vw, 30px);
+      line-height: 1.08;
+      font-weight: 820;
+      letter-spacing: -.045em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #formatPill { display: none !important; }
+    #setupScreen.active {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-top: 6px;
+    }
+    .setup-layout {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      padding: 0 2px calc(max(12px, env(safe-area-inset-bottom)) + 6px);
+      gap: 14px;
+    }
+    .settings-group {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(23,31,51,.82), rgba(12,18,32,.82));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 28px rgba(0,0,0,.18);
+    }
+    .settings-group-title {
+      margin: 0 0 2px;
+      color: rgba(255,255,255,.95);
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 750;
+      letter-spacing: -.03em;
+    }
+    #setupScreen .field {
+      gap: 10px;
+    }
+    #setupScreen .group-control-only {
+      gap: 0;
+    }
+    #setupScreen .name-field {
+      gap: 0;
+    }
+    #setupScreen label {
+      color: rgba(255,255,255,.82);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+      padding-left: 2px;
+    }
+    #setupScreen input,
+    #setupScreen select {
+      width: 100%;
+      min-height: 72px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      padding: 0 22px;
+      color: rgba(255,255,255,.92);
+      font-size: 18px;
+      font-weight: 500;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 20px rgba(0,0,0,.16);
+    }
+    #setupScreen input::placeholder,
+    #setupScreen select:disabled {
+      color: rgba(190,197,217,.58);
+    }
+    #setupScreen input:focus,
+    #setupScreen select:focus {
+      border-color: rgba(255,255,255,.22);
+    }
+    .native-hidden {
+      position: absolute !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      overflow: hidden !important;
+    }
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(183,191,211,.7);
+      border-bottom: 2px solid rgba(183,191,211,.7);
+      transform: translateY(-65%) rotate(45deg);
+      pointer-events: none;
+    }
+    #setupScreen select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 52px;
+    }
+    #setupScreen .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+      padding: 3px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 20px rgba(0,0,0,.16);
+    }
+    #setupScreen .segmented.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    #setupScreen .segmented button {
+      min-height: 66px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: rgba(235,239,249,.56);
+      font-size: 17px;
+      font-weight: 500;
+      padding: 0 12px;
+      box-shadow: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #setupScreen .segmented button.selected {
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 22px rgba(51,121,246,.2);
+      font-weight: 650;
+    }
+    #setupScreen #handicapPlayerButtons button.selected {
+      background: linear-gradient(180deg, #45b777 0%, #2d9a61 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 22px rgba(45,154,97,.2);
+    }
+    #setupScreen .primary {
+      min-height: 78px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 28px rgba(51,121,246,.25);
+    }
+    #setupScreen .tiny,
+    #setupScreen .app-version {
+      margin: 0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+      color: rgba(182,189,208,.7);
+      padding: 0 16px;
+    }
+    #setupScreen .app-version {
+      margin-top: -6px;
+      color: rgba(139,147,168,.74);
+    }
+
+    @media (max-height: 720px) {
+      .player-zone { min-height: 0; padding: 14px; }
+      .score { font-size: clamp(58px, 16vh, 120px); font-size: clamp(58px, 16dvh, 120px); }
+      .brand-title { font-size: clamp(13px, 4vw, 18px); }
+      .toolbar button { min-height: var(--game-badge-height); }
+      .tap-hint { display: none; }
+    }
+
+    @media (max-height: 620px) {
+      :root { --game-badge-height: 54px; }
+      .status-card { padding: 9px 12px; }
+      .status-main { font-size: 16px; }
+      .match-compact-header { column-gap: 6px; row-gap: 6px; }
+      .match-compact-name { padding: 8px 8px 6px; font-size: 16px; }
+      .match-compact-game {
+        min-height: var(--game-badge-height);
+        padding: 8px 8px;
+        font-size: clamp(32px, 8dvh, 48px);
+      }
+      .scoreboard { gap: 8px; }
+      .player-zone { border-radius: 24px; padding: 12px; }
+      .player-name { font-size: 18px; }
+      .games-won { font-size: 12px; }
+      .toolbar button { min-height: var(--game-badge-height); padding: 8px 10px; }
+    }
+
+
+    @media (max-height: 520px) and (orientation: landscape) {
+      .modal-backdrop {
+        align-items: center;
+        padding: 8px;
+      }
+      .modal {
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
+        border-radius: 20px;
+        padding: 12px;
+        gap: 8px;
+      }
+      .modal h2 {
+        font-size: 20px;
+        line-height: 1.12;
+      }
+      .modal p {
+        font-size: 14px;
+        line-height: 1.32;
+      }
+      .modal p.modal-heading {
+        font-size: 17px;
+        line-height: 1.2;
+      }
+      .summary-list {
+        gap: 4px;
+        font-size: 13px;
+      }
+      .summary-row {
+        padding: 6px 0;
+      }
+      .modal-actions {
+        gap: 6px;
+      }
+      .modal-actions button {
+        min-height: 48px;
+        border-radius: 14px;
+        padding: 0 12px;
+        font-size: 15px;
+        line-height: 1.08;
+      }
+    }
+  
+
+        html, body { height: auto; min-height: 100%; overflow: visible; }
+        body { user-select: text; }
+        .export-report { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+        .export-report #statScreen.active { overflow: visible; }
+        .export-report-controls .stat-perspective-select { flex-basis: 0; }
+        .export-perspective-view { display: grid; gap: 14px; }
+        .export-perspective-view[hidden] { display: none; }
+        .export-game-content { display: grid; gap: 14px; }
+        .export-game-content[hidden] { display: none; }
+        .stat-snapshot-time { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
+        @media print {
+          html, body, .export-report, .export-report #statScreen.active { height: auto; overflow: visible; }
+          .stat-card { break-inside: avoid; box-shadow: none; }
+        }
+      </style>
+</head>
+<body class="stat-page">
+<main class="app export-report" data-player-a="Спортсмен A" data-player-b="Спортсмен B"><section id="statScreen" class="screen active"><header class="stat-header">
+        <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
+        <h1 class="stat-title" data-export-perspective-title="">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
+      </header><div class="stat-report-controls export-report-controls"><label class="stat-perspective-label" for="exportPerspectiveSelect">С позиции спортсмена:</label><select class="stat-perspective-select" id="exportPerspectiveSelect" data-export-perspective-select="" aria-label="С позиции спортсмена"><option value="A" selected="">Спортсмен A</option><option value="B">Спортсмен B</option></select></div><div class="export-perspective-view" data-export-perspective-view="A"><section class="stat-card">
+        <div class="stat-score-heading">
+          <h2>Счёт</h2>
+          <div class="stat-status-line"><span class="stat-status-dot" style="background: var(--accent);"></span><span>Встреча завершена</span></div>
+        </div>
+        <div class="stat-score-table-wrap"><div><table class="stat-score-table stat-all-games-table" aria-label="Счёт по всем партиям: Спортсмен A — Спортсмен B"><colgroup><col style="width: 30%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 12%;"></colgroup><thead><tr><th scope="col" class="stat-score-player" aria-label="Спортсмен"></th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col" aria-label="Счёт встречи"></th></tr></thead><tbody><tr><th scope="row" class="stat-score-player">Спортсмен A</th><td>4</td><td class="stat-match-game-winner">11</td><td>5</td><td class="stat-match-game-winner">11</td><td class="stat-match-game-winner">11</td><td class="stat-match-total-score">3</td></tr><tr><th scope="row" class="stat-score-player">Спортсмен B</th><td class="stat-match-game-winner">11</td><td>3</td><td class="stat-match-game-winner">11</td><td>2</td><td>7</td><td class="stat-match-total-score">2</td></tr></tbody></table></div></div>
+        <p class="stat-server-line" hidden=""></p>
+      </section><div class="stat-content"><section class="stat-card"><h2>Выиграно розыгрышей (за встречу)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">47%</span><span class="stat-metric-detail">16 из 34</span></td><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">16 из 32</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">16 из 32</span></td><td><span class="stat-metric-main">53%</span><span class="stat-metric-detail">18 из 34</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">32</span></td><td><span class="stat-metric-main">34</span></td></tr></tbody></table></div><p class="stat-note">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p></section><section class="stat-card"><h2>Партии</h2><div class="stat-tabs" style="--stat-tab-count: 5;" role="group" aria-label="Выбор партии"><button type="button" class="selected" data-export-game-tab="0" aria-pressed="true" aria-controls="exportAGameContent1">1</button><button type="button" data-export-game-tab="1" aria-pressed="false" aria-controls="exportAGameContent2">2</button><button type="button" data-export-game-tab="2" aria-pressed="false" aria-controls="exportAGameContent3">3</button><button type="button" data-export-game-tab="3" aria-pressed="false" aria-controls="exportAGameContent4">4</button><button type="button" data-export-game-tab="4" aria-pressed="false" aria-controls="exportAGameContent5">5</button></div></section><div id="exportAGameContent1" class="export-game-content" data-export-game-content="0"><section class="stat-card"><h2>Выиграно розыгрышей (партия 1)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">14%</span><span class="stat-metric-detail">1 из 7</span></td><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td><td><span class="stat-metric-main">86%</span><span class="stat-metric-detail">6 из 7</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">2</span></td><td><span class="stat-metric-main">11</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен A (партия 1)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен A в партии 1"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-8</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+8</text><path d="M 42 106 L 86.15384615384616 120 L 130.30769230769232 134 L 174.46153846153848 148 L 218.6153846153846 162 L 262.7692307692308 176 L 306.92307692307696 190 L 351.07692307692304 204 L 395.2307692307692 218 L 439.38461538461536 232 L 483.53846153846155 218 L 527.6923076923076 204 L 571.8461538461539 218 L 616 232" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="86.15384615384616" cy="120" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="130.30769230769232" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="174.46153846153848" cy="148" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="218.6153846153846" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="262.7692307692308" cy="176" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="306.92307692307696" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="351.07692307692304" cy="204" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="395.2307692307692" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="439.38461538461536" cy="232" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="483.53846153846155" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="527.6923076923076" cy="204" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="571.8461538461539" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="232" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 1)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен A</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен A</th><th scope="col">Спортсмен B</th></tr></thead><tbody><tr class="stat-rally-selected-server" aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>1</td><td>2</td><td class="stat-rally-winner">1</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>2</td><td>2</td><td class="stat-rally-winner">2</td></tr><tr aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td>2</td><td class="stat-rally-winner">3</td></tr><tr aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td>2</td><td class="stat-rally-winner">4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td>2</td><td class="stat-rally-winner">5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td>2</td><td class="stat-rally-winner">6</td></tr><tr aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>7</td><td>2</td><td class="stat-rally-winner">7</td></tr><tr aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>8</td><td>2</td><td class="stat-rally-winner">8</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>9</td><td>2</td><td class="stat-rally-winner">9</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>10</td><td class="stat-rally-winner">3</td><td>9</td></tr><tr aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>11</td><td class="stat-rally-winner">4</td><td>9</td></tr><tr aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>12</td><td>4</td><td class="stat-rally-winner">10</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>13</td><td>4</td><td class="stat-rally-winner">11</td></tr></tbody></table></div></section></div><div id="exportAGameContent2" class="export-game-content" data-export-game-content="1" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 2)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td><td><span class="stat-metric-main">33%</span><span class="stat-metric-detail">2 из 6</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">67%</span><span class="stat-metric-detail">4 из 6</span></td><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">9</span></td><td><span class="stat-metric-main">3</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен A (партия 2)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен A в партии 2"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-8</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+8</text><path d="M 42 106 L 89.83333333333333 92 L 137.66666666666666 78 L 185.5 64 L 233.33333333333331 50 L 281.1666666666667 64 L 329 78 L 376.83333333333337 92 L 424.66666666666663 78 L 472.5 64 L 520.3333333333334 50 L 568.1666666666666 36 L 616 22" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="89.83333333333333" cy="92" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="137.66666666666666" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="185.5" cy="64" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="233.33333333333331" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="281.1666666666667" cy="64" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="376.83333333333337" cy="92" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="424.66666666666663" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="472.5" cy="64" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="520.3333333333334" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="568.1666666666666" cy="36" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="22" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 2)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен A</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен A</th><th scope="col">Спортсмен B</th></tr></thead><tbody><tr aria-label="Розыгрыш 1. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>1</td><td class="stat-rally-winner">3</td><td>0</td></tr><tr aria-label="Розыгрыш 2. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>2</td><td class="stat-rally-winner">4</td><td>0</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 3. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>3</td><td class="stat-rally-winner">5</td><td>0</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 4. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>4</td><td class="stat-rally-winner">6</td><td>0</td></tr><tr aria-label="Розыгрыш 5. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>5</td><td>6</td><td class="stat-rally-winner">1</td></tr><tr aria-label="Розыгрыш 6. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>6</td><td>6</td><td class="stat-rally-winner">2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 7. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>7</td><td>6</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 8. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>8</td><td class="stat-rally-winner">7</td><td>3</td></tr><tr aria-label="Розыгрыш 9. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>9</td><td class="stat-rally-winner">8</td><td>3</td></tr><tr aria-label="Розыгрыш 10. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>10</td><td class="stat-rally-winner">9</td><td>3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 11. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>11</td><td class="stat-rally-winner">10</td><td>3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 12. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>12</td><td class="stat-rally-winner">11</td><td>3</td></tr></tbody></table></div></section></div><div id="exportAGameContent3" class="export-game-content" data-export-game-content="2" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 3)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">13%</span><span class="stat-metric-detail">1 из 8</span></td><td><span class="stat-metric-main">67%</span><span class="stat-metric-detail">4 из 6</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">33%</span><span class="stat-metric-detail">2 из 6</span></td><td><span class="stat-metric-main">88%</span><span class="stat-metric-detail">7 из 8</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">3</span></td><td><span class="stat-metric-main">11</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен A (партия 3)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен A в партии 3"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="208.66666666666669" x2="616" y2="208.66666666666669" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="212.66666666666669" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="171.33333333333331" x2="616" y2="171.33333333333331" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="175.33333333333331" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="96.66666666666666" x2="616" y2="96.66666666666666" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="100.66666666666666" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="59.33333333333333" x2="616" y2="59.33333333333333" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="63.33333333333333" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><path d="M 42 96.66666666666666 L 83 115.33333333333334 L 124 134 L 165 152.66666666666669 L 206 171.33333333333331 L 247 190 L 288 208.66666666666669 L 329 190 L 370 171.33333333333331 L 411 152.66666666666669 L 452 171.33333333333331 L 493 190 L 534 208.66666666666669 L 575 227.33333333333331 L 616 246" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="83" cy="115.33333333333334" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="124" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="165" cy="152.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="206" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="247" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="288" cy="208.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="370" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="411" cy="152.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="452" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="493" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="534" cy="208.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="575" cy="227.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="246" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 3)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен A</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен A</th><th scope="col">Спортсмен B</th></tr></thead><tbody><tr class="stat-rally-selected-server" aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>1</td><td>2</td><td class="stat-rally-winner">1</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>2</td><td>2</td><td class="stat-rally-winner">2</td></tr><tr aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td>2</td><td class="stat-rally-winner">3</td></tr><tr aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td>2</td><td class="stat-rally-winner">4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td>2</td><td class="stat-rally-winner">5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td>2</td><td class="stat-rally-winner">6</td></tr><tr aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>7</td><td class="stat-rally-winner">3</td><td>6</td></tr><tr aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>8</td><td class="stat-rally-winner">4</td><td>6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>9</td><td class="stat-rally-winner">5</td><td>6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>10</td><td>5</td><td class="stat-rally-winner">7</td></tr><tr aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>11</td><td>5</td><td class="stat-rally-winner">8</td></tr><tr aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>12</td><td>5</td><td class="stat-rally-winner">9</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>13</td><td>5</td><td class="stat-rally-winner">10</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 14. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>14</td><td>5</td><td class="stat-rally-winner">11</td></tr></tbody></table></div></section></div><div id="exportAGameContent4" class="export-game-content" data-export-game-content="3" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 4)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">80%</span><span class="stat-metric-detail">4 из 5</span></td><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td><td><span class="stat-metric-main">20%</span><span class="stat-metric-detail">1 из 5</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">9</span></td><td><span class="stat-metric-main">2</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен A (партия 4)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен A в партии 4"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-9</text><line x1="42" y1="208.66666666666669" x2="616" y2="208.66666666666669" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="212.66666666666669" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="171.33333333333331" x2="616" y2="171.33333333333331" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="175.33333333333331" fill="#aab2c8" font-size="12" text-anchor="end">-3</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="96.66666666666666" x2="616" y2="96.66666666666666" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="100.66666666666666" fill="#aab2c8" font-size="12" text-anchor="end">+3</text><line x1="42" y1="59.33333333333333" x2="616" y2="59.33333333333333" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="63.33333333333333" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+9</text><path d="M 42 109.11111111111111 L 94.18181818181819 96.66666666666666 L 146.36363636363637 84.22222222222223 L 198.54545454545453 71.77777777777777 L 250.72727272727272 84.22222222222223 L 302.9090909090909 96.66666666666666 L 355.09090909090907 84.22222222222223 L 407.27272727272725 71.77777777777777 L 459.45454545454544 59.33333333333333 L 511.6363636363637 46.888888888888886 L 563.8181818181818 34.44444444444444 L 616 22" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="109.11111111111111" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="94.18181818181819" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="146.36363636363637" cy="84.22222222222223" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="198.54545454545453" cy="71.77777777777777" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="250.72727272727272" cy="84.22222222222223" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="302.9090909090909" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="355.09090909090907" cy="84.22222222222223" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="407.27272727272725" cy="71.77777777777777" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="459.45454545454544" cy="59.33333333333333" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="511.6363636363637" cy="46.888888888888886" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="563.8181818181818" cy="34.44444444444444" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="22" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 4)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен A</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен A</th><th scope="col">Спортсмен B</th></tr></thead><tbody><tr aria-label="Розыгрыш 1. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>1</td><td class="stat-rally-winner">3</td><td>0</td></tr><tr aria-label="Розыгрыш 2. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>2</td><td class="stat-rally-winner">4</td><td>0</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 3. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>3</td><td class="stat-rally-winner">5</td><td>0</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 4. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>4</td><td>5</td><td class="stat-rally-winner">1</td></tr><tr aria-label="Розыгрыш 5. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>5</td><td>5</td><td class="stat-rally-winner">2</td></tr><tr aria-label="Розыгрыш 6. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>6</td><td class="stat-rally-winner">6</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 7. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>7</td><td class="stat-rally-winner">7</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 8. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>8</td><td class="stat-rally-winner">8</td><td>2</td></tr><tr aria-label="Розыгрыш 9. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>9</td><td class="stat-rally-winner">9</td><td>2</td></tr><tr aria-label="Розыгрыш 10. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>10</td><td class="stat-rally-winner">10</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 11. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>11</td><td class="stat-rally-winner">11</td><td>2</td></tr></tbody></table></div></section></div><div id="exportAGameContent5" class="export-game-content" data-export-game-content="4" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 5)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">63%</span><span class="stat-metric-detail">5 из 8</span></td><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">4 из 8</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">4 из 8</span></td><td><span class="stat-metric-main">38%</span><span class="stat-metric-detail">3 из 8</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">9</span></td><td><span class="stat-metric-main">7</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен A (партия 5)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен A в партии 5"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-3</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-1</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+1</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+3</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><path d="M 42 78 L 77.875 50 L 113.75 22 L 149.625 50 L 185.5 78 L 221.375 106 L 257.25 134 L 293.125 162 L 329 190 L 364.875 218 L 400.75 190 L 436.625 162 L 472.5 134 L 508.375 106 L 544.25 78 L 580.125 50 L 616 22" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="77.875" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="113.75" cy="22" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="149.625" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="185.5" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="221.375" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="257.25" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="293.125" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="364.875" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="400.75" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="436.625" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="472.5" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="508.375" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="544.25" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="580.125" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="22" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 5)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен A</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен A</th><th scope="col">Спортсмен B</th></tr></thead><tbody><tr class="stat-rally-selected-server" aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>1</td><td class="stat-rally-winner">3</td><td>0</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>2</td><td class="stat-rally-winner">4</td><td>0</td></tr><tr aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td>4</td><td class="stat-rally-winner">1</td></tr><tr aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td>4</td><td class="stat-rally-winner">2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td>4</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td>4</td><td class="stat-rally-winner">4</td></tr><tr aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>7</td><td>4</td><td class="stat-rally-winner">5</td></tr><tr aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>8</td><td>4</td><td class="stat-rally-winner">6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>9</td><td>4</td><td class="stat-rally-winner">7</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>10</td><td class="stat-rally-winner">5</td><td>7</td></tr><tr aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>11</td><td class="stat-rally-winner">6</td><td>7</td></tr><tr aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>12</td><td class="stat-rally-winner">7</td><td>7</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>13</td><td class="stat-rally-winner">8</td><td>7</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 14. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>14</td><td class="stat-rally-winner">9</td><td>7</td></tr><tr aria-label="Розыгрыш 15. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>15</td><td class="stat-rally-winner">10</td><td>7</td></tr><tr aria-label="Розыгрыш 16. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>16</td><td class="stat-rally-winner">11</td><td>7</td></tr></tbody></table></div></section></div><section class="stat-card"><h2>Партии</h2><div class="stat-tabs" style="--stat-tab-count: 5;" role="group" aria-label="Выбор партии"><button type="button" class="selected" data-export-game-tab="0" aria-pressed="true" aria-controls="exportAGameContent1">1</button><button type="button" data-export-game-tab="1" aria-pressed="false" aria-controls="exportAGameContent2">2</button><button type="button" data-export-game-tab="2" aria-pressed="false" aria-controls="exportAGameContent3">3</button><button type="button" data-export-game-tab="3" aria-pressed="false" aria-controls="exportAGameContent4">4</button><button type="button" data-export-game-tab="4" aria-pressed="false" aria-controls="exportAGameContent5">5</button></div></section></div></div><div class="export-perspective-view" data-export-perspective-view="B" hidden=""><section class="stat-card">
+        <div class="stat-score-heading">
+          <h2>Счёт</h2>
+          <div class="stat-status-line"><span class="stat-status-dot" style="background: var(--accent);"></span><span>Встреча завершена</span></div>
+        </div>
+        <div class="stat-score-table-wrap"><div><table class="stat-score-table stat-all-games-table" aria-label="Счёт по всем партиям: Спортсмен B — Спортсмен A"><colgroup><col style="width: 30%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 11.6%;"><col style="width: 12%;"></colgroup><thead><tr><th scope="col" class="stat-score-player" aria-label="Спортсмен"></th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col" aria-label="Счёт встречи"></th></tr></thead><tbody><tr><th scope="row" class="stat-score-player">Спортсмен B</th><td class="stat-match-game-winner">11</td><td>3</td><td class="stat-match-game-winner">11</td><td>2</td><td>7</td><td class="stat-match-total-score">2</td></tr><tr><th scope="row" class="stat-score-player">Спортсмен A</th><td>4</td><td class="stat-match-game-winner">11</td><td>5</td><td class="stat-match-game-winner">11</td><td class="stat-match-game-winner">11</td><td class="stat-match-total-score">3</td></tr></tbody></table></div></div>
+        <p class="stat-server-line" hidden=""></p>
+      </section><div class="stat-content"><section class="stat-card"><h2>Выиграно розыгрышей (за встречу)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">16 из 32</span></td><td><span class="stat-metric-main">47%</span><span class="stat-metric-detail">16 из 34</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">53%</span><span class="stat-metric-detail">18 из 34</span></td><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">16 из 32</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">34</span></td><td><span class="stat-metric-main">32</span></td></tr></tbody></table></div><p class="stat-note">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p></section><section class="stat-card"><h2>Партии</h2><div class="stat-tabs" style="--stat-tab-count: 5;" role="group" aria-label="Выбор партии"><button type="button" class="selected" data-export-game-tab="0" aria-pressed="true" aria-controls="exportBGameContent1">1</button><button type="button" data-export-game-tab="1" aria-pressed="false" aria-controls="exportBGameContent2">2</button><button type="button" data-export-game-tab="2" aria-pressed="false" aria-controls="exportBGameContent3">3</button><button type="button" data-export-game-tab="3" aria-pressed="false" aria-controls="exportBGameContent4">4</button><button type="button" data-export-game-tab="4" aria-pressed="false" aria-controls="exportBGameContent5">5</button></div></section><div id="exportBGameContent1" class="export-game-content" data-export-game-content="0"><section class="stat-card"><h2>Выиграно розыгрышей (партия 1)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td><td><span class="stat-metric-main">14%</span><span class="stat-metric-detail">1 из 7</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">86%</span><span class="stat-metric-detail">6 из 7</span></td><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">11</span></td><td><span class="stat-metric-main">2</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен B (партия 1)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен B в партии 1"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-8</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+8</text><path d="M 42 162 L 86.15384615384616 148 L 130.30769230769232 134 L 174.46153846153848 120 L 218.6153846153846 106 L 262.7692307692308 92 L 306.92307692307696 78 L 351.07692307692304 64 L 395.2307692307692 50 L 439.38461538461536 36 L 483.53846153846155 50 L 527.6923076923076 64 L 571.8461538461539 50 L 616 36" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="86.15384615384616" cy="148" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="130.30769230769232" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="174.46153846153848" cy="120" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="218.6153846153846" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="262.7692307692308" cy="92" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="306.92307692307696" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="351.07692307692304" cy="64" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="395.2307692307692" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="439.38461538461536" cy="36" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="483.53846153846155" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="527.6923076923076" cy="64" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="571.8461538461539" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="36" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 1)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен B</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен B</th><th scope="col">Спортсмен A</th></tr></thead><tbody><tr aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>1</td><td class="stat-rally-winner">1</td><td>2</td></tr><tr aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>2</td><td class="stat-rally-winner">2</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td class="stat-rally-winner">3</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td class="stat-rally-winner">4</td><td>2</td></tr><tr aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td class="stat-rally-winner">5</td><td>2</td></tr><tr aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td class="stat-rally-winner">6</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>7</td><td class="stat-rally-winner">7</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>8</td><td class="stat-rally-winner">8</td><td>2</td></tr><tr aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>9</td><td class="stat-rally-winner">9</td><td>2</td></tr><tr aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>10</td><td>9</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>11</td><td>9</td><td class="stat-rally-winner">4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>12</td><td class="stat-rally-winner">10</td><td>4</td></tr><tr aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>13</td><td class="stat-rally-winner">11</td><td>4</td></tr></tbody></table></div></section></div><div id="exportBGameContent2" class="export-game-content" data-export-game-content="1" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 2)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">33%</span><span class="stat-metric-detail">2 из 6</span></td><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td><td><span class="stat-metric-main">67%</span><span class="stat-metric-detail">4 из 6</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">3</span></td><td><span class="stat-metric-main">9</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен B (партия 2)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен B в партии 2"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-8</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+8</text><path d="M 42 162 L 89.83333333333333 176 L 137.66666666666666 190 L 185.5 204 L 233.33333333333331 218 L 281.1666666666667 204 L 329 190 L 376.83333333333337 176 L 424.66666666666663 190 L 472.5 204 L 520.3333333333334 218 L 568.1666666666666 232 L 616 246" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="89.83333333333333" cy="176" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="137.66666666666666" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="185.5" cy="204" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="233.33333333333331" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="281.1666666666667" cy="204" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="376.83333333333337" cy="176" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="424.66666666666663" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="472.5" cy="204" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="520.3333333333334" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="568.1666666666666" cy="232" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="246" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 2)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен B</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен B</th><th scope="col">Спортсмен A</th></tr></thead><tbody><tr class="stat-rally-selected-server" aria-label="Розыгрыш 1. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>1</td><td>0</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 2. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>2</td><td>0</td><td class="stat-rally-winner">4</td></tr><tr aria-label="Розыгрыш 3. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>3</td><td>0</td><td class="stat-rally-winner">5</td></tr><tr aria-label="Розыгрыш 4. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>4</td><td>0</td><td class="stat-rally-winner">6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 5. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>5</td><td class="stat-rally-winner">1</td><td>6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 6. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>6</td><td class="stat-rally-winner">2</td><td>6</td></tr><tr aria-label="Розыгрыш 7. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>7</td><td class="stat-rally-winner">3</td><td>6</td></tr><tr aria-label="Розыгрыш 8. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>8</td><td>3</td><td class="stat-rally-winner">7</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 9. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>9</td><td>3</td><td class="stat-rally-winner">8</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 10. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>10</td><td>3</td><td class="stat-rally-winner">9</td></tr><tr aria-label="Розыгрыш 11. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>11</td><td>3</td><td class="stat-rally-winner">10</td></tr><tr aria-label="Розыгрыш 12. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>12</td><td>3</td><td class="stat-rally-winner">11</td></tr></tbody></table></div></section></div><div id="exportBGameContent3" class="export-game-content" data-export-game-content="2" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 3)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">67%</span><span class="stat-metric-detail">4 из 6</span></td><td><span class="stat-metric-main">13%</span><span class="stat-metric-detail">1 из 8</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">88%</span><span class="stat-metric-detail">7 из 8</span></td><td><span class="stat-metric-main">33%</span><span class="stat-metric-detail">2 из 6</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">11</span></td><td><span class="stat-metric-main">3</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен B (партия 3)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен B в партии 3"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="208.66666666666669" x2="616" y2="208.66666666666669" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="212.66666666666669" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="171.33333333333331" x2="616" y2="171.33333333333331" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="175.33333333333331" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="96.66666666666666" x2="616" y2="96.66666666666666" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="100.66666666666666" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="59.33333333333333" x2="616" y2="59.33333333333333" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="63.33333333333333" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><path d="M 42 171.33333333333331 L 83 152.66666666666669 L 124 134 L 165 115.33333333333334 L 206 96.66666666666666 L 247 78 L 288 59.33333333333333 L 329 78 L 370 96.66666666666666 L 411 115.33333333333334 L 452 96.66666666666666 L 493 78 L 534 59.33333333333333 L 575 40.666666666666664 L 616 22" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="83" cy="152.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="124" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="165" cy="115.33333333333334" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="206" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="247" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="288" cy="59.33333333333333" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="370" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="411" cy="115.33333333333334" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="452" cy="96.66666666666666" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="493" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="534" cy="59.33333333333333" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="575" cy="40.666666666666664" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="22" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 3)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен B</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен B</th><th scope="col">Спортсмен A</th></tr></thead><tbody><tr aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>1</td><td class="stat-rally-winner">1</td><td>2</td></tr><tr aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>2</td><td class="stat-rally-winner">2</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td class="stat-rally-winner">3</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td class="stat-rally-winner">4</td><td>2</td></tr><tr aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td class="stat-rally-winner">5</td><td>2</td></tr><tr aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td class="stat-rally-winner">6</td><td>2</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>7</td><td>6</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>8</td><td>6</td><td class="stat-rally-winner">4</td></tr><tr aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>9</td><td>6</td><td class="stat-rally-winner">5</td></tr><tr aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>10</td><td class="stat-rally-winner">7</td><td>5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>11</td><td class="stat-rally-winner">8</td><td>5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>12</td><td class="stat-rally-winner">9</td><td>5</td></tr><tr aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>13</td><td class="stat-rally-winner">10</td><td>5</td></tr><tr aria-label="Розыгрыш 14. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>14</td><td class="stat-rally-winner">11</td><td>5</td></tr></tbody></table></div></section></div><div id="exportBGameContent4" class="export-game-content" data-export-game-content="3" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 4)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">17%</span><span class="stat-metric-detail">1 из 6</span></td><td><span class="stat-metric-main">80%</span><span class="stat-metric-detail">4 из 5</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">20%</span><span class="stat-metric-detail">1 из 5</span></td><td><span class="stat-metric-main">83%</span><span class="stat-metric-detail">5 из 6</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">2</span></td><td><span class="stat-metric-main">9</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен B (партия 4)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен B в партии 4"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-9</text><line x1="42" y1="208.66666666666669" x2="616" y2="208.66666666666669" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="212.66666666666669" fill="#aab2c8" font-size="12" text-anchor="end">-6</text><line x1="42" y1="171.33333333333331" x2="616" y2="171.33333333333331" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="175.33333333333331" fill="#aab2c8" font-size="12" text-anchor="end">-3</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="96.66666666666666" x2="616" y2="96.66666666666666" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="100.66666666666666" fill="#aab2c8" font-size="12" text-anchor="end">+3</text><line x1="42" y1="59.33333333333333" x2="616" y2="59.33333333333333" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="63.33333333333333" fill="#aab2c8" font-size="12" text-anchor="end">+6</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+9</text><path d="M 42 158.8888888888889 L 94.18181818181819 171.33333333333331 L 146.36363636363637 183.77777777777777 L 198.54545454545453 196.22222222222223 L 250.72727272727272 183.77777777777777 L 302.9090909090909 171.33333333333331 L 355.09090909090907 183.77777777777777 L 407.27272727272725 196.22222222222223 L 459.45454545454544 208.66666666666669 L 511.6363636363637 221.1111111111111 L 563.8181818181818 233.55555555555554 L 616 246" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="158.8888888888889" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="94.18181818181819" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="146.36363636363637" cy="183.77777777777777" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="198.54545454545453" cy="196.22222222222223" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="250.72727272727272" cy="183.77777777777777" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="302.9090909090909" cy="171.33333333333331" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="355.09090909090907" cy="183.77777777777777" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="407.27272727272725" cy="196.22222222222223" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="459.45454545454544" cy="208.66666666666669" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="511.6363636363637" cy="221.1111111111111" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="563.8181818181818" cy="233.55555555555554" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="246" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 4)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен B</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен B</th><th scope="col">Спортсмен A</th></tr></thead><tbody><tr class="stat-rally-selected-server" aria-label="Розыгрыш 1. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>1</td><td>0</td><td class="stat-rally-winner">3</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 2. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>2</td><td>0</td><td class="stat-rally-winner">4</td></tr><tr aria-label="Розыгрыш 3. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>3</td><td>0</td><td class="stat-rally-winner">5</td></tr><tr aria-label="Розыгрыш 4. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>4</td><td class="stat-rally-winner">1</td><td>5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 5. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>5</td><td class="stat-rally-winner">2</td><td>5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 6. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>6</td><td>2</td><td class="stat-rally-winner">6</td></tr><tr aria-label="Розыгрыш 7. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>7</td><td>2</td><td class="stat-rally-winner">7</td></tr><tr aria-label="Розыгрыш 8. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>8</td><td>2</td><td class="stat-rally-winner">8</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 9. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>9</td><td>2</td><td class="stat-rally-winner">9</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 10. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>10</td><td>2</td><td class="stat-rally-winner">10</td></tr><tr aria-label="Розыгрыш 11. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>11</td><td>2</td><td class="stat-rally-winner">11</td></tr></tbody></table></div></section></div><div id="exportBGameContent5" class="export-game-content" data-export-game-content="4" hidden=""><section class="stat-card"><h2>Выиграно розыгрышей (партия 5)</h2><div class="stat-table-wrap"><table class="stat-table stat-performance-table"><thead><tr><th scope="col"></th><th scope="col"><span class="stat-performance-player-name">Спортсмен B</span></th><th scope="col"><span class="stat-performance-player-name">Спортсмен A</span></th></tr></thead><tbody><tr><th scope="row">На своей
+подаче</th><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">4 из 8</span></td><td><span class="stat-metric-main">63%</span><span class="stat-metric-detail">5 из 8</span></td></tr><tr><th scope="row">На приёме
+подачи</th><td><span class="stat-metric-main">38%</span><span class="stat-metric-detail">3 из 8</span></td><td><span class="stat-metric-main">50%</span><span class="stat-metric-detail">4 из 8</span></td></tr><tr><th scope="row">Всего</th><td><span class="stat-metric-main">7</span></td><td><span class="stat-metric-main">9</span></td></tr></tbody></table></div></section><section class="stat-card"><h2>Разница в счёте для спортсмена Спортсмен B (партия 5)</h2><div class="stat-chart-wrap"><svg class="stat-chart" viewBox="0 0 640 280" role="img" aria-label="Разница в счёте спортсмена Спортсмен B в партии 5"><line x1="42" y1="246" x2="616" y2="246" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="250" fill="#aab2c8" font-size="12" text-anchor="end">-4</text><line x1="42" y1="218" x2="616" y2="218" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="222" fill="#aab2c8" font-size="12" text-anchor="end">-3</text><line x1="42" y1="190" x2="616" y2="190" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="194" fill="#aab2c8" font-size="12" text-anchor="end">-2</text><line x1="42" y1="162" x2="616" y2="162" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="166" fill="#aab2c8" font-size="12" text-anchor="end">-1</text><line x1="42" y1="134" x2="616" y2="134" stroke="rgba(255,255,255,.42)" stroke-width="2"></line><text x="32" y="138" fill="#aab2c8" font-size="12" text-anchor="end">0</text><line x1="42" y1="106" x2="616" y2="106" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="110" fill="#aab2c8" font-size="12" text-anchor="end">+1</text><line x1="42" y1="78" x2="616" y2="78" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="82" fill="#aab2c8" font-size="12" text-anchor="end">+2</text><line x1="42" y1="50" x2="616" y2="50" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="54" fill="#aab2c8" font-size="12" text-anchor="end">+3</text><line x1="42" y1="22" x2="616" y2="22" stroke="rgba(255,255,255,.10)" stroke-width="1"></line><text x="32" y="26" fill="#aab2c8" font-size="12" text-anchor="end">+4</text><path d="M 42 190 L 77.875 218 L 113.75 246 L 149.625 218 L 185.5 190 L 221.375 162 L 257.25 134 L 293.125 106 L 329 78 L 364.875 50 L 400.75 78 L 436.625 106 L 472.5 134 L 508.375 162 L 544.25 190 L 580.125 218 L 616 246" fill="none" stroke="#4b86ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="42" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="77.875" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="113.75" cy="246" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="149.625" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="185.5" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="221.375" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="257.25" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="293.125" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="329" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="364.875" cy="50" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="400.75" cy="78" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="436.625" cy="106" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="472.5" cy="134" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="508.375" cy="162" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="544.25" cy="190" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="580.125" cy="218" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle><circle cx="616" cy="246" r="6" fill="#4b86ff" stroke="#0b1020" stroke-width="3"></circle></svg></div></section><section class="stat-card"><h2>Розыгрыши (партия 5)</h2><div class="stat-table-wrap stat-rally-wrap"><table class="stat-table stat-rally-table"><colgroup><col style="width: 33.333%;"><col style="width: 33.333%;"><col style="width: 33.333%;"></colgroup><thead><tr><th colspan="3" class="stat-rally-legend-cell"><div class="stat-rally-serve-legend"><span class="stat-rally-serve-swatch" aria-hidden="true"></span><span>Подающий: Спортсмен B</span></div></th></tr><tr><th scope="col">№</th><th scope="col">Спортсмен B</th><th scope="col">Спортсмен A</th></tr></thead><tbody><tr aria-label="Розыгрыш 1. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>1</td><td>0</td><td class="stat-rally-winner">3</td></tr><tr aria-label="Розыгрыш 2. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>2</td><td>0</td><td class="stat-rally-winner">4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 3. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>3</td><td class="stat-rally-winner">1</td><td>4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 4. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>4</td><td class="stat-rally-winner">2</td><td>4</td></tr><tr aria-label="Розыгрыш 5. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>5</td><td class="stat-rally-winner">3</td><td>4</td></tr><tr aria-label="Розыгрыш 6. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>6</td><td class="stat-rally-winner">4</td><td>4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 7. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>7</td><td class="stat-rally-winner">5</td><td>4</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 8. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен B."><td>8</td><td class="stat-rally-winner">6</td><td>4</td></tr><tr aria-label="Розыгрыш 9. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен B."><td>9</td><td class="stat-rally-winner">7</td><td>4</td></tr><tr aria-label="Розыгрыш 10. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>10</td><td>7</td><td class="stat-rally-winner">5</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 11. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>11</td><td>7</td><td class="stat-rally-winner">6</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 12. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>12</td><td>7</td><td class="stat-rally-winner">7</td></tr><tr aria-label="Розыгрыш 13. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>13</td><td>7</td><td class="stat-rally-winner">8</td></tr><tr aria-label="Розыгрыш 14. Подаёт Спортсмен A. Очко выиграл(а) Спортсмен A."><td>14</td><td>7</td><td class="stat-rally-winner">9</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 15. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>15</td><td>7</td><td class="stat-rally-winner">10</td></tr><tr class="stat-rally-selected-server" aria-label="Розыгрыш 16. Подаёт Спортсмен B. Очко выиграл(а) Спортсмен A."><td>16</td><td>7</td><td class="stat-rally-winner">11</td></tr></tbody></table></div></section></div><section class="stat-card"><h2>Партии</h2><div class="stat-tabs" style="--stat-tab-count: 5;" role="group" aria-label="Выбор партии"><button type="button" class="selected" data-export-game-tab="0" aria-pressed="true" aria-controls="exportBGameContent1">1</button><button type="button" data-export-game-tab="1" aria-pressed="false" aria-controls="exportBGameContent2">2</button><button type="button" data-export-game-tab="2" aria-pressed="false" aria-controls="exportBGameContent3">3</button><button type="button" data-export-game-tab="3" aria-pressed="false" aria-controls="exportBGameContent4">4</button><button type="button" data-export-game-tab="4" aria-pressed="false" aria-controls="exportBGameContent5">5</button></div></section></div></div><p class="stat-snapshot-time">Отчёт сохранён: 05.08.2026, 09:57:39</p><p class="app-version">Версия 0.2.15</p></section></main>
+<script>
+        (() => {
+          const report = document.querySelector('.export-report');
+          const perspectiveSelect = document.querySelector('[data-export-perspective-select]');
+          const perspectiveTitle = document.querySelector('[data-export-perspective-title]');
+          const perspectiveViews = [...document.querySelectorAll('[data-export-perspective-view]')];
+          const applyPerspective = player => {
+            const selected = player === 'B' ? 'B' : 'A';
+            const firstName = report.dataset['player' + selected];
+            const secondName = report.dataset['player' + (selected === 'A' ? 'B' : 'A')];
+            const title = `Отчёт о встрече «${firstName} — ${secondName}»`;
+            perspectiveViews.forEach(view => {
+              view.hidden = view.dataset.exportPerspectiveView !== selected;
+            });
+            perspectiveTitle.textContent = title;
+            document.title = title;
+          };
+          perspectiveSelect.addEventListener('change', () => applyPerspective(perspectiveSelect.value));
+          applyPerspective(perspectiveSelect.value);
+
+          const tabs = [...document.querySelectorAll('[data-export-game-tab]')];
+          const contents = [...document.querySelectorAll('[data-export-game-content]')];
+          tabs.forEach(tab => tab.addEventListener('click', () => {
+            const selected = tab.dataset.exportGameTab;
+            tabs.forEach(candidate => {
+              const active = candidate.dataset.exportGameTab === selected;
+              candidate.classList.toggle('selected', active);
+              candidate.setAttribute('aria-pressed', String(active));
+            });
+            contents.forEach(content => {
+              content.hidden = content.dataset.exportGameContent !== selected;
+            });
+          }));
+        })();
+      </script>
+</body>
+</html>
