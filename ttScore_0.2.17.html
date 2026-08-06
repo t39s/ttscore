@@ -1,0 +1,3298 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>ttScore</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #151b2f;
+      --panel-2: #1d2540;
+      --text: #f7f8fb;
+      --muted: #aab2c8;
+      --line: rgba(255,255,255,.12);
+      --accent: #72e0a8;
+      --danger: #ff6b6b;
+      --warn: #ffd166;
+      --shadow: 0 16px 44px rgba(0,0,0,.28);
+      --radius: 24px;
+      --game-badge-height: 74px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top, #192140 0, var(--bg) 46%, #070b16 100%);
+      overscroll-behavior: none;
+      user-select: none;
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 18px;
+      background: var(--panel-2);
+      min-height: 48px;
+      padding: 12px 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:active { transform: scale(.985); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    select:disabled { opacity: .45; cursor: not-allowed; }
+
+    .app {
+      height: 100vh;
+      min-height: 100vh;
+      height: 100dvh;
+      min-height: 100dvh;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+      max-width: 560px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    body.in-match .topbar { display: none; }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: -.03em;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pill {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
+    #setupScreen.active { overflow: auto; -webkit-overflow-scrolling: touch; }
+    #matchScreen.active { overflow: hidden; }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(21,27,47,.84);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 16px;
+      backdrop-filter: blur(18px);
+    }
+
+    .setup-grid { display: grid; gap: 14px; }
+    .field { display: grid; gap: 7px; }
+    label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 13px 14px;
+      outline: none;
+      min-height: 48px;
+    }
+    input:focus, select:focus { border-color: rgba(114,224,168,.65); }
+
+    .segmented { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .segmented.two { grid-template-columns: repeat(2, 1fr); }
+    .segmented button { color: var(--muted); font-weight: 800; }
+    .segmented button.selected { background: var(--accent); color: #082115; }
+
+    .primary {
+      background: var(--accent);
+      color: #082115;
+      font-weight: 900;
+      min-height: 58px;
+      font-size: 17px;
+    }
+    .secondary { color: var(--text); border: 1px solid var(--line); }
+    .danger { background: rgba(255,107,107,.16); color: #ffd0d0; }
+
+    .status-card { display: none; }
+    .status-title { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .status-main { font-size: 18px; font-weight: 900; margin-top: 2px; }
+    .server-dot {
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 999px;
+      box-shadow: 0 0 0 7px rgba(114,224,168,.12);
+    }
+
+    .match-compact-header {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 8px;
+      row-gap: 8px;
+      flex: 0 0 auto;
+    }
+    .match-compact-names,
+    .match-compact-games {
+      display: contents;
+    }
+    .match-compact-name,
+    .match-compact-game {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius: 18px;
+      min-width: 0;
+      text-align: center;
+    }
+    .match-compact-name {
+      padding: 10px 10px 8px;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .match-compact-game {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--game-badge-height);
+      padding: 10px 10px;
+      color: var(--text);
+      font-size: clamp(44px, 7.4vh, 68px);
+      font-size: clamp(44px, 7.4dvh, 68px);
+      font-weight: 950;
+      line-height: .9;
+      letter-spacing: -.06em;
+      box-shadow: none;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: minmax(0, 1fr);
+      gap: 10px;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .player-zone {
+      position: relative;
+      min-height: 0;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      display: grid;
+      grid-template-rows: 1fr;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .player-zone.server {
+      border-color: rgba(114,224,168,.72);
+      box-shadow: inset 0 0 0 2px rgba(114,224,168,.18), var(--shadow);
+    }
+
+    .player-head {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      z-index: 1;
+    }
+    .player-name {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .games-won { color: var(--muted); font-size: 14px; font-weight: 800; }
+    .score {
+      align-self: center;
+      justify-self: center;
+      font-size: clamp(72px, 18vh, 156px);
+      font-size: clamp(72px, 18dvh, 156px);
+      font-weight: 950;
+      letter-spacing: -.08em;
+      line-height: .88;
+      z-index: 1;
+    }
+    .tap-hint { display: none; color: var(--muted); font-size: 13px; font-weight: 700; z-index: 1; }
+    .plus {
+      position: absolute;
+      right: 18px;
+      bottom: 10px;
+      font-size: 68px;
+      font-weight: 900;
+      opacity: .08;
+      display: none;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 0.72fr 1.28fr 1.28fr 0.72fr;
+      gap: 8px;
+      flex: 0 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .toolbar button {
+      min-height: var(--game-badge-height);
+      padding: 10px 12px;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+    .sound-toggle {
+      white-space: normal;
+      padding-left: 8px;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      line-height: 1.06;
+      text-align: center;
+    }
+    .sound-toggle span {
+      display: block;
+      white-space: nowrap;
+    }
+    .sound-toggle.sound-off span {
+      color: var(--danger);
+    }
+    .sound-toggle:disabled {
+      box-shadow: none;
+    }
+
+    .sound-repeat-button {
+      white-space: normal;
+      padding-left: 8px;
+      padding-right: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      line-height: 1.06;
+      text-align: center;
+    }
+    .sound-repeat-button span {
+      display: block;
+      white-space: nowrap;
+    }
+
+    .notice {
+      border: 1px solid rgba(255,209,102,.34);
+      background: rgba(255,209,102,.12);
+      color: #ffecb8;
+      border-radius: 20px;
+      padding: 12px 14px;
+      display: none;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .notice.show { display: flex; }
+    .notice strong { display: block; font-size: 14px; }
+    .notice span { display: block; font-size: 12px; color: #f8d98c; margin-top: 2px; }
+    .notice button { min-height: 38px; padding: 8px 10px; background: rgba(255,255,255,.12); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: end;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(0,0,0,.52);
+      z-index: 20;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      width: min(560px, 100%);
+      max-height: calc(100vh - 28px);
+      max-height: calc(100dvh - 28px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid var(--line);
+      background: #12182a;
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+      display: grid;
+      gap: 12px;
+    }
+    .modal h2 { margin: 0; font-size: 24px; letter-spacing: -.04em; white-space: pre-line; }
+    .modal p { margin: 0; color: var(--muted); line-height: 1.45; white-space: pre-line; }
+    .modal p.modal-heading {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: 1.28;
+    }
+    .modal-actions { display: grid; gap: 10px; }
+    .modal-actions button {
+      min-height: 66px;
+      border-radius: 18px;
+      padding: 0 18px;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.18);
+    }
+    .modal-actions .primary {
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 24px rgba(51,121,246,.23);
+    }
+    .modal-actions .secondary {
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      color: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .modal-actions .danger {
+      background: linear-gradient(180deg, #ee6469 0%, #dd4f57 100%);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 10px 24px rgba(221,79,87,.22);
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .result-card {
+      display: none;
+      gap: 14px;
+    }
+    .result-card.show { display: grid; }
+    .result-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 950;
+      letter-spacing: -.04em;
+    }
+    .result-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .result-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
+    .app-version { margin: -4px 0 0; text-align: center; font-size: 12px; color: rgba(170,178,200,.72); line-height: 1.35; }
+
+    body.stat-page .topbar { display: none; }
+    #statScreen.active {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 14px;
+      padding-bottom: 8px;
+    }
+    #statScreen.active::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .stat-header {
+      display: grid;
+      gap: 8px;
+      padding: 4px 2px 0;
+    }
+    .stat-title {
+      margin: 0;
+      font-size: clamp(28px, 7vw, 38px);
+      line-height: 1;
+      letter-spacing: -.05em;
+    }
+    .stat-export-button {
+      flex: 0 0 auto;
+      min-width: 0;
+      min-height: 48px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 850;
+    }
+    .stat-report-controls {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+    .stat-perspective-label {
+      flex: 0 1 auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      color: var(--muted);
+      font-size: clamp(10px, 3vw, 13px);
+      font-weight: 800;
+      line-height: 1.08;
+      white-space: nowrap;
+    }
+    .stat-perspective-select {
+      flex: 1 1 90px;
+      width: auto;
+      min-width: 0;
+      height: 48px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      text-overflow: ellipsis;
+    }
+    .stat-card {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(21,27,47,.84);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+      padding: 16px;
+    }
+    .stat-card h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      letter-spacing: -.035em;
+    }
+    .stat-score-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .stat-score-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-score-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-score-table th,
+    .stat-score-table td {
+      height: 44px;
+      padding: 8px 6px;
+      border-right: 1px solid #303850;
+      border-bottom: 1px solid #303850;
+      background: #151b2f;
+      text-align: center;
+      vertical-align: middle;
+      font-weight: 850;
+    }
+    .stat-score-table thead th {
+      height: 38px;
+      background: #1b2238;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-score-table tr:last-child > * { border-bottom: 0; }
+    .stat-score-table tr > *:last-child { border-right: 0; }
+    .stat-score-table .stat-score-player {
+      color: var(--text);
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .stat-score-table thead .stat-score-player {
+      color: var(--muted);
+    }
+    .stat-all-games-table .stat-match-current-game {
+      background: #20365e;
+      color: #f4f7ff;
+    }
+    .stat-all-games-table thead .stat-match-current-game {
+      background: #2c4e88;
+    }
+    .stat-all-games-table {
+      min-width: 0;
+      font-size: clamp(9px, 2.6vw, 12px);
+    }
+    .stat-all-games-table th,
+    .stat-all-games-table td {
+      height: 38px;
+      padding: 6px 2px;
+    }
+    .stat-all-games-table .stat-score-player {
+      line-height: 1.08;
+    }
+    .stat-all-games-table tbody .stat-score-player {
+      padding-left: 10px;
+      padding-right: 6px;
+    }
+    .stat-all-games-table .stat-match-total-score {
+      background: #2c4e88;
+      color: #fff;
+      font-size: 115%;
+      font-weight: 950;
+    }
+    .stat-all-games-table .stat-match-game-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-all-games-table .stat-match-future { color: var(--muted); }
+    .stat-status-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--muted);
+      font-size: clamp(12px, 3.5vw, 14px);
+      text-align: right;
+      white-space: nowrap;
+    }
+    .stat-status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 5px rgba(114,224,168,.11);
+    }
+    .stat-server-line {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .stat-empty {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .stat-content {
+      display: grid;
+      gap: 14px;
+    }
+    .stat-content[hidden],
+    .stat-empty[hidden] { display: none; }
+    .stat-tabs {
+      display: grid;
+      grid-template-columns: repeat(var(--stat-tab-count, 1), minmax(0, 1fr));
+      gap: 8px;
+      padding-bottom: 2px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .stat-tabs button {
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      padding: 9px 4px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .stat-tabs button.selected {
+      background: #3379f6;
+      color: #fff;
+      border-color: transparent;
+    }
+    .stat-table-wrap {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .stat-table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 14px;
+    }
+    .stat-table th,
+    .stat-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      vertical-align: top;
+    }
+    .stat-table tr:last-child th,
+    .stat-table tr:last-child td { border-bottom: 0; }
+    .stat-table th:first-child,
+    .stat-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      text-align: left;
+      color: var(--muted);
+      font-weight: 700;
+      background: #151b2f;
+      box-shadow: 8px 0 14px -12px rgba(0,0,0,.95);
+    }
+    .stat-table thead th {
+      color: var(--text);
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+    .stat-table thead th:first-child { z-index: 3; }
+    .stat-metric-main {
+      display: block;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .stat-metric-detail {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .stat-performance-table th:first-child,
+    .stat-performance-table td:first-child {
+      width: 33.333%;
+      max-width: none;
+      white-space: pre-line;
+    }
+    .stat-performance-table th,
+    .stat-performance-table td {
+      width: 33.333%;
+      min-width: 0;
+    }
+    .stat-performance-player-name {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.15;
+      max-height: 2.3em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    .stat-chart-wrap {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(5,9,18,.34);
+    }
+    .stat-chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 210px;
+    }
+    .stat-rally-table {
+      min-width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .stat-rally-wrap {
+      position: relative;
+      max-height: min(56vh, 520px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      background: #151b2f;
+      isolation: isolate;
+    }
+    .stat-rally-wrap::before {
+      content: "";
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 8;
+      display: block;
+      width: 100%;
+      height: 2px;
+      margin-bottom: -2px;
+      background: #151b2f;
+      pointer-events: none;
+    }
+    .stat-rally-serve-legend {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .stat-rally-serve-swatch {
+      flex: 0 0 auto;
+      width: 30px;
+      height: 10px;
+      border-radius: 3px;
+      background: rgba(75,134,255,.20);
+      border: 1px solid rgba(75,134,255,.62);
+    }
+    .stat-rally-table th,
+    .stat-rally-table td {
+      width: 33.333%;
+      text-align: center;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+      transition: background-color .15s ease, color .15s ease;
+    }
+    .stat-rally-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      background: #151b2f;
+    }
+    .stat-rally-table thead th {
+      position: static;
+      z-index: auto;
+      background: #151b2f;
+      border-color: #151b2f;
+      outline: 1px solid #151b2f;
+      outline-offset: -1px;
+      box-shadow: 0 -2px 0 #151b2f;
+    }
+    .stat-rally-table th:first-child,
+    .stat-rally-table td:first-child {
+      position: static;
+      width: 33.333%;
+      text-align: center;
+      background: transparent;
+      box-shadow: none;
+    }
+    .stat-rally-table thead th:first-child {
+      position: static;
+      background: #151b2f;
+      border-color: #151b2f;
+      box-shadow: none;
+    }
+    .stat-rally-table thead .stat-rally-legend-cell {
+      padding: 10px 12px;
+      text-align: left;
+      background: #151b2f;
+      border-color: #151b2f;
+    }
+    .stat-rally-table tbody tr.stat-rally-selected-server > * {
+      background: rgba(75,134,255,.20);
+      color: #eaf1ff;
+    }
+    .stat-rally-table tbody td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+      font-weight: 950;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.28);
+    }
+    .stat-rally-table tbody tr.stat-rally-selected-server td.stat-rally-winner {
+      background: #ffd166;
+      color: #251900;
+    }
+    .stat-rally-table .stat-rally-empty {
+      padding: 18px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .stat-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    
+
+
+
+    .match-brand-line {
+      flex: 0 0 auto;
+      min-width: 0;
+      font-size: clamp(13px, 4vw, 18px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+      padding: 2px 2px 0;
+    }
+    .match-brand-name {
+      color: #4b86ff;
+      font-weight: 800;
+    }
+    .match-brand-description {
+      color: rgba(255,255,255,.94);
+    }
+    body.in-match #matchScreen.active {
+      gap: 8px;
+    }
+    body.in-match .scoreboard {
+      gap: 8px;
+    }
+    body.in-match .player-zone {
+      border-radius: 26px;
+      padding: 14px;
+    }
+    body.in-match .score {
+      font-size: clamp(68px, 16.5vh, 138px);
+      font-size: clamp(68px, 16.5dvh, 138px);
+    }
+
+    /* Settings screen style from reference + grouped settings */
+    .topbar {
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding: 6px 2px 0;
+    }
+    .brand {
+      gap: 12px;
+      width: 100%;
+    }
+    .brand-title {
+      display: block;
+      min-width: 0;
+      font-size: clamp(13px, 4vw, 18px);
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
+    }
+    .brand-name {
+      color: #4b86ff;
+      font-weight: 800;
+    }
+    .brand-description {
+      color: rgba(255,255,255,.94);
+    }
+    .brand-subtitle {
+      color: rgba(255,255,255,.95);
+      font-size: clamp(24px, 5.7vw, 30px);
+      line-height: 1.08;
+      font-weight: 820;
+      letter-spacing: -.045em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #formatPill { display: none !important; }
+    #setupScreen.active {
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-top: 6px;
+    }
+    .setup-layout {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      padding: 0 2px calc(max(12px, env(safe-area-inset-bottom)) + 6px);
+      gap: 14px;
+    }
+    .settings-group {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(23,31,51,.82), rgba(12,18,32,.82));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 28px rgba(0,0,0,.18);
+    }
+    .settings-group-title {
+      margin: 0 0 2px;
+      color: rgba(255,255,255,.95);
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 750;
+      letter-spacing: -.03em;
+    }
+    #setupScreen .field {
+      gap: 10px;
+    }
+    #setupScreen .group-control-only {
+      gap: 0;
+    }
+    #setupScreen .name-field {
+      gap: 0;
+    }
+    #setupScreen label {
+      color: rgba(255,255,255,.82);
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -.02em;
+      padding-left: 2px;
+    }
+    #setupScreen input,
+    #setupScreen select {
+      width: 100%;
+      min-height: 72px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      padding: 0 22px;
+      color: rgba(255,255,255,.92);
+      font-size: 18px;
+      font-weight: 500;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 20px rgba(0,0,0,.16);
+    }
+    #setupScreen input::placeholder,
+    #setupScreen select:disabled {
+      color: rgba(190,197,217,.58);
+    }
+    #setupScreen input:focus,
+    #setupScreen select:focus {
+      border-color: rgba(255,255,255,.22);
+    }
+    .native-hidden {
+      position: absolute !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      overflow: hidden !important;
+    }
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(183,191,211,.7);
+      border-bottom: 2px solid rgba(183,191,211,.7);
+      transform: translateY(-65%) rotate(45deg);
+      pointer-events: none;
+    }
+    #setupScreen select {
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 52px;
+    }
+    #setupScreen .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+      padding: 3px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 20px rgba(0,0,0,.16);
+    }
+    #setupScreen .segmented.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    #setupScreen .segmented button {
+      min-height: 66px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: rgba(235,239,249,.56);
+      font-size: 17px;
+      font-weight: 500;
+      padding: 0 12px;
+      box-shadow: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #setupScreen .segmented button.selected {
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 8px 22px rgba(51,121,246,.2);
+      font-weight: 650;
+    }
+    #setupScreen #handicapPlayerButtons button.selected {
+      background: linear-gradient(180deg, #45b777 0%, #2d9a61 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 8px 22px rgba(45,154,97,.2);
+    }
+    #setupScreen .primary {
+      min-height: 78px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #4a95ff 0%, #3379f6 100%);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 28px rgba(51,121,246,.25);
+    }
+    #setupScreen .primary:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    #setupScreen .tiny,
+    #setupScreen .app-version {
+      margin: 0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+      color: rgba(182,189,208,.7);
+      padding: 0 16px;
+    }
+    #setupScreen .app-version {
+      margin-top: -6px;
+      color: rgba(139,147,168,.74);
+    }
+
+    @media (max-height: 720px) {
+      .player-zone { min-height: 0; padding: 14px; }
+      .score { font-size: clamp(58px, 16vh, 120px); font-size: clamp(58px, 16dvh, 120px); }
+      .brand-title { font-size: clamp(13px, 4vw, 18px); }
+      .toolbar button { min-height: var(--game-badge-height); }
+      .tap-hint { display: none; }
+    }
+
+    @media (max-height: 620px) {
+      :root { --game-badge-height: 54px; }
+      .status-card { padding: 9px 12px; }
+      .status-main { font-size: 16px; }
+      .match-compact-header { column-gap: 6px; row-gap: 6px; }
+      .match-compact-name { padding: 8px 8px 6px; font-size: 16px; }
+      .match-compact-game {
+        min-height: var(--game-badge-height);
+        padding: 8px 8px;
+        font-size: clamp(32px, 8dvh, 48px);
+      }
+      .scoreboard { gap: 8px; }
+      .player-zone { border-radius: 24px; padding: 12px; }
+      .player-name { font-size: 18px; }
+      .games-won { font-size: 12px; }
+      .toolbar button { min-height: var(--game-badge-height); padding: 8px 10px; }
+    }
+
+
+    @media (max-height: 520px) and (orientation: landscape) {
+      .modal-backdrop {
+        align-items: center;
+        padding: 8px;
+      }
+      .modal {
+        max-height: calc(100vh - 16px);
+        max-height: calc(100dvh - 16px);
+        border-radius: 20px;
+        padding: 12px;
+        gap: 8px;
+      }
+      .modal h2 {
+        font-size: 20px;
+        line-height: 1.12;
+      }
+      .modal p {
+        font-size: 14px;
+        line-height: 1.32;
+      }
+      .modal p.modal-heading {
+        font-size: 17px;
+        line-height: 1.2;
+      }
+      .summary-list {
+        gap: 4px;
+        font-size: 13px;
+      }
+      .summary-row {
+        padding: 6px 0;
+      }
+      .modal-actions {
+        gap: 6px;
+      }
+      .modal-actions button {
+        min-height: 48px;
+        border-radius: 14px;
+        padding: 0 12px;
+        font-size: 15px;
+        line-height: 1.08;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title"><span class="brand-name">ttScore</span><span class="brand-description"> — счётчик для настольного тенниса</span></div>
+        <div class="brand-subtitle" id="subtitle">Настройки встречи</div>
+      </div>
+      <div class="pill" id="formatPill">Из 5 партий</div>
+    </header>
+
+    <section id="setupScreen" class="screen active">
+      <div class="setup-grid setup-layout">
+        <section class="settings-group" aria-labelledby="groupMatchTitle">
+          <h2 class="settings-group-title" id="groupMatchTitle">Встреча</h2>
+          <div class="field">
+            <label for="matchDateInput">Дата встречи</label>
+            <input id="matchDateInput" type="date" required />
+          </div>
+        </section>
+
+        <section class="settings-group" aria-labelledby="groupAthletesTitle">
+          <h2 class="settings-group-title" id="groupAthletesTitle">Спортсмены</h2>
+          <div class="field name-field">
+            <input id="playerAInput" value="Спортсмен A" autocomplete="off" aria-label="Спортсмен A" />
+          </div>
+          <div class="field name-field">
+            <input id="playerBInput" value="Спортсмен B" autocomplete="off" aria-label="Спортсмен B" />
+          </div>
+          <div class="field">
+            <label>Слева на экране</label>
+            <div class="segmented two" id="sideButtons">
+              <button type="button" data-left="A" class="selected">Спортсмен A</button>
+              <button type="button" data-left="B">Спортсмен B</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-group" aria-labelledby="groupServerTitle">
+          <h2 class="settings-group-title" id="groupServerTitle">Первый подающий</h2>
+          <div class="field group-control-only">
+            <div class="segmented two" id="serverButtons">
+              <button type="button" data-server="A" class="selected">Спортсмен A</button>
+              <button type="button" data-server="B">Спортсмен B</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-group" aria-labelledby="groupFormatTitle">
+          <h2 class="settings-group-title" id="groupFormatTitle">Формат встречи</h2>
+          <div class="field group-control-only">
+            <div class="segmented" id="formatButtons">
+              <button type="button" data-format="3">Из 3 партий</button>
+              <button type="button" data-format="5" class="selected">Из 5 партий</button>
+              <button type="button" data-format="7">Из 7 партий</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-group" aria-labelledby="groupHandicapTitle">
+          <h2 class="settings-group-title" id="groupHandicapTitle">Фора</h2>
+          <div class="field">
+            <label>Получает фору</label>
+            <div class="segmented" id="handicapPlayerButtons">
+              <button type="button" data-handicap-player="none" class="selected">Нет</button>
+              <button type="button" data-handicap-player="A">Спортсмен A</button>
+              <button type="button" data-handicap-player="B">Спортсмен B</button>
+            </div>
+            <select id="handicapPlayerSelect" class="native-hidden"><option value="none">Нет</option><option value="A">Спортсмен A</option><option value="B">Спортсмен B</option></select>
+          </div>
+          <div class="field">
+            <label for="handicapPointsSelect">Размер форы (очков)</label>
+            <div class="select-wrap">
+              <select id="handicapPointsSelect"><option value="0">Нет</option></select>
+            </div>
+          </div>
+        </section>
+
+        <button class="primary" id="startButton" type="button">Начать встречу</button>
+        <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
+        <p class="app-version">Версия 0.2.17</p>
+      </div>
+    </section>
+
+    <section id="matchScreen" class="screen">
+      <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
+
+      <div class="card status-card">
+        <div>
+          <div class="status-title" id="gameLabel">Партия 1</div>
+          <div class="status-main" id="serverLabel">Подающий: Спортсмен A</div>
+        </div>
+        <div class="server-dot" aria-hidden="true"></div>
+      </div>
+
+      <div class="match-compact-header" aria-label="Счет встречи">
+        <div class="match-compact-names">
+          <div class="match-compact-name" id="compactNameLeft">Спортсмен A</div>
+          <div class="match-compact-name" id="compactNameRight">Спортсмен B</div>
+        </div>
+        <div class="match-compact-games">
+          <div class="match-compact-game" id="compactGamesLeft">0</div>
+          <div class="match-compact-game" id="compactGamesRight">0</div>
+        </div>
+      </div>
+
+      <div class="notice" id="sideNotice">
+        <div>
+          <strong id="sideNoticeTitle">Смена сторон</strong>
+          <span id="sideNoticeText">В решающей партии один спортсмен набрал 5 очков.</span>
+        </div>
+        <button id="ackSideNotice" type="button">ОК</button>
+      </div>
+
+      <div class="notice" id="gameOverNotice">
+        <div>
+          <strong id="gameOverTitle">Партия завершена</strong>
+          <span id="gameOverText">Начните следующую партию.</span>
+        </div>
+        <button id="nextGameButton" type="button">Партия 2</button>
+      </div>
+
+      <div class="card result-card" id="matchResultCard">
+        <h2 class="result-title">Встреча завершена</h2>
+        <p class="result-text" id="matchResultText"></p>
+        <div class="summary-list" id="matchResultSummary"></div>
+        <div class="result-actions">
+          <button class="primary" id="copyProtocolButton" type="button">Скопировать протокол</button>
+          <button class="secondary" id="newMatchButton" type="button">Новая встреча</button>
+        </div>
+      </div>
+
+      <div class="scoreboard" id="scoreboard">
+        <button class="player-zone" id="zoneA" type="button" aria-label="Добавить очко спортсмену A">
+          <div class="player-head">
+            <div class="player-name" id="nameA">Спортсмен A</div>
+            <div class="games-won" id="gamesA">Партии: 0</div>
+          </div>
+          <div class="score" id="scoreA">0</div>
+          <div class="tap-hint">Нажмите, чтобы добавить очко</div>
+          <div class="plus">+1</div>
+        </button>
+
+        <button class="player-zone" id="zoneB" type="button" aria-label="Добавить очко спортсмену B">
+          <div class="player-head">
+            <div class="player-name" id="nameB">Спортсмен B</div>
+            <div class="games-won" id="gamesB">Партии: 0</div>
+          </div>
+          <div class="score" id="scoreB">0</div>
+          <div class="tap-hint">Нажмите, чтобы добавить очко</div>
+          <div class="plus">+1</div>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <button id="undoButton" class="secondary" type="button">Undo</button>
+        <button id="speechButton" class="secondary sound-toggle" type="button" aria-label="Звук выключен. Нажмите, чтобы включить звук" aria-pressed="false"><span>Звук</span><span id="speechStateLabel">выключен</span></button>
+        <button id="speechRepeatButton" class="secondary sound-repeat-button" type="button" disabled aria-label="Повторить счёт"><span>Повторить</span><span>счёт</span></button>
+        <button id="menuButton" class="secondary" type="button" aria-label="Дополнительно">…</button>
+      </div>
+    </section>
+
+    <section id="statScreen" class="screen" aria-live="polite">
+      <header class="stat-header">
+        <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
+        <h1 class="stat-title" id="statTitle">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
+      </header>
+      <div class="stat-report-controls" id="statReportControls">
+        <label class="stat-perspective-label" for="statPerspectiveSelect"><span>С позиции</span><span>спортсмена:</span></label>
+        <select class="stat-perspective-select" id="statPerspectiveSelect" aria-label="С позиции спортсмена">
+          <option value="A">Спортсмен A</option>
+          <option value="B">Спортсмен B</option>
+        </select>
+        <button class="secondary stat-export-button" id="exportReportButton" type="button">Поделиться</button>
+      </div>
+
+      <section class="stat-card" id="statStatusCard">
+        <div class="stat-score-heading">
+          <h2>Счёт</h2>
+          <div class="stat-status-line"><span class="stat-status-dot" id="statStatusDot"></span><span id="statStatusText">Ожидание данных</span></div>
+        </div>
+        <div class="stat-score-table-wrap" id="statScoreTableWrap" hidden><div id="statAllGamesScore"></div></div>
+        <p class="stat-note" id="statScoreHandicap" hidden></p>
+        <p class="stat-server-line" id="statServerText" hidden></p>
+      </section>
+
+      <section class="stat-card stat-empty" id="statEmpty">
+        Начните встречу в основной вкладке ttScore. Статистика появится после первого сохранения состояния.
+      </section>
+
+      <div class="stat-content" id="statContent" hidden>
+        <section class="stat-card">
+          <h2>Выиграно розыгрышей (за встречу)</h2>
+          <div class="stat-table-wrap" id="statMatchPerformance"></div>
+          <p class="stat-note" id="statHandicapNote">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p>
+        </section>
+
+        <section class="stat-card">
+          <h2>Партии</h2>
+          <div class="stat-tabs" id="statGameTabs"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statGamePerformanceTitle">Выиграно розыгрышей (партия)</h2>
+          <div class="stat-table-wrap" id="statGamePerformance"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statChartTitle">Разница в счёте</h2>
+          <div class="stat-chart-wrap" id="statChart"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2 id="statLogTitle">Розыгрыши</h2>
+          <div class="stat-table-wrap stat-rally-wrap" id="statRallyLog"></div>
+        </section>
+
+        <section class="stat-card">
+          <h2>Партии</h2>
+          <div class="stat-tabs" id="statGameTabsBeforeRallies"></div>
+        </section>
+      </div>
+
+      <p class="app-version">Версия 0.2.17</p>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">Заголовок</h2>
+      <p id="modalBody">Текст</p>
+      <div class="summary-list" id="modalSummary"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "ttScore:0.2.17:currentMeeting";
+    const RESTORE_CONFIRMATION_AGE_MS = 120_000;
+    const requestedPage = new URLSearchParams(location.search).get("page");
+    const PAGE_MODE = requestedPage === "report" ? "report" : "score";
+    const IS_REPORT_PAGE = PAGE_MODE === "report";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.17:meeting";
+
+    function localDateValue(date = new Date()) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function validMatchDate(value) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+      if (!match) return false;
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      const day = Number(match[3]);
+      const date = new Date(Date.UTC(year, month - 1, day));
+      return date.getUTCFullYear() === year
+        && date.getUTCMonth() === month - 1
+        && date.getUTCDate() === day;
+    }
+
+    function matchIdPrefix(matchDate) {
+      return `${matchDate.slice(0, 7)}${matchDate.slice(8)}-`;
+    }
+
+    function validMatchId(matchId, matchDate) {
+      return validMatchDate(matchDate)
+        && new RegExp(`^${matchIdPrefix(matchDate)}[0-9a-f]{4}$`).test(matchId || "");
+    }
+
+    function randomHexSuffix() {
+      const bytes = new Uint8Array(2);
+      if (globalThis.crypto?.getRandomValues) {
+        globalThis.crypto.getRandomValues(bytes);
+      } else {
+        bytes[0] = Math.floor(Math.random() * 256);
+        bytes[1] = Math.floor(Math.random() * 256);
+      }
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function createMatchId(matchDate, excludedId = null) {
+      const prefix = matchIdPrefix(matchDate);
+      let matchId = "";
+      for (let attempt = 0; attempt < 16; attempt += 1) {
+        matchId = `${prefix}${randomHexSuffix()}`;
+        if (matchId !== excludedId) return matchId;
+      }
+      const nextSuffix = ((parseInt(matchId.slice(-4), 16) + 1) & 0xffff)
+        .toString(16)
+        .padStart(4, "0");
+      return `${prefix}${nextSuffix}`;
+    }
+
+    const defaultState = () => ({
+      matchDate: localDateValue(),
+      matchId: null,
+      players: { A: "Спортсмен A", B: "Спортсмен B" },
+      format: 5,
+      initialServer: "A",
+      currentFirstServer: "A",
+      leftPlayer: "A",
+      handicap: {
+        enabled: false,
+        player: "A",
+        points: 0
+      },
+      gameIndex: 0,
+      score: { A: 0, B: 0 },
+      games: [],
+      pendingGame: null,
+      rallies: [],
+      history: [],
+      status: "setup",
+      sideChangeAcknowledgedForGame: false,
+      speechEnabled: false,
+      speechRate: 1.05
+    });
+
+    const storedMeeting = loadStoredMeeting();
+    let pendingRestoreState = !IS_REPORT_PAGE && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
+    let state = storedMeeting && (IS_REPORT_PAGE || !storedMeeting.needsConfirmation) ? storedMeeting.state : defaultState();
+    const MAX_UNDO = 50;
+    let historyStack = [];
+    let setupFormat = state.format || 5;
+    let setupMatchDate = validMatchDate(state.matchDate) ? state.matchDate : localDateValue();
+    let setupServer = state.initialServer || "A";
+    let setupLeft = state.leftPlayer || "A";
+    let setupHandicapPlayer = state.handicap?.enabled ? (state.handicap?.player || "A") : "none";
+    let setupHandicapPoints = state.handicap?.enabled ? (state.handicap?.points || 0) : 0;
+    let statsSelectedGame = state.gameIndex || 0;
+    let statsFollowCurrentGame = true;
+    let reportPerspectivePlayer = "A";
+    let lastMatchId = validMatchId(state.matchId, state.matchDate) ? state.matchId : null;
+    let syncChannel = null;
+    try {
+      if ("BroadcastChannel" in window) syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+    } catch (_) {}
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      setupScreen: $("setupScreen"),
+      matchScreen: $("matchScreen"),
+      statScreen: $("statScreen"),
+      subtitle: $("subtitle"),
+      formatPill: $("formatPill"),
+      matchDateInput: $("matchDateInput"),
+      playerAInput: $("playerAInput"),
+      playerBInput: $("playerBInput"),
+      formatButtons: $("formatButtons"),
+      serverButtons: $("serverButtons"),
+      sideButtons: $("sideButtons"),
+      handicapPlayerButtons: $("handicapPlayerButtons"),
+      handicapPlayerSelect: $("handicapPlayerSelect"),
+      handicapPointsSelect: $("handicapPointsSelect"),
+      startButton: $("startButton"),
+      gameLabel: $("gameLabel"),
+      serverLabel: $("serverLabel"),
+      sideNotice: $("sideNotice"),
+      sideNoticeTitle: $("sideNoticeTitle"),
+      sideNoticeText: $("sideNoticeText"),
+      ackSideNotice: $("ackSideNotice"),
+      scoreboard: $("scoreboard"),
+      compactNameLeft: $("compactNameLeft"),
+      compactNameRight: $("compactNameRight"),
+      compactGamesLeft: $("compactGamesLeft"),
+      compactGamesRight: $("compactGamesRight"),
+      zoneA: $("zoneA"),
+      zoneB: $("zoneB"),
+      nameA: $("nameA"),
+      nameB: $("nameB"),
+      gamesA: $("gamesA"),
+      gamesB: $("gamesB"),
+      scoreA: $("scoreA"),
+      scoreB: $("scoreB"),
+      undoButton: $("undoButton"),
+      speechButton: $("speechButton"),
+      speechStateLabel: $("speechStateLabel"),
+      speechRepeatButton: $("speechRepeatButton"),
+      menuButton: $("menuButton"),
+      gameOverNotice: $("gameOverNotice"),
+      gameOverTitle: $("gameOverTitle"),
+      gameOverText: $("gameOverText"),
+      nextGameButton: $("nextGameButton"),
+      matchResultCard: $("matchResultCard"),
+      matchResultText: $("matchResultText"),
+      matchResultSummary: $("matchResultSummary"),
+      copyProtocolButton: $("copyProtocolButton"),
+      newMatchButton: $("newMatchButton"),
+      modalBackdrop: $("modalBackdrop"),
+      modalTitle: $("modalTitle"),
+      modalBody: $("modalBody"),
+      modalSummary: $("modalSummary"),
+      modalActions: $("modalActions"),
+      statTitle: $("statTitle"),
+      statReportControls: $("statReportControls"),
+      statPerspectiveSelect: $("statPerspectiveSelect"),
+      exportReportButton: $("exportReportButton"),
+      statStatusCard: $("statStatusCard"),
+      statScoreTableWrap: $("statScoreTableWrap"),
+      statAllGamesScore: $("statAllGamesScore"),
+      statScoreHandicap: $("statScoreHandicap"),
+      statStatusDot: $("statStatusDot"),
+      statStatusText: $("statStatusText"),
+      statServerText: $("statServerText"),
+      statEmpty: $("statEmpty"),
+      statContent: $("statContent"),
+      statMatchPerformance: $("statMatchPerformance"),
+      statHandicapNote: $("statHandicapNote"),
+      statGameTabs: $("statGameTabs"),
+      statGameTabsBeforeRallies: $("statGameTabsBeforeRallies"),
+      statChartTitle: $("statChartTitle"),
+      statChart: $("statChart"),
+      statGamePerformanceTitle: $("statGamePerformanceTitle"),
+      statGamePerformance: $("statGamePerformance"),
+      statLogTitle: $("statLogTitle"),
+      statRallyLog: $("statRallyLog")
+    };
+
+    function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function normalizeRestoredState(candidate) {
+      if (!candidate || typeof candidate !== "object") return null;
+      const restored = candidate.state && typeof candidate.state === "object" ? candidate.state : candidate;
+      if (!restored || restored.status !== "match") return null;
+      if (!validMatchDate(restored.matchDate) || !validMatchId(restored.matchId, restored.matchDate)) return null;
+      if (!restored.players || typeof restored.players.A !== "string" || typeof restored.players.B !== "string") return null;
+      if (!restored.score || typeof restored.score.A !== "number" || typeof restored.score.B !== "number") return null;
+      restored.format = [3, 5, 7].includes(Number(restored.format)) ? Number(restored.format) : 5;
+      restored.initialServer = restored.initialServer === "B" ? "B" : "A";
+      restored.currentFirstServer = restored.currentFirstServer === "B" ? "B" : restored.initialServer;
+      restored.leftPlayer = restored.leftPlayer === "B" ? "B" : "A";
+      restored.handicap = restored.handicap && typeof restored.handicap === "object"
+        ? restored.handicap
+        : { enabled: false, player: "A", points: 0 };
+      restored.handicap.enabled = !!restored.handicap.enabled;
+      restored.handicap.player = restored.handicap.player === "B" ? "B" : "A";
+      restored.handicap.points = Math.min(10, Math.max(0, Number(restored.handicap.points) || 0));
+      restored.gameIndex = Math.max(0, Number(restored.gameIndex) || 0);
+      restored.games = Array.isArray(restored.games) ? restored.games : [];
+      restored.pendingGame = typeof restored.pendingGame === "undefined" ? null : restored.pendingGame;
+      restored.rallies = Array.isArray(restored.rallies)
+        ? restored.rallies.filter(rally => rally && typeof rally === "object")
+        : [];
+      restored.sideChangeAcknowledgedForGame = !!restored.sideChangeAcknowledgedForGame;
+      restored.speechEnabled = typeof restored.speechEnabled === "boolean" ? restored.speechEnabled : false;
+      restored.speechRate = Number(restored.speechRate) || 1.05;
+      restored.history = [];
+      return restored;
+    }
+
+    function persistableState() {
+      const copy = clone(state);
+      copy.history = [];
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        if (state.status !== "match") {
+          localStorage.removeItem(STORAGE_KEY);
+          notifyStateChanged();
+          return;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          app: "ttScore",
+          schema: 2,
+          savedAt: new Date().toISOString(),
+          state: persistableState()
+        }));
+        notifyStateChanged();
+      } catch (_) {}
+    }
+
+    function notifyStateChanged() {
+      try { syncChannel?.postMessage({ type: "state-updated" }); } catch (_) {}
+    }
+
+    function loadStoredMeeting() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        const restoredState = normalizeRestoredState(parsed);
+        if (!restoredState) return null;
+
+        const savedAtMs = Date.parse(parsed?.savedAt);
+        const hasValidSavedAt = Number.isFinite(savedAtMs);
+        const ageMs = hasValidSavedAt ? Math.max(0, Date.now() - savedAtMs) : 0;
+
+        return {
+          state: restoredState,
+          needsConfirmation: hasValidSavedAt && ageMs >= RESTORE_CONFIRMATION_AGE_MS
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function clearSavedState() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        notifyStateChanged();
+      } catch (_) {}
+    }
+
+    function vibrate(pattern) {
+      if ("vibrate" in navigator) navigator.vibrate(pattern);
+    }
+
+    function speechSupported() {
+      return "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+    }
+
+    function speak(text) {
+      if (!state.speechEnabled || !speechSupported()) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "ru-RU";
+        utterance.rate = state.speechRate || 1.05;
+        utterance.pitch = 1;
+        window.speechSynthesis.speak(utterance);
+      } catch (_) {}
+    }
+
+    function spokenNumber(n) {
+      return n === 0 ? "ноль" : String(n);
+    }
+
+    function scorePhrase() {
+      const server = currentServer();
+      const receiver = other(server);
+      return `${spokenNumber(state.score[server])} ${spokenNumber(state.score[receiver])}`;
+    }
+
+    function toggleSpeech() {
+      const willEnable = !state.speechEnabled;
+      state.speechEnabled = willEnable;
+      saveState();
+      updateHandicapPlayerNames();
+      render();
+    }
+
+    function repeatSpeech() {
+      if (!state.speechEnabled || !speechSupported()) return;
+      speak(scorePhrase());
+    }
+
+    function snapshotState() {
+      const copy = clone(state);
+      copy.history = [];
+      return copy;
+    }
+
+    function pushHistory() {
+      historyStack.push(snapshotState());
+      if (historyStack.length > MAX_UNDO) historyStack.shift();
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ("wakeLock" in navigator) await navigator.wakeLock.request("screen");
+      } catch (_) {}
+    }
+
+    function gamesWon(player) {
+      return state.games.filter(g => g.winner === player).length;
+    }
+
+    function gamesWonAfterCompletedGame(player, completedGame) {
+      return gamesWon(player) + (completedGame && completedGame.winner === player ? 1 : 0);
+    }
+
+    function wouldMatchBeOverAfter(completedGame) {
+      return gamesWonAfterCompletedGame("A", completedGame) >= requiredGames()
+        || gamesWonAfterCompletedGame("B", completedGame) >= requiredGames();
+    }
+
+    function pendingGameEndsMatch() {
+      return !!state.pendingGame && wouldMatchBeOverAfter(state.pendingGame);
+    }
+
+    function requiredGames() {
+      return Math.ceil(state.format / 2);
+    }
+
+    function isDecidingGame() {
+      return gamesWon("A") === requiredGames() - 1 && gamesWon("B") === requiredGames() - 1;
+    }
+
+    function isGameOver(score = state.score) {
+      const max = Math.max(score.A, score.B);
+      const diff = Math.abs(score.A - score.B);
+      return max >= 11 && diff >= 2;
+    }
+
+    function gameWinner(score = state.score) {
+      if (!isGameOver(score)) return null;
+      return score.A > score.B ? "A" : "B";
+    }
+
+    function isMatchOver() {
+      return gamesWon("A") >= requiredGames() || gamesWon("B") >= requiredGames();
+    }
+
+    function matchWinner() {
+      if (!isMatchOver()) return null;
+      return gamesWon("A") > gamesWon("B") ? "A" : "B";
+    }
+
+    function resultGames() {
+      return state.pendingGame ? [...state.games, state.pendingGame] : state.games;
+    }
+
+    function resultGamesWon(player) {
+      return resultGames().filter(g => g.winner === player).length;
+    }
+
+    function resultMatchWinner() {
+      return resultGamesWon("A") > resultGamesWon("B") ? "A" : "B";
+    }
+
+    function other(player) { return player === "A" ? "B" : "A"; }
+
+    function serveStartTotal() {
+      return state.handicap?.enabled ? state.handicap.points : 0;
+    }
+
+    function serveStartBlock() {
+      return Math.floor(serveStartTotal() / 2);
+    }
+
+    function currentServer() {
+      const total = state.score.A + state.score.B;
+      const deuce = state.score.A >= 10 && state.score.B >= 10;
+      const block = deuce ? total : Math.floor(total / 2);
+      const adjustedBlock = block - serveStartBlock();
+      return adjustedBlock % 2 === 0 ? state.currentFirstServer : other(state.currentFirstServer);
+    }
+
+    function pointsUntilServeChange() {
+      if (state.score.A >= 10 && state.score.B >= 10) return 1;
+      const total = state.score.A + state.score.B;
+      return 2 - (total % 2 || 0);
+    }
+
+    function nextGameFirstServer() {
+      return other(state.currentFirstServer);
+    }
+
+    function handicapScore() {
+      const score = { A: 0, B: 0 };
+      if (state.handicap && state.handicap.enabled) {
+        score[state.handicap.player] = state.handicap.points;
+      }
+      return score;
+    }
+
+    function addPoint(player) {
+      if (isMatchOver() || isGameOver()) return;
+      const server = currentServer();
+      const scoreBefore = { A: state.score.A, B: state.score.B };
+      pushHistory();
+      state.score[player] += 1;
+      const gameRallies = state.rallies.filter(rally => Number(rally.gameIndex) === state.gameIndex);
+      state.rallies.push({
+        gameIndex: state.gameIndex,
+        rallyNumber: gameRallies.length + 1,
+        server,
+        receiver: other(server),
+        winner: player,
+        scoreBefore,
+        scoreAfter: { A: state.score.A, B: state.score.B }
+      });
+      vibrate(12);
+
+      if (isGameOver()) {
+        const winner = gameWinner();
+        const completedGame = {
+          scoreA: state.score.A,
+          scoreB: state.score.B,
+          winner,
+          firstServer: state.currentFirstServer
+        };
+        vibrate([30, 40, 30]);
+
+        if (wouldMatchBeOverAfter(completedGame)) {
+          state.pendingGame = completedGame;
+          saveState();
+          updateHandicapPlayerNames();
+          render();
+          speak(scorePhrase());
+          showMatchOver();
+        } else {
+          state.pendingGame = completedGame;
+          saveState();
+          updateHandicapPlayerNames();
+          render();
+          speak(scorePhrase());
+          showGameOver(winner);
+        }
+        return;
+      }
+
+      saveState();
+      updateHandicapPlayerNames();
+    render();
+      speak(scorePhrase());
+    }
+
+    function undo() {
+      const prev = historyStack.pop();
+      if (!prev) return;
+      const currentSpeechEnabled = state.speechEnabled;
+      state = prev;
+      state.speechEnabled = currentSpeechEnabled;
+      saveState();
+      closeModal();
+      updateHandicapPlayerNames();
+    render();
+      vibrate(8);
+    }
+
+    function startNextGame() {
+      if (state.pendingGame) {
+        state.games.push(state.pendingGame);
+        state.pendingGame = null;
+      }
+      state.score = handicapScore();
+      state.currentFirstServer = nextGameFirstServer();
+      state.leftPlayer = other(state.leftPlayer);
+      state.gameIndex += 1;
+      state.sideChangeAcknowledgedForGame = false;
+      saveState();
+      closeModal();
+      updateHandicapPlayerNames();
+      render();
+      speak(scorePhrase());
+    }
+
+    function resetToSetup(clearPlayers = false) {
+      historyStack = [];
+      const oldPlayers = state.players;
+      state = defaultState();
+      if (!clearPlayers) state.players = oldPlayers;
+      setupFormat = state.format;
+      setupMatchDate = state.matchDate;
+      setupServer = state.initialServer;
+      setupLeft = state.leftPlayer;
+      saveState();
+      closeModal();
+      updateHandicapPlayerNames();
+    render();
+    }
+
+    function startMatch() {
+      const matchDate = els.matchDateInput.value;
+      if (!validMatchDate(matchDate)) {
+        alert("Укажите дату встречи.");
+        els.matchDateInput.focus();
+        return;
+      }
+      if (setupHandicapPoints > 0 && setupHandicapPlayer === "none") {
+        alert("Выберите спортсмена, который получает фору, или установите размер форы 0.");
+        return;
+      }
+      historyStack = [];
+      state = defaultState();
+      state.matchDate = matchDate;
+      state.matchId = createMatchId(matchDate, lastMatchId);
+      lastMatchId = state.matchId;
+      state.players.A = els.playerAInput.value.trim() || "Спортсмен A";
+      state.players.B = els.playerBInput.value.trim() || "Спортсмен B";
+      state.format = setupFormat;
+      state.initialServer = setupServer;
+      state.currentFirstServer = setupServer;
+      state.leftPlayer = setupLeft;
+      const handicapEnabled = setupHandicapPlayer !== "none" && setupHandicapPoints > 0;
+      state.handicap = {
+        enabled: handicapEnabled,
+        player: handicapEnabled ? setupHandicapPlayer : "A",
+        points: handicapEnabled ? setupHandicapPoints : 0
+      };
+      state.score = handicapScore();
+      state.status = "match";
+      saveState();
+      requestWakeLock();
+      updateHandicapPlayerNames();
+    render();
+      speak(scorePhrase());
+    }
+
+    function swapSides() {
+      pushHistory();
+      state.leftPlayer = other(state.leftPlayer);
+      saveState();
+      updateHandicapPlayerNames();
+    render();
+    }
+
+    function shouldOfferSideChange() {
+      const handicapBlocksSideChange = state.handicap?.enabled && state.handicap.points >= 5;
+      return !handicapBlocksSideChange
+        && isDecidingGame()
+        && !state.sideChangeAcknowledgedForGame
+        && !isGameOver()
+        && !isMatchOver()
+        && (state.score.A >= 5 || state.score.B >= 5);
+    }
+
+    let activeModal = null;
+
+    function applyScoreboardSide() {
+      const left = state.leftPlayer;
+      els.scoreboard.style.gridTemplateAreas = left === "A" ? '"a b"' : '"b a"';
+      els.zoneA.style.gridArea = "a";
+      els.zoneB.style.gridArea = "b";
+    }
+
+    function renderCompactHeader() {
+      const left = state.leftPlayer;
+      const right = other(left);
+      els.compactNameLeft.textContent = state.players[left];
+      els.compactNameRight.textContent = state.players[right];
+      els.compactGamesLeft.textContent = gamesWon(left);
+      els.compactGamesRight.textContent = gamesWon(right);
+    }
+
+    function setSideNotice(title, text, buttonLabel = "ОК") {
+      els.sideNoticeTitle.textContent = title;
+      els.sideNoticeText.textContent = text;
+      els.ackSideNotice.textContent = buttonLabel;
+    }
+
+    function chooseSideChange(changeSides) {
+      if (changeSides) state.leftPlayer = other(state.leftPlayer);
+      state.sideChangeAcknowledgedForGame = true;
+      saveState();
+      closeModal();
+      updateHandicapPlayerNames();
+      render();
+    }
+
+    function showSideChangeChoice() {
+      if (activeModal === "sideChangeChoice") return;
+      activeModal = "sideChangeChoice";
+      showModal(
+        "Смена сторон",
+        `Счет ${state.score.A}:${state.score.B} в решающей партии.\nНапомните спортсменам поменяться сторонами.`,
+        [
+          makeButton("Смена сторон выполнена", "primary", () => chooseSideChange(true)),
+          makeButton("Стороны не менялись", "secondary", () => chooseSideChange(false))
+        ]
+      );
+      activeModal = "sideChangeChoice";
+    }
+
+    function maybeHandleSideChange() {
+      const should = shouldOfferSideChange();
+      if (!should) {
+        els.sideNotice.classList.remove("show");
+        return;
+      }
+
+      els.sideNotice.classList.remove("show");
+      showSideChangeChoice();
+    }
+
+    function acknowledgeSideNotice() {
+      els.sideNotice.classList.remove("show");
+    }
+
+    function makeButton(label, className, onClick) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.className = className || "secondary";
+      b.addEventListener("click", onClick);
+      return b;
+    }
+
+    function makeUndoButton() {
+      const b = makeButton("Undo", "secondary", undo);
+      b.disabled = !historyStack.length;
+      return b;
+    }
+
+    function showModal(title, body, actions, summaryRows = []) {
+      els.modalTitle.textContent = title;
+      els.modalBody.textContent = body;
+      els.modalBody.classList.remove("modal-heading");
+      els.modalBody.style.display = body ? "" : "none";
+      els.modalActions.innerHTML = "";
+      fillSummary(els.modalSummary, summaryRows);
+      actions.forEach(a => els.modalActions.append(a));
+      els.modalBackdrop.classList.add("show");
+    }
+
+    function closeModal() {
+      els.modalBackdrop.classList.remove("show");
+      activeModal = null;
+    }
+
+    function showRestoreChoice() {
+      if (!pendingRestoreState) return;
+      activeModal = "restoreChoice";
+      showModal(
+        "Найдена сохранённая встреча",
+        `${pendingRestoreState.players.A} — ${pendingRestoreState.players.B}`,
+        [
+          makeButton("Восстановить встречу", "primary", restoreSavedMeeting),
+          makeButton("Начать новую встречу", "danger", discardSavedMeeting)
+        ]
+      );
+      activeModal = "restoreChoice";
+    }
+
+    function restoreSavedMeeting() {
+      if (!pendingRestoreState) return;
+      state = pendingRestoreState;
+      lastMatchId = state.matchId;
+      pendingRestoreState = null;
+      historyStack = [];
+      closeModal();
+      render();
+    }
+
+    function discardSavedMeeting() {
+      pendingRestoreState = null;
+      clearSavedState();
+      state = defaultState();
+      historyStack = [];
+      setupFormat = state.format;
+      setupMatchDate = state.matchDate;
+      setupServer = state.initialServer;
+      setupLeft = state.leftPlayer;
+      setupHandicapPlayer = "none";
+      setupHandicapPoints = 0;
+      els.playerAInput.value = state.players.A;
+      els.playerBInput.value = state.players.B;
+      updateHandicapPlayerNames();
+      closeModal();
+      render();
+    }
+
+    function matchScoreText() {
+      return `${gamesWon("A")}:${gamesWon("B")}`;
+    }
+
+    function finalMatchScoreText(winner) {
+      const loser = winner === "A" ? "B" : "A";
+      return `${resultGamesWon(winner)}:${resultGamesWon(loser)}`;
+    }
+
+    function finalGameScoreText(game, winner) {
+      return winner === "A" ? `${game.scoreA}:${game.scoreB}` : `${game.scoreB}:${game.scoreA}`;
+    }
+
+    function currentGameScoreText(winner) {
+      return winner === "A" ? `${state.score.A}:${state.score.B}` : `${state.score.B}:${state.score.A}`;
+    }
+
+    function gamesListText() {
+      return resultGames().map(g => `${g.scoreA}:${g.scoreB}`).join(", ");
+    }
+
+    function handicapProtocolText() {
+      if (!state.handicap?.enabled) return "";
+      return `${state.players[state.handicap.player]}, +${state.handicap.points} очков в каждой партии`;
+    }
+
+    function protocolLines() {
+      const winner = resultMatchWinner();
+      const lines = [
+        `Встреча «${state.players.A} — ${state.players.B}» завершена.`,
+        `Выиграл(а) ${state.players[winner]} со счётом ${finalMatchScoreText(winner)}.`,
+        "",
+        ...resultGames().map((g, index) => `Партия ${index + 1}: ${finalGameScoreText(g, winner)}`)
+      ];
+      if (state.handicap?.enabled) {
+        lines.push("", `Фора: ${state.players[state.handicap.player]} +${state.handicap.points}`);
+      }
+      return lines;
+    }
+
+    function fillSummary(container, rows) {
+      container.innerHTML = "";
+      rows.forEach(([left, right]) => {
+        const row = document.createElement("div");
+        row.className = "summary-row";
+        const l = document.createElement("span");
+        l.textContent = left;
+        const r = document.createElement("strong");
+        r.textContent = right;
+        row.append(l, r);
+        container.append(row);
+      });
+    }
+
+    function finalMatchRows(winner) {
+      const rows = resultGames().map((g, index) => [
+        `Партия ${index + 1}`,
+        finalGameScoreText(g, winner)
+      ]);
+      if (state.handicap?.enabled) {
+        rows.push(["Фора", `${state.players[state.handicap.player]} +${state.handicap.points}`]);
+      }
+      return rows;
+    }
+
+    function matchResultRows() {
+      const rows = [
+        ["Итоговый счет", matchScoreText()],
+        ["Партии", gamesListText()]
+      ];
+      const handicapText = handicapProtocolText();
+      if (handicapText) rows.push(["Фора", handicapText]);
+      return rows;
+    }
+
+    function showGameOver(winner) {
+      activeModal = "gameOver";
+      showModal(
+        "Партия завершена",
+        `Выиграл(а) ${state.players[winner]} со счётом ${currentGameScoreText(winner)}.`,
+        [
+          makeButton("Начать следующую партию", "primary", startNextGame),
+          makeUndoButton()
+        ]
+      );
+      els.modalBody.classList.add("modal-heading");
+      activeModal = "gameOver";
+    }
+
+    function showMatchOver() {
+      if (activeModal === "matchOver") return;
+      const winner = resultMatchWinner();
+      activeModal = "matchOver";
+      showModal(
+        `Встреча «${state.players.A} — ${state.players.B}» завершена.
+
+Выиграл(а) ${state.players[winner]} со счётом ${finalMatchScoreText(winner)}.`,
+        "",
+        [
+          makeShareReportButton("Поделиться отчётом о встрече"),
+          makeButton("Новая встреча", "secondary", () => showNewMatchConfirm(showMatchOver)),
+          makeUndoButton()
+        ],
+        finalMatchRows(winner)
+      );
+      activeModal = "matchOver";
+    }
+
+    async function copyResult(event) {
+      const button = event?.currentTarget;
+      const defaultLabel = "Скопировать протокол";
+      const text = protocolLines().join("\n");
+      const resetButton = () => {
+        if (!button || !button.isConnected) return;
+        button.textContent = defaultLabel;
+        button.disabled = false;
+      };
+
+      try {
+        await writeTextToClipboard(text);
+        if (button) {
+          button.textContent = "✓ Протокол скопирован";
+          button.disabled = true;
+          window.setTimeout(resetButton, 2000);
+        }
+      } catch {
+        if (button) {
+          button.textContent = "Не удалось скопировать";
+          button.disabled = true;
+          window.setTimeout(resetButton, 2000);
+        }
+      }
+    }
+
+    async function writeTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        const ok = document.execCommand("copy");
+        if (!ok) throw new Error("copy failed");
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+
+    function showMenu() {
+      activeModal = "overflowMenu";
+      showModal(
+        "Дополнительно",
+        "",
+        [
+          makeButton("Открыть отчёт о встрече", "primary", openStatistics),
+          makeButton("Новая встреча", "secondary", showNewMatchConfirm),
+          makeButton("Закрыть", "secondary", closeModal)
+        ]
+      );
+      activeModal = "overflowMenu";
+    }
+
+    function openStatistics() {
+      const statUrl = new URL(location.href);
+      statUrl.search = "?page=report";
+      window.open(statUrl.toString(), "_blank", "noopener");
+      closeModal();
+    }
+
+    function showNewMatchConfirm(returnTo = showMenu) {
+      const cancelAction = typeof returnTo === "function" ? returnTo : showMenu;
+      activeModal = "newMatchConfirm";
+      showModal(
+        "Начать новую встречу?",
+        "Данные о счёте в текущей встрече будут удалены.",
+        [
+          makeButton("Начать новую встречу", "danger", () => resetToSetup(false)),
+          makeButton("Отмена", "secondary", cancelAction)
+        ]
+      );
+      activeModal = "newMatchConfirm";
+    }
+
+    function syncHandicapPointsOptions() {
+      const recipientSelected = setupHandicapPlayer !== "none";
+      const desiredValue = recipientSelected ? String(Math.max(1, setupHandicapPoints || 1)) : "0";
+      const optionsHtml = recipientSelected
+        ? Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("")
+        : '<option value="0">Нет</option>';
+
+      if (els.handicapPointsSelect.innerHTML !== optionsHtml) {
+        els.handicapPointsSelect.innerHTML = optionsHtml;
+      }
+
+      setupHandicapPoints = Number(desiredValue);
+      els.handicapPointsSelect.value = desiredValue;
+      els.handicapPointsSelect.disabled = !recipientSelected;
+      els.handicapPointsSelect.title = recipientSelected ? "" : "Сначала выберите, кто получает фору";
+    }
+
+    function renderSetup() {
+      if (els.matchDateInput.value !== setupMatchDate) els.matchDateInput.value = setupMatchDate;
+      els.startButton.disabled = !validMatchDate(setupMatchDate);
+      [...els.formatButtons.children].forEach(btn => btn.classList.toggle("selected", Number(btn.dataset.format) === setupFormat));
+      [...els.serverButtons.children].forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.server === setupServer);
+        btn.textContent = btn.dataset.server === "A" ? (els.playerAInput.value || "Спортсмен A") : (els.playerBInput.value || "Спортсмен B");
+      });
+      [...els.sideButtons.children].forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.left === setupLeft);
+        btn.textContent = btn.dataset.left === "A" ? (els.playerAInput.value || "Спортсмен A") : (els.playerBInput.value || "Спортсмен B");
+      });
+      [...els.handicapPlayerButtons.children].forEach(btn => {
+        btn.classList.toggle("selected", btn.dataset.handicapPlayer === setupHandicapPlayer);
+        if (btn.dataset.handicapPlayer === "A") btn.textContent = els.playerAInput.value || "Спортсмен A";
+        else if (btn.dataset.handicapPlayer === "B") btn.textContent = els.playerBInput.value || "Спортсмен B";
+        else btn.textContent = "Нет";
+      });
+      els.handicapPlayerSelect.value = setupHandicapPlayer;
+      syncHandicapPointsOptions();
+    }
+
+    function ralliesForGame(gameIndex) {
+      return state.rallies
+        .filter(rally => Number(rally.gameIndex) === gameIndex)
+        .sort((a, b) => Number(a.rallyNumber) - Number(b.rallyNumber));
+    }
+
+    function startScoreForGame() {
+      const score = { A: 0, B: 0 };
+      if (state.handicap?.enabled) score[state.handicap.player] = state.handicap.points;
+      return score;
+    }
+
+    function reportPlayerOrder(perspective = reportPerspectivePlayer) {
+      const first = perspective === "B" ? "B" : "A";
+      return [first, other(first)];
+    }
+
+    function scorePointWord(value) {
+      const points = Math.abs(Number(value) || 0);
+      const lastTwoDigits = points % 100;
+      const lastDigit = points % 10;
+      if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return "очков";
+      if (lastDigit === 1) return "очко";
+      if (lastDigit >= 2 && lastDigit <= 4) return "очка";
+      return "очков";
+    }
+
+    function scoreHandicapText() {
+      const points = Number(state.handicap?.points) || 0;
+      const player = state.handicap?.player === "B" ? "B" : "A";
+      return `${state.players[player]} получает фору ${points} ${scorePointWord(points)}`;
+    }
+
+    function calculatePerformance(rallies) {
+      const result = {
+        A: { serveWon: 0, serveTotal: 0, receiveWon: 0, receiveTotal: 0, pointsWon: 0 },
+        B: { serveWon: 0, serveTotal: 0, receiveWon: 0, receiveTotal: 0, pointsWon: 0 }
+      };
+      rallies.forEach(rally => {
+        const server = rally.server === "B" ? "B" : "A";
+        const receiver = rally.receiver === "A" || rally.receiver === "B" ? rally.receiver : other(server);
+        const winner = rally.winner === "B" ? "B" : "A";
+        result[server].serveTotal += 1;
+        result[receiver].receiveTotal += 1;
+        result[winner].pointsWon += 1;
+        if (winner === server) result[server].serveWon += 1;
+        if (winner === receiver) result[receiver].receiveWon += 1;
+      });
+      return result;
+    }
+
+    function statPercent(won, total) {
+      return total ? `${Math.round((won / total) * 100)}%` : "—";
+    }
+
+    function statMetricCell(main, detail = "") {
+      const td = document.createElement("td");
+      const mainLine = document.createElement("span");
+      mainLine.className = "stat-metric-main";
+      mainLine.textContent = main;
+      td.append(mainLine);
+      if (detail) {
+        const detailLine = document.createElement("span");
+        detailLine.className = "stat-metric-detail";
+        detailLine.textContent = detail;
+        td.append(detailLine);
+      }
+      return td;
+    }
+
+    function renderPerformanceTable(container, rallies, perspective = reportPerspectivePlayer) {
+      container.replaceChildren();
+      const performance = calculatePerformance(rallies);
+      const playerOrder = reportPlayerOrder(perspective);
+      const table = document.createElement("table");
+      table.className = "stat-table stat-performance-table";
+
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      ["", ...playerOrder.map(player => state.players[player])].forEach((label, index) => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        if (index === 0) {
+          th.textContent = label;
+        } else {
+          const name = document.createElement("span");
+          name.className = "stat-performance-player-name";
+          name.textContent = label;
+          th.append(name);
+        }
+        headerRow.append(th);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      const rows = [
+        {
+          label: "На своей\nподаче",
+          value: player => [statPercent(performance[player].serveWon, performance[player].serveTotal), `${performance[player].serveWon} из ${performance[player].serveTotal}`]
+        },
+        {
+          label: "На приёме\nподачи",
+          value: player => [statPercent(performance[player].receiveWon, performance[player].receiveTotal), `${performance[player].receiveWon} из ${performance[player].receiveTotal}`]
+        },
+        {
+          label: "Всего",
+          value: player => [String(performance[player].pointsWon), ""]
+        }
+      ];
+
+      rows.forEach(definition => {
+        const row = document.createElement("tr");
+        const th = document.createElement("th");
+        th.scope = "row";
+        th.textContent = definition.label;
+        row.append(th);
+        playerOrder.forEach(player => {
+          const [main, detail] = definition.value(player);
+          row.append(statMetricCell(main, detail));
+        });
+        tbody.append(row);
+      });
+      table.append(tbody);
+      container.append(table);
+    }
+
+    function svgElement(tag, attributes = {}) {
+      const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, String(value)));
+      return element;
+    }
+
+    function renderScoreChart(container, gameIndex, rallies, perspective = reportPerspectivePlayer) {
+      container.replaceChildren();
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
+      const start = startScoreForGame();
+      const points = [start, ...rallies.map(rally => rally.scoreAfter)];
+      const differences = points.map(point => (Number(point[selectedPlayer]) || 0) - (Number(point[otherPlayer]) || 0));
+      const width = 640;
+      const height = 280;
+      const padding = { left: 42, right: 24, top: 22, bottom: 34 };
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const maxAbsoluteDifference = Math.max(1, ...differences.map(value => Math.abs(value)));
+      const tickStep = Math.max(1, Math.ceil(maxAbsoluteDifference / 4));
+      const scaleLimit = Math.max(tickStep, Math.ceil(maxAbsoluteDifference / tickStep) * tickStep);
+      const xFor = index => padding.left + (points.length > 1 ? (index / (points.length - 1)) * plotWidth : 0);
+      const yFor = value => padding.top + ((scaleLimit - Number(value)) / (scaleLimit * 2)) * plotHeight;
+
+      const svg = svgElement("svg", {
+        class: "stat-chart",
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": `Разница в счёте спортсмена ${state.players[selectedPlayer]} в партии ${gameIndex + 1}`
+      });
+
+      for (let value = -scaleLimit; value <= scaleLimit; value += tickStep) {
+        const y = yFor(value);
+        svg.append(svgElement("line", {
+          x1: padding.left,
+          y1: y,
+          x2: width - padding.right,
+          y2: y,
+          stroke: value === 0 ? "rgba(255,255,255,.42)" : "rgba(255,255,255,.10)",
+          "stroke-width": value === 0 ? 2 : 1
+        }));
+        const label = svgElement("text", {
+          x: padding.left - 10,
+          y: y + 4,
+          fill: "#aab2c8",
+          "font-size": 12,
+          "text-anchor": "end"
+        });
+        label.textContent = value > 0 ? `+${value}` : String(value);
+        svg.append(label);
+      }
+
+      let pathData = `M ${xFor(0)} ${yFor(differences[0])}`;
+      for (let index = 1; index < differences.length; index += 1) {
+        pathData += ` L ${xFor(index)} ${yFor(differences[index])}`;
+      }
+      svg.append(svgElement("path", {
+        d: pathData,
+        fill: "none",
+        stroke: "#4b86ff",
+        "stroke-width": 5,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      }));
+      differences.forEach((difference, index) => {
+        svg.append(svgElement("circle", {
+          cx: xFor(index),
+          cy: yFor(difference),
+          r: 6,
+          fill: "#4b86ff",
+          stroke: "#0b1020",
+          "stroke-width": 3
+        }));
+      });
+      container.append(svg);
+    }
+
+    function renderRallyLog(container, gameIndex, rallies, perspective = reportPerspectivePlayer) {
+      container.replaceChildren();
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
+      const playerOrder = [selectedPlayer, otherPlayer];
+      const table = document.createElement("table");
+      table.className = "stat-table stat-rally-table";
+      const colgroup = document.createElement("colgroup");
+      ["№", "A", "B"].forEach(() => {
+        const column = document.createElement("col");
+        column.style.width = "33.333%";
+        colgroup.append(column);
+      });
+      table.append(colgroup);
+      const thead = document.createElement("thead");
+      const legendRow = document.createElement("tr");
+      const legendCell = document.createElement("th");
+      legendCell.colSpan = 3;
+      legendCell.className = "stat-rally-legend-cell";
+      const legend = document.createElement("div");
+      legend.className = "stat-rally-serve-legend";
+      const swatch = document.createElement("span");
+      swatch.className = "stat-rally-serve-swatch";
+      swatch.setAttribute("aria-hidden", "true");
+      const legendText = document.createElement("span");
+      legendText.textContent = `Подающий: ${state.players[selectedPlayer]}`;
+      legend.append(swatch, legendText);
+      legendCell.append(legend);
+      legendRow.append(legendCell);
+      thead.append(legendRow);
+
+      const headerRow = document.createElement("tr");
+      ["№", ...playerOrder.map(player => state.players[player])].forEach(label => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = label;
+        headerRow.append(th);
+      });
+      thead.append(headerRow);
+      table.append(thead);
+
+      const tbody = document.createElement("tbody");
+      if (!rallies.length) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 3;
+        cell.className = "stat-rally-empty";
+        cell.textContent = "Розыгрышей пока нет";
+        row.append(cell);
+        tbody.append(row);
+      } else {
+        rallies.forEach((rally, index) => {
+          const row = document.createElement("tr");
+          const rallyNumber = rally.rallyNumber || index + 1;
+          const server = rally.server === "B" ? "B" : "A";
+          const winner = rally.winner === "B" ? "B" : "A";
+          row.classList.toggle("stat-rally-selected-server", server === selectedPlayer);
+          row.setAttribute(
+            "aria-label",
+            `Розыгрыш ${rallyNumber}. Подаёт ${state.players[server]}. Очко выиграл(а) ${state.players[winner]}.`
+          );
+
+          const numberCell = document.createElement("td");
+          numberCell.textContent = String(rallyNumber);
+          row.append(numberCell);
+          playerOrder.forEach(player => {
+            const scoreCell = document.createElement("td");
+            scoreCell.textContent = String(rally.scoreAfter[player]);
+            scoreCell.classList.toggle("stat-rally-winner", winner === player);
+            row.append(scoreCell);
+          });
+          tbody.append(row);
+        });
+      }
+      table.append(tbody);
+      container.append(table);
+    }
+
+    function exportDateStamp(date) {
+      const pad = value => String(value).padStart(2, "0");
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+    }
+
+    function standaloneReportFilename(date = new Date()) {
+      return `tts_${exportDateStamp(date)}.html`;
+    }
+
+    function snapshotCard(title) {
+      const card = document.createElement("section");
+      card.className = "stat-card";
+      const heading = document.createElement("h2");
+      heading.textContent = title;
+      card.append(heading);
+      return card;
+    }
+
+    function stripElementIds(root) {
+      if (root.id) root.removeAttribute("id");
+      root.querySelectorAll("[id]").forEach(element => element.removeAttribute("id"));
+      return root;
+    }
+
+    function buildStandalonePerspectiveView(perspective, selectedGame) {
+      const [selectedPlayer] = reportPlayerOrder(perspective);
+      const view = document.createElement("div");
+      view.className = "export-perspective-view";
+      view.dataset.exportPerspectiveView = perspective;
+      view.hidden = perspective !== reportPerspectivePlayer;
+
+      const statusCard = els.statStatusCard.cloneNode(true);
+      const statusScore = statusCard.querySelector("#statAllGamesScore");
+      renderAllGamesScoreTable(perspective, statusScore);
+      view.append(stripElementIds(statusCard));
+
+      const content = document.createElement("div");
+      content.className = "stat-content";
+
+      const matchPerformanceCard = snapshotCard("Выиграно розыгрышей (за встречу)");
+      const matchPerformanceContainer = document.createElement("div");
+      matchPerformanceContainer.className = "stat-table-wrap";
+      renderPerformanceTable(matchPerformanceContainer, state.rallies, perspective);
+      matchPerformanceCard.append(matchPerformanceContainer);
+      if (state.handicap?.enabled) {
+        const handicapNote = document.createElement("p");
+        handicapNote.className = "stat-note";
+        handicapNote.textContent = "Фора входит в счёт партии, но не считается выигранным розыгрышем.";
+        matchPerformanceCard.append(handicapNote);
+      }
+      content.append(matchPerformanceCard);
+
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      const createExportGameTabs = () => {
+        const tabs = document.createElement("div");
+        tabs.className = "stat-tabs";
+        tabs.style.setProperty("--stat-tab-count", String(gameIndexes.length));
+        tabs.setAttribute("role", "group");
+        tabs.setAttribute("aria-label", "Выбор партии");
+        gameIndexes.forEach(gameIndex => {
+          const selected = gameIndex === selectedGame;
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.classList.toggle("selected", selected);
+          tab.dataset.exportGameTab = String(gameIndex);
+          tab.setAttribute("aria-pressed", String(selected));
+          tab.setAttribute("aria-controls", `export${perspective}GameContent${gameIndex + 1}`);
+          tab.textContent = String(gameIndex + 1);
+          tabs.append(tab);
+        });
+        return tabs;
+      };
+
+      const gamesCard = snapshotCard("Партии");
+      gamesCard.append(createExportGameTabs());
+      content.append(gamesCard);
+
+      gameIndexes.forEach(gameIndex => {
+        const selected = gameIndex === selectedGame;
+        const gameContent = document.createElement("div");
+        gameContent.id = `export${perspective}GameContent${gameIndex + 1}`;
+        gameContent.className = "export-game-content";
+        gameContent.dataset.exportGameContent = String(gameIndex);
+        gameContent.hidden = !selected;
+
+        const gameRallies = ralliesForGame(gameIndex);
+        const performanceCard = snapshotCard(`Выиграно розыгрышей (партия ${gameIndex + 1})`);
+        const performanceContainer = document.createElement("div");
+        performanceContainer.className = "stat-table-wrap";
+        performanceCard.append(performanceContainer);
+        renderPerformanceTable(performanceContainer, gameRallies, perspective);
+
+        const chartCard = snapshotCard(
+          `Разница в счёте для спортсмена ${state.players[selectedPlayer]} (партия ${gameIndex + 1})`
+        );
+        const chartContainer = document.createElement("div");
+        chartContainer.className = "stat-chart-wrap";
+        chartCard.append(chartContainer);
+        renderScoreChart(chartContainer, gameIndex, gameRallies, perspective);
+
+        const ralliesCard = snapshotCard(`Розыгрыши (партия ${gameIndex + 1})`);
+        const ralliesContainer = document.createElement("div");
+        ralliesContainer.className = "stat-table-wrap stat-rally-wrap";
+        ralliesCard.append(ralliesContainer);
+        renderRallyLog(ralliesContainer, gameIndex, gameRallies, perspective);
+
+        gameContent.append(performanceCard, chartCard, ralliesCard);
+        content.append(gameContent);
+      });
+
+      const bottomGamesCard = snapshotCard("Партии");
+      bottomGamesCard.append(createExportGameTabs());
+      content.append(bottomGamesCard);
+      view.append(content);
+      return view;
+    }
+
+    function buildStandaloneReportRoot(createdAt = new Date()) {
+      const root = document.createElement("main");
+      root.className = "app export-report";
+      root.dataset.playerA = state.players.A;
+      root.dataset.playerB = state.players.B;
+      const screen = document.createElement("section");
+      screen.id = "statScreen";
+      screen.className = "screen active";
+
+      const header = document.querySelector("#statScreen .stat-header").cloneNode(true);
+      const headerTitle = header.querySelector("#statTitle");
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      headerTitle.dataset.exportPerspectiveTitle = "";
+      headerTitle.textContent = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
+      stripElementIds(header);
+      screen.append(header);
+
+      const controls = document.createElement("div");
+      controls.className = "stat-report-controls export-report-controls";
+      const label = document.createElement("label");
+      label.className = "stat-perspective-label";
+      label.htmlFor = "exportPerspectiveSelect";
+      const labelFirstLine = document.createElement("span");
+      labelFirstLine.textContent = "С позиции";
+      const labelSecondLine = document.createElement("span");
+      labelSecondLine.textContent = "спортсмена:";
+      label.append(labelFirstLine, labelSecondLine);
+      const select = document.createElement("select");
+      select.className = "stat-perspective-select";
+      select.id = "exportPerspectiveSelect";
+      select.dataset.exportPerspectiveSelect = "";
+      select.setAttribute("aria-label", "С позиции спортсмена");
+      ["A", "B"].forEach(player => {
+        const option = document.createElement("option");
+        option.value = player;
+        option.textContent = state.players[player];
+        if (player === reportPerspectivePlayer) option.setAttribute("selected", "");
+        select.append(option);
+      });
+      controls.append(label, select);
+      screen.append(controls);
+
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      const selectedGame = gameIndexes.includes(statsSelectedGame) ? statsSelectedGame : state.gameIndex;
+      screen.append(
+        buildStandalonePerspectiveView("A", selectedGame),
+        buildStandalonePerspectiveView("B", selectedGame)
+      );
+
+      const savedAt = document.createElement("p");
+      savedAt.className = "stat-snapshot-time";
+      savedAt.textContent = `Отчёт сохранён: ${createdAt.toLocaleString("ru-RU")}`;
+      const version = document.createElement("p");
+      version.className = "app-version";
+      version.textContent = "Версия 0.2.17";
+      screen.append(savedAt, version);
+      root.append(screen);
+      return root;
+    }
+
+    function escapeDocumentText(value) {
+      const span = document.createElement("span");
+      span.textContent = String(value);
+      return span.innerHTML;
+    }
+
+    function buildStandaloneReportHtml(createdAt = new Date()) {
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
+      const sourceCss = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
+      const standaloneCss = `
+        html, body { height: auto; min-height: 100%; overflow: visible; }
+        body { user-select: text; }
+        .export-report { height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; }
+        .export-report #statScreen.active { overflow: visible; }
+        .export-report-controls .stat-perspective-select { flex-basis: 0; }
+        .export-perspective-view { display: grid; gap: 14px; }
+        .export-perspective-view[hidden] { display: none; }
+        .export-game-content { display: grid; gap: 14px; }
+        .export-game-content[hidden] { display: none; }
+        .stat-snapshot-time { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
+        @media print {
+          html, body, .export-report, .export-report #statScreen.active { height: auto; overflow: visible; }
+          .stat-card { break-inside: avoid; box-shadow: none; }
+        }
+      `;
+      const standaloneScript = `
+        (() => {
+          const report = document.querySelector('.export-report');
+          const perspectiveSelect = document.querySelector('[data-export-perspective-select]');
+          const perspectiveTitle = document.querySelector('[data-export-perspective-title]');
+          const perspectiveViews = [...document.querySelectorAll('[data-export-perspective-view]')];
+          const applyPerspective = player => {
+            const selected = player === 'B' ? 'B' : 'A';
+            const firstName = report.dataset['player' + selected];
+            const secondName = report.dataset['player' + (selected === 'A' ? 'B' : 'A')];
+            const title = \`Отчёт о встрече «\${firstName} — \${secondName}»\`;
+            perspectiveViews.forEach(view => {
+              view.hidden = view.dataset.exportPerspectiveView !== selected;
+            });
+            perspectiveTitle.textContent = title;
+            document.title = title;
+          };
+          perspectiveSelect.addEventListener('change', () => applyPerspective(perspectiveSelect.value));
+          applyPerspective(perspectiveSelect.value);
+
+          const tabs = [...document.querySelectorAll('[data-export-game-tab]')];
+          const contents = [...document.querySelectorAll('[data-export-game-content]')];
+          tabs.forEach(tab => tab.addEventListener('click', () => {
+            const selected = tab.dataset.exportGameTab;
+            tabs.forEach(candidate => {
+              const active = candidate.dataset.exportGameTab === selected;
+              candidate.classList.toggle('selected', active);
+              candidate.setAttribute('aria-pressed', String(active));
+            });
+            contents.forEach(content => {
+              content.hidden = content.dataset.exportGameContent !== selected;
+            });
+          }));
+        })();
+      `;
+      return `<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>${escapeDocumentText(reportTitle)}</title>
+  <style>${sourceCss}\n${standaloneCss}</style>
+</head>
+<body class="stat-page">
+${buildStandaloneReportRoot(createdAt).outerHTML}
+<script>${standaloneScript}<\/script>
+</body>
+</html>`;
+    }
+
+    function createStandaloneReportArtifact(createdAt = new Date()) {
+      const html = buildStandaloneReportHtml(createdAt);
+      const filename = standaloneReportFilename(createdAt);
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const file = typeof File === "function"
+        ? new File([blob], filename, { type: "text/html;charset=utf-8" })
+        : null;
+      return { html, filename, blob, file };
+    }
+
+    function canShareStandaloneReport() {
+      if (typeof navigator.share !== "function" || typeof navigator.canShare !== "function" || typeof File !== "function") return false;
+      try {
+        const probe = new File([""], "tts_report.html", { type: "text/html" });
+        return navigator.canShare({ files: [probe] });
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function configureShareButton(button, availableLabel) {
+      const sharingAvailable = state.status === "match" && canShareStandaloneReport();
+      button.disabled = !sharingAvailable;
+      button.title = sharingAvailable ? "" : "Передача HTML-файлов не поддерживается этим браузером";
+      button.setAttribute(
+        "aria-label",
+        sharingAvailable ? availableLabel : "Передача HTML-файлов не поддерживается этим браузером"
+      );
+      return button;
+    }
+
+    function makeShareReportButton(label) {
+      return configureShareButton(
+        makeButton(label, "primary", shareStandaloneReport),
+        label
+      );
+    }
+
+    function createCurrentStandaloneReportArtifact() {
+      const originalTitle = document.title;
+      try {
+        if (!IS_REPORT_PAGE) renderStats();
+        return createStandaloneReportArtifact();
+      } finally {
+        if (!IS_REPORT_PAGE) document.title = originalTitle;
+      }
+    }
+
+    async function shareStandaloneReport() {
+      if (state.status !== "match" || !canShareStandaloneReport()) return;
+      const artifact = createCurrentStandaloneReportArtifact();
+      if (!artifact.file) return;
+      try {
+        await navigator.share({ files: [artifact.file] });
+      } catch (error) {
+        if (error?.name !== "AbortError") alert("Не удалось поделиться отчётом.");
+      }
+    }
+
+    function statsStatusText() {
+      if (state.pendingGame && pendingGameEndsMatch()) return "Встреча завершена";
+      if (state.pendingGame) return "Партия завершена";
+      return "Встреча идёт";
+    }
+
+    function scoreForStatusGame(gameIndex, player) {
+      const completedGame = resultGames()[gameIndex];
+      if (completedGame) return String(player === "A" ? completedGame.scoreA : completedGame.scoreB);
+      if (gameIndex === state.gameIndex && !state.pendingGame) return String(state.score[player]);
+      return "—";
+    }
+
+    function statsMeetingCompleted() {
+      return resultGamesWon("A") >= requiredGames() || resultGamesWon("B") >= requiredGames();
+    }
+
+    function renderAllGamesScoreTable(perspective = reportPerspectivePlayer, container = els.statAllGamesScore) {
+      container.replaceChildren();
+      const playerOrder = reportPlayerOrder(perspective);
+      const table = document.createElement("table");
+      table.className = "stat-score-table stat-all-games-table";
+      table.setAttribute(
+        "aria-label",
+        `Счёт по всем партиям: ${state.players[playerOrder[0]]} — ${state.players[playerOrder[1]]}`
+      );
+
+      const playerPercent = state.format >= 7 ? 26 : 30;
+      const totalPercent = state.format >= 7 ? 10 : 12;
+      const gamePercent = (100 - playerPercent - totalPercent) / state.format;
+      const colgroup = document.createElement("colgroup");
+      [playerPercent, ...Array(state.format).fill(gamePercent), totalPercent].forEach(width => {
+        const column = document.createElement("col");
+        column.style.width = `${width}%`;
+        colgroup.append(column);
+      });
+      table.append(colgroup);
+
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      const playerHeader = document.createElement("th");
+      playerHeader.scope = "col";
+      playerHeader.className = "stat-score-player";
+      playerHeader.setAttribute("aria-label", "Спортсмен");
+      headerRow.append(playerHeader);
+      const meetingCompleted = statsMeetingCompleted();
+      for (let gameIndex = 0; gameIndex < state.format; gameIndex += 1) {
+        const gameHeader = document.createElement("th");
+        gameHeader.scope = "col";
+        gameHeader.textContent = String(gameIndex + 1);
+        gameHeader.classList.toggle("stat-match-current-game", !meetingCompleted && gameIndex === state.gameIndex);
+        headerRow.append(gameHeader);
+      }
+      const totalHeader = document.createElement("th");
+      totalHeader.scope = "col";
+      totalHeader.setAttribute("aria-label", "Счёт встречи");
+      headerRow.append(totalHeader);
+      thead.append(headerRow);
+      table.append(thead);
+
+      const games = resultGames();
+      const tbody = document.createElement("tbody");
+      playerOrder.forEach(player => {
+        const row = document.createElement("tr");
+        const playerCell = document.createElement("th");
+        playerCell.scope = "row";
+        playerCell.className = "stat-score-player";
+        playerCell.textContent = state.players[player];
+        row.append(playerCell);
+
+        for (let gameIndex = 0; gameIndex < state.format; gameIndex += 1) {
+          const scoreCell = document.createElement("td");
+          const completedGame = games[gameIndex];
+          scoreCell.classList.toggle("stat-match-current-game", !meetingCompleted && gameIndex === state.gameIndex);
+          scoreCell.textContent = scoreForStatusGame(gameIndex, player);
+          if (completedGame) {
+            scoreCell.classList.toggle("stat-match-game-winner", completedGame.winner === player);
+          } else if (gameIndex !== state.gameIndex || state.pendingGame) {
+            scoreCell.classList.add("stat-match-future");
+          }
+          row.append(scoreCell);
+        }
+
+        const totalCell = document.createElement("td");
+        totalCell.className = "stat-match-total-score";
+        totalCell.textContent = String(resultGamesWon(player));
+        row.append(totalCell);
+        tbody.append(row);
+      });
+      table.append(tbody);
+      container.append(table);
+    }
+
+    function renderGameTabSet(container, gameIndexes) {
+      container.replaceChildren();
+      container.style.setProperty("--stat-tab-count", String(gameIndexes.length));
+      container.setAttribute("role", "group");
+      container.setAttribute("aria-label", "Выбор партии");
+      gameIndexes.forEach(gameIndex => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.classList.toggle("selected", gameIndex === statsSelectedGame);
+        button.setAttribute("aria-pressed", String(gameIndex === statsSelectedGame));
+        button.textContent = String(gameIndex + 1);
+        button.addEventListener("click", () => {
+          statsSelectedGame = gameIndex;
+          statsFollowCurrentGame = gameIndex === state.gameIndex;
+          renderStats();
+        });
+        container.append(button);
+      });
+    }
+
+    function renderGameTabs() {
+      const gameIndexes = Array.from({ length: state.gameIndex + 1 }, (_, index) => index);
+      if (!gameIndexes.includes(statsSelectedGame)) statsSelectedGame = state.gameIndex;
+      renderGameTabSet(els.statGameTabs, gameIndexes);
+      renderGameTabSet(els.statGameTabsBeforeRallies, gameIndexes);
+    }
+
+    function renderStats() {
+      const hasMeeting = state.status === "match";
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder();
+      const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
+      els.statTitle.textContent = reportTitle;
+      document.title = reportTitle;
+      els.statEmpty.hidden = hasMeeting;
+      els.statContent.hidden = !hasMeeting;
+      els.statScoreTableWrap.hidden = !hasMeeting;
+      els.statPerspectiveSelect.options[0].textContent = state.players.A;
+      els.statPerspectiveSelect.options[1].textContent = state.players.B;
+      els.statPerspectiveSelect.value = reportPerspectivePlayer;
+      els.statPerspectiveSelect.disabled = !hasMeeting;
+      configureShareButton(els.exportReportButton, "Поделиться автономным HTML-отчётом");
+      els.statStatusDot.style.background = hasMeeting ? "var(--accent)" : "var(--muted)";
+      els.statHandicapNote.hidden = !state.handicap?.enabled;
+      const showHandicap = hasMeeting && state.handicap?.enabled && Number(state.handicap?.points) > 0;
+      els.statScoreHandicap.hidden = !showHandicap;
+      els.statScoreHandicap.textContent = showHandicap ? scoreHandicapText() : "";
+
+      if (!hasMeeting) {
+        els.statAllGamesScore.replaceChildren();
+        els.statStatusText.textContent = "Ожидание данных";
+        els.statServerText.hidden = true;
+        els.statServerText.textContent = "";
+        return;
+      }
+
+      renderAllGamesScoreTable(reportPerspectivePlayer);
+      els.statStatusText.textContent = statsStatusText();
+      const showServer = !state.pendingGame && !statsMeetingCompleted();
+      els.statServerText.hidden = !showServer;
+      els.statServerText.textContent = showServer ? `Подающий: ${state.players[currentServer()]}` : "";
+      renderPerformanceTable(els.statMatchPerformance, state.rallies);
+      renderGameTabs();
+
+      const gameRallies = ralliesForGame(statsSelectedGame);
+      els.statChartTitle.textContent = `Разница в счёте для спортсмена ${state.players[selectedPlayer]} (партия ${statsSelectedGame + 1})`;
+      renderScoreChart(els.statChart, statsSelectedGame, gameRallies, reportPerspectivePlayer);
+      els.statGamePerformanceTitle.textContent = `Выиграно розыгрышей (партия ${statsSelectedGame + 1})`;
+      renderPerformanceTable(els.statGamePerformance, gameRallies);
+      els.statLogTitle.textContent = `Розыгрыши (партия ${statsSelectedGame + 1})`;
+      renderRallyLog(els.statRallyLog, statsSelectedGame, gameRallies);
+    }
+
+    function refreshStatsFromStorage() {
+      if (!IS_REPORT_PAGE) return;
+      const freshMeeting = loadStoredMeeting();
+      state = freshMeeting?.state || defaultState();
+      statsSelectedGame = statsFollowCurrentGame
+        ? (state.gameIndex || 0)
+        : Math.min(statsSelectedGame, state.gameIndex || 0);
+      render();
+    }
+
+    function renderMatch() {
+      els.formatPill.textContent = `Из ${state.format} партий`;
+      els.subtitle.textContent = `${state.players.A} ${gamesWon("A")} — ${gamesWon("B")} ${state.players.B}`;
+      els.gameLabel.textContent = `Партия ${state.gameIndex + 1} · ${state.score.A}:${state.score.B}`;
+
+      const server = currentServer();
+      els.serverLabel.textContent = `Подающий: ${state.players[server]}`;
+
+      els.nameA.textContent = state.players.A;
+      els.nameB.textContent = state.players.B;
+      els.gamesA.textContent = `${gamesWon("A")}`;
+      els.gamesB.textContent = `${gamesWon("B")}`;
+      renderCompactHeader();
+      els.scoreA.textContent = state.score.A;
+      els.scoreB.textContent = state.score.B;
+      const gameOver = isGameOver();
+      const matchOver = isMatchOver();
+      els.zoneA.classList.toggle("server", !gameOver && server === "A");
+      els.zoneB.classList.toggle("server", !gameOver && server === "B");
+      els.zoneA.classList.toggle("locked", gameOver);
+      els.zoneB.classList.toggle("locked", gameOver);
+      els.undoButton.disabled = !historyStack.length;
+      const speechAvailable = speechSupported();
+      els.speechStateLabel.textContent = state.speechEnabled ? "включён" : "выключен";
+      els.speechButton.setAttribute(
+        "aria-label",
+        state.speechEnabled ? "Звук включен. Нажмите, чтобы выключить звук" : "Звук выключен. Нажмите, чтобы включить звук"
+      );
+      els.speechButton.setAttribute("aria-pressed", state.speechEnabled ? "true" : "false");
+      els.speechButton.classList.toggle("sound-off", !state.speechEnabled);
+      els.speechButton.disabled = !speechAvailable;
+      els.speechRepeatButton.disabled = !speechAvailable || !state.speechEnabled;
+      els.speechRepeatButton.setAttribute(
+        "aria-label",
+        state.speechEnabled ? "Повторить озвучивание текущего счета" : "Повтор озвучивания недоступен: звук выключен"
+      );
+
+      els.gameOverNotice.classList.remove("show");
+
+      els.matchResultCard.classList.remove("show");
+
+      applyScoreboardSide();
+
+      maybeHandleSideChange();
+      if (state.pendingGame && activeModal !== "gameOver" && activeModal !== "matchOver") {
+        if (pendingGameEndsMatch()) showMatchOver();
+        else showGameOver(state.pendingGame.winner);
+      }
+    }
+
+    function render() {
+      document.body.classList.toggle("stat-page", IS_REPORT_PAGE);
+      if (IS_REPORT_PAGE) {
+        document.body.classList.remove("in-match");
+        els.setupScreen.classList.remove("active");
+        els.matchScreen.classList.remove("active");
+        els.statScreen.classList.add("active");
+        renderStats();
+        return;
+      }
+
+      const inMatch = state.status === "match";
+      document.body.classList.toggle("in-match", inMatch);
+      els.setupScreen.classList.toggle("active", !inMatch);
+      els.matchScreen.classList.toggle("active", inMatch);
+      els.statScreen.classList.remove("active");
+      els.formatPill.textContent = `Из ${inMatch ? state.format : setupFormat} партий`;
+      if (inMatch) renderMatch();
+      else {
+        els.subtitle.textContent = "Настройки встречи";
+        renderSetup();
+      }
+    }
+
+    els.formatButtons.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-format]");
+      if (!btn) return;
+      setupFormat = Number(btn.dataset.format);
+      renderSetup();
+      els.formatPill.textContent = `Из ${setupFormat} партий`;
+    });
+
+    els.serverButtons.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-server]");
+      if (!btn) return;
+      setupServer = btn.dataset.server;
+      renderSetup();
+    });
+
+    els.sideButtons.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-left]");
+      if (!btn) return;
+      setupLeft = btn.dataset.left;
+      renderSetup();
+    });
+
+    els.handicapPlayerButtons.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-handicap-player]");
+      if (!btn) return;
+      setupHandicapPlayer = btn.dataset.handicapPlayer;
+      setupHandicapPoints = setupHandicapPlayer === "none" ? 0 : Math.max(1, setupHandicapPoints || 1);
+      renderSetup();
+    });
+
+    function updateHandicapPlayerNames(){
+      const a=els.playerAInput.value||"Спортсмен A";
+      const b=els.playerBInput.value||"Спортсмен B";
+      els.handicapPlayerSelect.options[1].text=a;
+      els.handicapPlayerSelect.options[2].text=b;
+    }
+    els.playerAInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
+    els.playerBInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
+    els.matchDateInput.addEventListener("input", () => {
+      setupMatchDate = els.matchDateInput.value;
+      els.startButton.disabled = !validMatchDate(setupMatchDate);
+    });
+    els.handicapPlayerSelect.addEventListener("change",()=>{
+      setupHandicapPlayer = els.handicapPlayerSelect.value;
+      setupHandicapPoints = setupHandicapPlayer === "none" ? 0 : Math.max(1, setupHandicapPoints || 1);
+      renderSetup();
+    });
+    els.handicapPointsSelect.addEventListener("change",()=>{
+      setupHandicapPoints = setupHandicapPlayer === "none"
+        ? 0
+        : Math.min(10, Math.max(1, Number(els.handicapPointsSelect.value) || 1));
+      renderSetup();
+    });
+    els.startButton.addEventListener("click", startMatch);
+    els.zoneA.addEventListener("click", () => addPoint("A"));
+    els.zoneB.addEventListener("click", () => addPoint("B"));
+    els.undoButton.addEventListener("click", undo);
+    els.speechButton.addEventListener("click", toggleSpeech);
+    els.speechRepeatButton.addEventListener("click", repeatSpeech);
+    els.menuButton.addEventListener("click", showMenu);
+    els.ackSideNotice.addEventListener("click", acknowledgeSideNotice);
+    els.nextGameButton.addEventListener("click", startNextGame);
+    els.copyProtocolButton.addEventListener("click", copyResult);
+    els.newMatchButton.addEventListener("click", () => showNewMatchConfirm(showMatchOver));
+    els.statPerspectiveSelect.addEventListener("change", () => {
+      reportPerspectivePlayer = els.statPerspectiveSelect.value === "B" ? "B" : "A";
+      renderStats();
+    });
+    els.exportReportButton.addEventListener("click", shareStandaloneReport);
+    els.modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver" && activeModal !== "restoreChoice") closeModal();
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (!IS_REPORT_PAGE && state.status === "match") saveState();
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (!IS_REPORT_PAGE && state.status === "match") saveState();
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!IS_REPORT_PAGE && document.visibilityState === "hidden" && state.status === "match") saveState();
+      if (!IS_REPORT_PAGE && document.visibilityState === "visible" && state.status === "match") requestWakeLock();
+    });
+
+    window.addEventListener("storage", event => {
+      if (IS_REPORT_PAGE && event.key === STORAGE_KEY) refreshStatsFromStorage();
+    });
+
+    if (syncChannel) {
+      syncChannel.addEventListener("message", event => {
+        if (IS_REPORT_PAGE && event.data?.type === "state-updated") refreshStatsFromStorage();
+      });
+    }
+
+    els.playerAInput.value = state.players?.A || "Спортсмен A";
+    els.playerBInput.value = state.players?.B || "Спортсмен B";
+
+    updateHandicapPlayerNames();
+    render();
+    if (!IS_REPORT_PAGE && pendingRestoreState) showRestoreChoice();
+  </script>
+</body>
+</html>
