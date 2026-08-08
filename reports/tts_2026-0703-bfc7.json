@@ -1,0 +1,783 @@
+{
+  "format": "ttscore-match",
+  "schemaVersion": 1,
+  "record": {
+    "id": "2026-0703-bfc7",
+    "status": "complete",
+    "revision": 1,
+    "createdAt": "2026-08-08T18:14:28.128Z",
+    "updatedAt": "2026-08-08T18:17:45.810Z"
+  },
+  "createdBy": {
+    "application": "ttScore",
+    "version": "0.2.28"
+  },
+  "match": {
+    "date": "2026-07-03",
+    "players": {
+      "A": {
+        "name": "Харимото"
+      },
+      "B": {
+        "name": "Сидоренко"
+      }
+    },
+    "bestOf": 5,
+    "initialServer": "B",
+    "initialLeftPlayer": "A",
+    "handicap": {
+      "enabled": false,
+      "player": null,
+      "points": 0
+    }
+  },
+  "dataQuality": {
+    "completeness": "complete"
+  },
+  "rallies": [
+    {
+      "gameNumber": 1,
+      "rallyNumber": 1,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 1,
+          "B": 0
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 2,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 1,
+          "B": 1
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 3,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 1,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 4,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 2,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 5,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 2,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 6,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 3,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 7,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 4,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 8,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 4,
+          "B": 4
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 9,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 5,
+          "B": 4
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 10,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 5,
+          "B": 5
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 11,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 5,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 12,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 5,
+          "B": 7
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 13,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 6,
+          "B": 7
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 14,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 7,
+          "B": 7
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 15,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 7,
+          "B": 8
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 16,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 7,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 17,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 8,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 18,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 8,
+          "B": 10
+        }
+      }
+    },
+    {
+      "gameNumber": 1,
+      "rallyNumber": 19,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 8,
+          "B": 11
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 1,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 1,
+          "B": 0
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 2,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 2,
+          "B": 0
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 3,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 2,
+          "B": 1
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 4,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 3,
+          "B": 1
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 5,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 4,
+          "B": 1
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 6,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 4,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 7,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 4,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 8,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 5,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 9,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 5,
+          "B": 4
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 10,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 6,
+          "B": 4
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 11,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 6,
+          "B": 5
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 12,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 6,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 13,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 7,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 14,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 8,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 15,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 9,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 16,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 10,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 17,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 10,
+          "B": 7
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 18,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 10,
+          "B": 8
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 19,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 10,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 20,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 10,
+          "B": 10
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 21,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 11,
+          "B": 10
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 22,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 11,
+          "B": 11
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 23,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 11,
+          "B": 12
+        }
+      }
+    },
+    {
+      "gameNumber": 2,
+      "rallyNumber": 24,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 11,
+          "B": 13
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 1,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 0,
+          "B": 1
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 2,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 0,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 3,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 1,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 4,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 2,
+          "B": 2
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 5,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 2,
+          "B": 3
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 6,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 2,
+          "B": 4
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 7,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 2,
+          "B": 5
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 8,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 3,
+          "B": 5
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 9,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 4,
+          "B": 5
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 10,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 4,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 11,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 5,
+          "B": 6
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 12,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 5,
+          "B": 7
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 13,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 5,
+          "B": 8
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 14,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 5,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 15,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 6,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 16,
+      "winner": "A",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 7,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 17,
+      "winner": "A",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 8,
+          "B": 9
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 18,
+      "winner": "B",
+      "verification": {
+        "server": "B",
+        "scoreAfter": {
+          "A": 8,
+          "B": 10
+        }
+      }
+    },
+    {
+      "gameNumber": 3,
+      "rallyNumber": 19,
+      "winner": "B",
+      "verification": {
+        "server": "A",
+        "scoreAfter": {
+          "A": 8,
+          "B": 11
+        }
+      }
+    }
+  ]
+}
