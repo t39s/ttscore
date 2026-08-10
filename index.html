@@ -1518,7 +1518,7 @@
         <button class="primary" id="startButton" type="button">Начать встречу</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.2.28</p>
+        <p class="app-version">Версия 0.2.30</p>
       </div>
     </section>
 
@@ -1668,7 +1668,7 @@
         </section>
       </div>
 
-      <p class="app-version">Версия 0.2.28</p>
+      <p class="app-version">Версия 0.2.30</p>
     </section>
   </main>
 
@@ -1682,17 +1682,29 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.2.28:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.2.28:importedMeeting";
+    const STORAGE_KEY = "ttScore:0.2.30:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.2.30:importedMeeting";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
+    const PROTECTED_REPORT_MAGIC = new Uint8Array([0x54, 0x54, 0x53, 0x31]);
+    const PROTECTED_REPORT_VERSION = 1;
+    const PROTECTED_REPORT_ALGORITHM_AES_128_GCM = 1;
+    const PROTECTED_REPORT_HEADER_BYTES = 18;
+    const PROTECTED_REPORT_TAG_BYTES = 16;
+    const PROTECTED_REPORT_KEY_BYTES = 16;
+    const PROTECTED_REPORT_IV_BYTES = 12;
+    const PROTECTED_REPORT_ID_BYTES = 12;
+    const MAX_CANONICAL_JSON_BYTES = 1024 * 1024;
+    const PROTECTED_REPORT_ID_CONTEXT = "ttscore-report-id-v1\0";
     const pageParams = new URLSearchParams(location.search);
     const requestedPage = pageParams.get("page");
     const requestedSource = pageParams.get("source");
-    const PAGE_MODE = requestedPage === "report" ? "report" : "score";
+    const protectedReportKeyText = location.hash.length > 1 ? location.hash.slice(1) : "";
+    const IS_PROTECTED_REPORT = !!protectedReportKeyText && requestedSource !== "picker" && requestedSource !== "import";
+    const PAGE_MODE = requestedPage === "report" || IS_PROTECTED_REPORT ? "report" : "score";
     const IS_REPORT_PAGE = PAGE_MODE === "report";
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.2.28:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.30:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -1785,13 +1797,16 @@
     });
 
     const importedSessionResult = IS_IMPORTED_REPORT ? loadImportedSessionMeeting() : null;
-    const storedMeeting = IS_IMPORTED_REPORT
+    const storedMeeting = IS_PROTECTED_REPORT
+      ? null
+      : IS_IMPORTED_REPORT
       ? (importedSessionResult?.meeting || null)
       : (IS_IMPORT_PICKER ? null : loadStoredMeeting());
     let pendingRestoreState = !IS_REPORT_PAGE && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
     let state = storedMeeting && (IS_REPORT_PAGE || !storedMeeting.needsConfirmation) ? storedMeeting.state : defaultState();
     let importedCanonicalSource = importedSessionResult?.source || null;
     let importLoadError = importedSessionResult?.error || "";
+    let protectedReportLoading = IS_PROTECTED_REPORT;
     const MAX_UNDO = 50;
     let historyStack = [];
     let setupFormat = state.format || 5;
@@ -3114,7 +3129,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.2.28"
+          version: "0.2.30"
         },
         match: {
           date: state.matchDate,
@@ -3377,7 +3392,7 @@
       return restored;
     }
 
-    function parseImportedJsonSource(filename, text) {
+    function parseCanonicalJsonText(text) {
       if (typeof text !== "string" || !text.length) throw new Error("JSON встречи: файл пуст.");
       let data;
       try {
@@ -3386,6 +3401,11 @@
         throw new Error("JSON встречи: файл содержит некорректный JSON.");
       }
       const analysis = validateCanonicalMatchData(data);
+      return { data, analysis };
+    }
+
+    function parseImportedJsonSource(filename, text) {
+      const { data, analysis } = parseCanonicalJsonText(text);
       validateImportedFilename(filename, data);
       return {
         state: buildStateFromCanonicalData(data, analysis),
@@ -3420,6 +3440,129 @@
         reader.onload = () => resolve(String(reader.result || ""));
         reader.readAsText(file);
       });
+    }
+
+    function encodeBase64Url(bytes) {
+      let binary = "";
+      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function decodeProtectedReportKey(value) {
+      if (!/^[A-Za-z0-9_-]{22}$/.test(value || "")) {
+        throw new Error("Ссылка содержит некорректный ключ защищённого отчёта.");
+      }
+      try {
+        const base64 = value.replace(/-/g, "+").replace(/_/g, "/") + "==";
+        const binary = atob(base64);
+        const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+        if (bytes.length !== PROTECTED_REPORT_KEY_BYTES || encodeBase64Url(bytes) !== value) throw new Error();
+        return bytes;
+      } catch (_) {
+        throw new Error("Ссылка содержит некорректный ключ защищённого отчёта.");
+      }
+    }
+
+    function protectedCryptoAvailable() {
+      return !!globalThis.crypto?.subtle && typeof globalThis.crypto.getRandomValues === "function";
+    }
+
+    async function deriveProtectedReportId(keyBytes) {
+      if (!protectedCryptoAvailable()) throw new Error("Защищённые отчёты требуют HTTPS и поддержки Web Crypto API.");
+      const context = new TextEncoder().encode(PROTECTED_REPORT_ID_CONTEXT);
+      const digest = await crypto.subtle.digest("SHA-256", joinBytes([context, keyBytes]));
+      return encodeBase64Url(new Uint8Array(digest).subarray(0, PROTECTED_REPORT_ID_BYTES));
+    }
+
+    async function encryptProtectedReport(json, keyBytes, iv) {
+      const plaintext = new TextEncoder().encode(json);
+      if (plaintext.length > MAX_CANONICAL_JSON_BYTES) {
+        throw new Error("JSON встречи превышает допустимый размер 1 МиБ.");
+      }
+      const header = new Uint8Array(PROTECTED_REPORT_HEADER_BYTES);
+      header.set(PROTECTED_REPORT_MAGIC, 0);
+      header[4] = PROTECTED_REPORT_VERSION;
+      header[5] = PROTECTED_REPORT_ALGORITHM_AES_128_GCM;
+      header.set(iv, 6);
+      const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
+      const ciphertext = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv, additionalData: header, tagLength: 128 },
+        key,
+        plaintext
+      );
+      return joinBytes([header, new Uint8Array(ciphertext)]);
+    }
+
+    async function decryptProtectedReport(bytes, keyBytes) {
+      if (bytes.length < PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES) {
+        throw new Error("Файл защищённого отчёта имеет некорректный формат.");
+      }
+      if (!PROTECTED_REPORT_MAGIC.every((byte, index) => bytes[index] === byte)) {
+        throw new Error("Файл не является защищённым отчётом ttScore.");
+      }
+      if (bytes[4] !== PROTECTED_REPORT_VERSION) {
+        throw new Error(`Версия защищённого отчёта ${String(bytes[4])} не поддерживается.`);
+      }
+      if (bytes[5] !== PROTECTED_REPORT_ALGORITHM_AES_128_GCM) {
+        throw new Error("Алгоритм защищённого отчёта не поддерживается.");
+      }
+      if (bytes.length > MAX_CANONICAL_JSON_BYTES + PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES) {
+        throw new Error("Файл защищённого отчёта превышает допустимый размер.");
+      }
+      const header = bytes.subarray(0, PROTECTED_REPORT_HEADER_BYTES);
+      const iv = bytes.subarray(6, 6 + PROTECTED_REPORT_IV_BYTES);
+      const ciphertext = bytes.subarray(PROTECTED_REPORT_HEADER_BYTES);
+      const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+      let plaintext;
+      try {
+        plaintext = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv, additionalData: header, tagLength: 128 },
+          key,
+          ciphertext
+        );
+      } catch (_) {
+        throw new Error("Файл повреждён или не соответствует ссылке.");
+      }
+      try {
+        return new TextDecoder("utf-8", { fatal: true }).decode(plaintext);
+      } catch (_) {
+        throw new Error("Расшифрованный отчёт содержит некорректный UTF-8.");
+      }
+    }
+
+    async function loadProtectedReport() {
+      protectedReportLoading = true;
+      importLoadError = "";
+      render();
+      try {
+        if (!protectedCryptoAvailable()) throw new Error("Защищённые отчёты требуют HTTPS и поддержки Web Crypto API.");
+        const keyBytes = decodeProtectedReportKey(protectedReportKeyText);
+        const reportId = await deriveProtectedReportId(keyBytes);
+        const reportUrl = new URL(`reports/${reportId}.ttscore`, location.href);
+        const response = await fetch(reportUrl, { cache: "no-store" });
+        if (response.status === 404) {
+          throw new Error("Защищённый отчёт не найден. Ссылка неверна или файл ещё не опубликован.");
+        }
+        if (!response.ok) throw new Error(`Не удалось загрузить защищённый отчёт: HTTP ${response.status}.`);
+        const contentLength = Number(response.headers.get("content-length"));
+        const maximumFileBytes = MAX_CANONICAL_JSON_BYTES + PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES;
+        if (Number.isFinite(contentLength) && contentLength > maximumFileBytes) {
+          throw new Error("Файл защищённого отчёта превышает допустимый размер.");
+        }
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const json = await decryptProtectedReport(bytes, keyBytes);
+        const { data, analysis } = parseCanonicalJsonText(json);
+        state = buildStateFromCanonicalData(data, analysis);
+        statsSelectedGame = state.gameIndex || 0;
+        statsFollowCurrentGame = true;
+        reportPerspectivePlayer = "A";
+      } catch (error) {
+        state = defaultState();
+        importLoadError = error?.message || "Не удалось открыть защищённый отчёт.";
+      } finally {
+        protectedReportLoading = false;
+        render();
+      }
     }
 
     function openImportReportPage() {
@@ -3635,7 +3778,7 @@
       savedAt.textContent = `Отчёт сохранён: ${createdAt.toLocaleString("ru-RU")}`;
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.2.28";
+      version.textContent = "Версия 0.2.30";
       screen.append(savedAt, version);
       root.append(screen);
       return root;
@@ -3736,23 +3879,27 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       }
     }
 
+    function downloadTransportAvailable() {
+      return typeof Blob === "function"
+        && typeof URL !== "undefined"
+        && typeof URL.createObjectURL === "function"
+        && typeof document !== "undefined"
+        && typeof document.createElement === "function";
+    }
+
     function sharingTransportAvailable() {
-      if (typeof navigator.share !== "function" || typeof File !== "function" || typeof TextEncoder !== "function") return false;
-      const pairProbe = [
-        new File(["{}"], "tts_match.json", { type: "application/json" }),
-        new File([""], "tts_match.html", { type: "text/html" })
-      ];
-      const zipProbe = new File([""], "tts_match.zip", { type: "application/zip" });
-      return canShareFiles(pairProbe) || canShareFiles([zipProbe]);
+      if (typeof TextEncoder !== "function" || !downloadTransportAvailable()) return false;
+      if (IS_PROTECTED_REPORT) return false;
+      return protectedCryptoAvailable();
     }
 
     function configureShareButton(button, availableLabel) {
       const sharingAvailable = state.status === "match" && sharingTransportAvailable();
       button.disabled = !sharingAvailable;
-      button.title = sharingAvailable ? "" : "Передача файлов не поддерживается этим браузером";
+      button.title = sharingAvailable ? "" : "Создание файлов не поддерживается этим браузером";
       button.setAttribute(
         "aria-label",
-        sharingAvailable ? availableLabel : "Передача файлов не поддерживается этим браузером"
+        sharingAvailable ? availableLabel : "Создание файлов не поддерживается этим браузером"
       );
       return button;
     }
@@ -3781,7 +3928,6 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       if (jsonArtifact.filename !== `${expectedBase}.json` || htmlArtifact.filename !== `${expectedBase}.html`) {
         throw new Error("Имена JSON и HTML не согласованы.");
       }
-      if (!jsonArtifact.file || !htmlArtifact.file) throw new Error("Браузер не поддерживает создание файлов.");
       return { base: expectedBase, jsonArtifact, htmlArtifact, createdAt };
     }
 
@@ -3886,10 +4032,45 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       return joinBytes([localBytes, centralBytes, end]);
     }
 
-    function createZipArtifact(pair) {
+    function protectedReportLink(keyText) {
+      const url = new URL(location.href);
+      url.search = "";
+      url.hash = keyText;
+      return url.toString();
+    }
+
+    async function createProtectedReportArtifacts(pair) {
+      if (!protectedCryptoAvailable()) throw new Error("Защищённый экспорт требует HTTPS и поддержки Web Crypto API.");
+      const keyBytes = crypto.getRandomValues(new Uint8Array(PROTECTED_REPORT_KEY_BYTES));
+      const iv = crypto.getRandomValues(new Uint8Array(PROTECTED_REPORT_IV_BYTES));
+      const keyText = encodeBase64Url(keyBytes);
+      const reportId = await deriveProtectedReportId(keyBytes);
+      const bytes = await encryptProtectedReport(pair.jsonArtifact.json, keyBytes, iv);
+      const binaryFilename = `${reportId}.ttscore`;
+      const binaryBlob = new Blob([bytes], { type: "application/octet-stream" });
+      const binaryFile = typeof File === "function"
+        ? new File([binaryBlob], binaryFilename, { type: "application/octet-stream" })
+        : null;
+      const link = `${protectedReportLink(keyText)}\n`;
+      const linkBlob = new Blob([link], { type: "text/plain;charset=utf-8" });
+      const linkFile = typeof File === "function"
+        ? new File([linkBlob], "link.txt", { type: "text/plain;charset=utf-8" })
+        : null;
+      return {
+        keyText,
+        reportId,
+        binary: { bytes, filename: binaryFilename, blob: binaryBlob, file: binaryFile },
+        link: { text: link, filename: "link.txt", blob: linkBlob, file: linkFile }
+      };
+    }
+
+    function createProtectedPackageZipArtifact(pair, protectedArtifacts) {
+      const directory = `${pair.base}/`;
       const bytes = createStoredZip([
-        { name: pair.jsonArtifact.filename, content: pair.jsonArtifact.json },
-        { name: pair.htmlArtifact.filename, content: pair.htmlArtifact.html }
+        { name: `${directory}${pair.jsonArtifact.filename}`, content: pair.jsonArtifact.json },
+        { name: `${directory}${pair.htmlArtifact.filename}`, content: pair.htmlArtifact.html },
+        { name: `${directory}${protectedArtifacts.binary.filename}`, content: protectedArtifacts.binary.bytes },
+        { name: `${directory}${protectedArtifacts.link.filename}`, content: protectedArtifacts.link.text }
       ], pair.createdAt);
       const filename = `${pair.base}.zip`;
       const blob = new Blob([bytes], { type: "application/zip" });
@@ -3899,22 +4080,42 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       return { bytes, filename, blob, file };
     }
 
+    function downloadArtifact(artifact) {
+      if (!downloadTransportAvailable()) throw new Error("Скачивание файлов не поддерживается этим браузером.");
+      const url = URL.createObjectURL(artifact.blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = artifact.filename;
+      anchor.hidden = true;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    }
+
+    async function deliverSingleFile(artifact) {
+      if (artifact.file && typeof navigator.share === "function" && canShareFiles([artifact.file])) {
+        try {
+          await navigator.share({ files: [artifact.file] });
+          return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+        }
+      }
+      downloadArtifact(artifact);
+    }
+
     async function shareMatchFiles() {
       if (state.status !== "match" || !sharingTransportAvailable()) return;
       try {
         const pair = createSharePairArtifacts();
-        const pairFiles = [pair.jsonArtifact.file, pair.htmlArtifact.file];
-        if (canShareFiles(pairFiles)) {
-          await navigator.share({ files: pairFiles });
-          return;
-        }
-        const zipArtifact = createZipArtifact(pair);
-        if (!zipArtifact.file || !canShareFiles([zipArtifact.file])) {
-          throw new Error("Передача пары файлов и ZIP не поддерживается.");
-        }
-        await navigator.share({ files: [zipArtifact.file] });
+        const protectedArtifacts = await createProtectedReportArtifacts(pair);
+        const zipArtifact = createProtectedPackageZipArtifact(pair, protectedArtifacts);
+        await deliverSingleFile(zipArtifact);
       } catch (error) {
-        if (error?.name !== "AbortError") alert("Не удалось подготовить или передать файлы встречи.");
+        if (error?.name !== "AbortError") {
+          alert(`Не удалось подготовить или передать файлы встречи.\n${error?.message || "Неизвестная ошибка."}`);
+        }
       }
     }
 
@@ -4040,6 +4241,23 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
 
     function renderStats() {
       const hasMeeting = state.status === "match";
+      if (IS_PROTECTED_REPORT && !hasMeeting) {
+        const title = protectedReportLoading ? "Загрузка защищённого отчёта" : "Защищённый отчёт";
+        document.title = `${title} — ttScore`;
+        els.statTitle.textContent = title;
+        els.statReportControls.hidden = true;
+        els.statStatusCard.hidden = true;
+        els.statContent.hidden = true;
+        els.statScoreTableWrap.hidden = true;
+        els.statEmpty.hidden = false;
+        els.statEmptyText.textContent = protectedReportLoading
+          ? "Загрузка и расшифрование отчёта…"
+          : (importLoadError || "Не удалось открыть защищённый отчёт.");
+        els.selectSavedReportButton.hidden = true;
+        els.selectAnotherReportButton.hidden = true;
+        els.exportReportButton.hidden = true;
+        return;
+      }
       const [selectedPlayer, otherPlayer] = reportPlayerOrder();
       const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
       els.statTitle.textContent = reportTitle;
@@ -4048,6 +4266,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       els.statStatusCard.hidden = false;
       els.selectSavedReportButton.hidden = true;
       els.selectAnotherReportButton.hidden = !IS_IMPORTED_REPORT;
+      els.exportReportButton.hidden = IS_PROTECTED_REPORT;
       els.statEmpty.hidden = hasMeeting;
       els.statEmptyText.textContent = importLoadError
         || "Начните встречу в основной вкладке ttScore. Статистика появится после первого сохранения состояния.";
@@ -4104,7 +4323,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
     }
 
     function refreshStatsFromStorage() {
-      if (!IS_REPORT_PAGE || IS_IMPORTED_REPORT || IS_IMPORT_PICKER) return;
+      if (!IS_REPORT_PAGE || IS_IMPORTED_REPORT || IS_IMPORT_PICKER || IS_PROTECTED_REPORT) return;
       const freshMeeting = loadStoredMeeting();
       state = freshMeeting?.state || defaultState();
       statsSelectedGame = statsFollowCurrentGame
@@ -4301,6 +4520,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
 
     updateHandicapPlayerNames();
     render();
+    if (IS_PROTECTED_REPORT) loadProtectedReport();
     if (!IS_REPORT_PAGE && pendingRestoreState) showRestoreChoice();
   </script>
 </body>
