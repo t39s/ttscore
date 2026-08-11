@@ -447,6 +447,39 @@
 
     .tiny { font-size: 12px; color: var(--muted); line-height: 1.35; }
     .app-version { margin: -4px 0 0; text-align: center; font-size: 12px; color: rgba(170,178,200,.72); line-height: 1.35; }
+    .stat-report-footer {
+      display: grid;
+      gap: 4px;
+      justify-items: center;
+      color: rgba(170,178,200,.82);
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: center;
+    }
+    .stat-report-footer p { margin: 0; }
+    .stat-report-footer .app-version { margin: 0; }
+    .stat-report-footer a,
+    .stat-report-footer a:visited,
+    .stat-report-footer a:active {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .stat-report-footer a:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+    #formatButtons button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      line-height: 1.06;
+      white-space: normal;
+    }
+    #formatButtons button span { display: block; white-space: nowrap; }
 
     body.stat-page .topbar { display: none; }
     #statScreen.active {
@@ -1008,6 +1041,36 @@
     #setupScreen .name-field {
       gap: 0;
     }
+    #setupScreen .name-input-shell {
+      position: relative;
+      min-width: 0;
+    }
+    #setupScreen .name-clear-button {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 44px;
+      min-width: 44px;
+      height: 44px;
+      min-height: 44px;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: rgba(190,197,217,.7);
+      font-size: 22px;
+      font-weight: 400;
+      line-height: 1;
+      transform: translateY(-50%);
+      box-shadow: none;
+    }
+    #setupScreen .name-clear-button:active {
+      transform: translateY(-50%) scale(.96);
+    }
+    #setupScreen .name-clear-button:focus-visible {
+      outline: 2px solid rgba(255,255,255,.72);
+      outline-offset: -3px;
+    }
     #setupScreen label {
       color: rgba(255,255,255,.82);
       font-size: 16px;
@@ -1027,6 +1090,9 @@
       font-size: 18px;
       font-weight: 500;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 20px rgba(0,0,0,.16);
+    }
+    #setupScreen .name-input-shell input {
+      padding-right: 66px;
     }
     #setupScreen input::placeholder,
     #setupScreen select:disabled {
@@ -1327,6 +1393,9 @@
         padding-left: 19px;
         font-size: 15px;
       }
+      #setupScreen .name-input-shell input {
+        padding-right: 62px;
+      }
       #setupScreen .date-control-shell {
         gap: 10px;
         min-height: 61px;
@@ -1435,6 +1504,7 @@
         padding-left: 6px;
       }
     }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -1461,10 +1531,16 @@
         <section class="settings-group" aria-labelledby="groupAthletesTitle">
           <h2 class="settings-group-title" id="groupAthletesTitle">Спортсмены</h2>
           <div class="field name-field">
-            <input id="playerAInput" value="Спортсмен A" maxlength="200" autocomplete="off" aria-label="Спортсмен A" />
+            <div class="name-input-shell">
+              <input id="playerAInput" value="Спортсмен A" maxlength="200" autocomplete="off" aria-label="Спортсмен A" />
+              <button class="name-clear-button" id="playerAClearButton" type="button" aria-label="Очистить имя спортсмена A">×</button>
+            </div>
           </div>
           <div class="field name-field">
-            <input id="playerBInput" value="Спортсмен B" maxlength="200" autocomplete="off" aria-label="Спортсмен B" />
+            <div class="name-input-shell">
+              <input id="playerBInput" value="Спортсмен B" maxlength="200" autocomplete="off" aria-label="Спортсмен B" />
+              <button class="name-clear-button" id="playerBClearButton" type="button" aria-label="Очистить имя спортсмена B">×</button>
+            </div>
           </div>
           <div class="field">
             <label>Слева на экране</label>
@@ -1489,9 +1565,9 @@
           <h2 class="settings-group-title" id="groupFormatTitle">Формат встречи</h2>
           <div class="field group-control-only">
             <div class="segmented" id="formatButtons">
-              <button type="button" data-format="3">Из 3 партий</button>
-              <button type="button" data-format="5" class="selected">Из 5 партий</button>
-              <button type="button" data-format="7">Из 7 партий</button>
+              <button type="button" data-format="3" aria-label="Из 3 партий"><span>Из 3</span><span>партий</span></button>
+              <button type="button" data-format="5" aria-label="Из 5 партий" class="selected"><span>Из 5</span><span>партий</span></button>
+              <button type="button" data-format="7" aria-label="Из 7 партий"><span>Из 7</span><span>партий</span></button>
             </div>
           </div>
         </section>
@@ -1515,10 +1591,10 @@
           </div>
         </section>
 
-        <button class="primary" id="startButton" type="button">Начать встречу</button>
+        <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.2.30</p>
+        <p class="app-version">Версия 0.2.33</p>
       </div>
     </section>
 
@@ -1604,8 +1680,9 @@
       <header class="stat-header">
         <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
         <h1 class="stat-title" id="statTitle">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
+        <p class="stat-server-line" id="statHeaderHandicap" hidden></p>
       </header>
-      <div class="stat-report-controls" id="statReportControls">
+      <div class="stat-report-controls" id="statReportControls" hidden>
         <label class="stat-perspective-label" for="statPerspectiveSelect"><span>С позиции</span><span>спортсмена:</span></label>
         <select class="stat-perspective-select" id="statPerspectiveSelect" aria-label="С позиции спортсмена">
           <option value="A">Спортсмен A</option>
@@ -1619,13 +1696,12 @@
         </button>
       </div>
 
-      <section class="stat-card" id="statStatusCard">
+      <section class="stat-card" id="statStatusCard" hidden>
         <div class="stat-score-heading">
           <h2>Счёт</h2>
           <div class="stat-status-line"><span class="stat-status-dot" id="statStatusDot"></span><span id="statStatusText">Ожидание данных</span></div>
         </div>
         <div class="stat-score-table-wrap" id="statScoreTableWrap" hidden><div id="statAllGamesScore"></div></div>
-        <p class="stat-note" id="statScoreHandicap" hidden></p>
         <p class="stat-server-line" id="statServerText" hidden></p>
       </section>
 
@@ -1637,7 +1713,7 @@
 
       <div class="stat-content" id="statContent" hidden>
         <section class="stat-card">
-          <h2>Выиграно розыгрышей (за встречу)</h2>
+          <h2>Выиграно розыгрышей (за&nbsp;встречу)</h2>
           <div class="stat-table-wrap" id="statMatchPerformance"></div>
           <p class="stat-note" id="statHandicapNote">Фора входит в счёт партии, но не считается выигранным розыгрышем.</p>
         </section>
@@ -1668,7 +1744,11 @@
         </section>
       </div>
 
-      <p class="app-version">Версия 0.2.30</p>
+      <footer class="stat-report-footer" id="statReportFooter">
+        <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
+        <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
+        <p class="app-version">Версия 0.2.33</p>
+      </footer>
     </section>
   </main>
 
@@ -1682,8 +1762,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.2.30:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.2.30:importedMeeting";
+    const STORAGE_KEY = "ttScore:0.2.33:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.2.33:importedMeeting";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
     const PROTECTED_REPORT_MAGIC = new Uint8Array([0x54, 0x54, 0x53, 0x31]);
     const PROTECTED_REPORT_VERSION = 1;
@@ -1704,7 +1784,7 @@
     const IS_REPORT_PAGE = PAGE_MODE === "report";
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.2.30:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.33:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -1733,6 +1813,13 @@
         "июля", "августа", "сентября", "октября", "ноября", "декабря"
       ];
       return `${day} ${monthNames[month - 1]} ${year}`;
+    }
+
+    function formatLocalRecordUpdatedAt(value) {
+      const date = new Date(value);
+      if (!Number.isFinite(date.getTime())) return "";
+      const twoDigits = number => String(number).padStart(2, "0");
+      return `${twoDigits(date.getDate())}.${twoDigits(date.getMonth() + 1)}.${date.getFullYear()}, ${twoDigits(date.getHours())}:${twoDigits(date.getMinutes())}:${twoDigits(date.getSeconds())}`;
     }
 
     function matchIdPrefix(matchDate) {
@@ -1840,6 +1927,8 @@
       importJsonInput: $("importJsonInput"),
       playerAInput: $("playerAInput"),
       playerBInput: $("playerBInput"),
+      playerAClearButton: $("playerAClearButton"),
+      playerBClearButton: $("playerBClearButton"),
       formatButtons: $("formatButtons"),
       serverButtons: $("serverButtons"),
       sideButtons: $("sideButtons"),
@@ -1886,13 +1975,17 @@
       modalSummary: $("modalSummary"),
       modalActions: $("modalActions"),
       statTitle: $("statTitle"),
+      statHeaderHandicap: $("statHeaderHandicap"),
       statReportControls: $("statReportControls"),
       statPerspectiveSelect: $("statPerspectiveSelect"),
       exportReportButton: $("exportReportButton"),
+      statReportFooter: $("statReportFooter"),
+      statDataEnteredLine: $("statDataEnteredLine"),
+      statDataEnteredAt: $("statDataEnteredAt"),
+      statAppLinkLine: $("statAppLinkLine"),
       statStatusCard: $("statStatusCard"),
       statScoreTableWrap: $("statScoreTableWrap"),
       statAllGamesScore: $("statAllGamesScore"),
-      statScoreHandicap: $("statScoreHandicap"),
       statStatusDot: $("statStatusDot"),
       statStatusText: $("statStatusText"),
       statServerText: $("statServerText"),
@@ -2528,7 +2621,7 @@
     function showGameOver(winner) {
       activeModal = "gameOver";
       showModal(
-        "Партия завершена",
+        `Партия ${state.gameIndex + 1} из ${state.format} завершена`,
         `Выиграл(а) ${state.players[winner]} со счётом ${currentGameScoreText(winner)}.`,
         [
           makeButton("Начать следующую партию", "primary", startNextGame),
@@ -2661,6 +2754,10 @@
       if (els.matchDateInput.value !== setupMatchDate) els.matchDateInput.value = setupMatchDate;
       els.matchDateDisplay.textContent = formatMatchDateDisplay(setupMatchDate);
       els.startButton.disabled = !validMatchDate(setupMatchDate);
+      els.startButton.textContent = `Начать встречу из ${setupFormat} партий`;
+      els.startButton.setAttribute("aria-label", els.startButton.textContent);
+      els.playerAClearButton.hidden = els.playerAInput.value.length === 0;
+      els.playerBClearButton.hidden = els.playerBInput.value.length === 0;
       [...els.formatButtons.children].forEach(btn => btn.classList.toggle("selected", Number(btn.dataset.format) === setupFormat));
       [...els.serverButtons.children].forEach(btn => {
         btn.classList.toggle("selected", btn.dataset.server === setupServer);
@@ -2707,10 +2804,10 @@
       return "очков";
     }
 
-    function scoreHandicapText() {
+    function reportHandicapText() {
       const points = Number(state.handicap?.points) || 0;
       const player = state.handicap?.player === "B" ? "B" : "A";
-      return `${state.players[player]} получает фору ${points} ${scorePointWord(points)}`;
+      return `Фора: ${points} ${scorePointWord(points)}. Получатель: ${state.players[player]}`;
     }
 
     const SOFT_HYPHEN = "\u00AD";
@@ -2719,28 +2816,16 @@
     const EN_NAME_VOWELS = new Set("aeiou");
     const EN_NAME_DIGRAPHS = new Set(["ch", "ck", "gh", "ng", "ph", "qu", "sh", "th", "wh", "wr"]);
 
-    function keepUsefulNameBreaks(word, candidates) {
-      const accepted = [];
-      let previous = 0;
-      [...new Set(candidates)].sort((a, b) => a - b).forEach(candidate => {
-        if (candidate < 2 || word.length - candidate < 2) return;
-        if (candidate - previous < 2) return;
-        accepted.push(candidate);
-        previous = candidate;
-      });
-      return accepted;
+    function chooseUsefulNameBreak(word, candidates) {
+      const middle = word.length / 2;
+      return [...new Set(candidates)]
+        .filter(candidate => candidate >= 2 && word.length - candidate >= 2)
+        .sort((left, right) => Math.abs(left - middle) - Math.abs(right - middle) || left - right)[0] ?? null;
     }
 
     function insertNameBreaks(word, candidates) {
-      const breaks = keepUsefulNameBreaks(word, candidates);
-      if (!breaks.length) return word;
-      let result = "";
-      let start = 0;
-      breaks.forEach(cut => {
-        result += word.slice(start, cut) + SOFT_HYPHEN;
-        start = cut;
-      });
-      return result + word.slice(start);
+      const cut = chooseUsefulNameBreak(word, candidates);
+      return cut === null ? word : `${word.slice(0, cut)}${SOFT_HYPHEN}${word.slice(cut)}`;
     }
 
     function hyphenateRussianNameWord(word) {
@@ -3129,7 +3214,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.2.30"
+          version: "0.2.33"
         },
         match: {
           date: state.matchDate,
@@ -3646,7 +3731,7 @@
       const content = document.createElement("div");
       content.className = "stat-content";
 
-      const matchPerformanceCard = snapshotCard("Выиграно розыгрышей (за встречу)");
+      const matchPerformanceCard = snapshotCard("Выиграно розыгрышей (за\u00A0встречу)");
       const matchPerformanceContainer = document.createElement("div");
       matchPerformanceContainer.className = "stat-table-wrap";
       renderPerformanceTable(matchPerformanceContainer, state.rallies, perspective);
@@ -3724,7 +3809,7 @@
       return view;
     }
 
-    function buildStandaloneReportRoot(createdAt = new Date()) {
+    function buildStandaloneReportRoot() {
       const root = document.createElement("main");
       root.className = "app export-report";
       root.dataset.playerA = state.players.A;
@@ -3735,9 +3820,13 @@
 
       const header = document.querySelector("#statScreen .stat-header").cloneNode(true);
       const headerTitle = header.querySelector("#statTitle");
+      const headerHandicap = header.querySelector("#statHeaderHandicap");
       const [selectedPlayer, otherPlayer] = reportPlayerOrder();
       headerTitle.dataset.exportPerspectiveTitle = "";
       headerTitle.textContent = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
+      const showHandicap = state.handicap?.enabled && Number(state.handicap?.points) > 0;
+      headerHandicap.hidden = !showHandicap;
+      headerHandicap.textContent = showHandicap ? reportHandicapText() : "";
       stripElementIds(header);
       screen.append(header);
 
@@ -3773,13 +3862,26 @@
         buildStandalonePerspectiveView("B", selectedGame)
       );
 
-      const savedAt = document.createElement("p");
-      savedAt.className = "stat-snapshot-time";
-      savedAt.textContent = `Отчёт сохранён: ${createdAt.toLocaleString("ru-RU")}`;
+      const footer = document.createElement("footer");
+      footer.className = "stat-report-footer";
+      const dataEnteredLine = document.createElement("p");
+      dataEnteredLine.append(document.createTextNode("Данные введены: "));
+      const dataEnteredAt = document.createElement("time");
+      dataEnteredAt.dateTime = state.recordUpdatedAt;
+      dataEnteredAt.dataset.reportUpdatedAt = state.recordUpdatedAt;
+      dataEnteredLine.append(dataEnteredAt);
+      const appLinkLine = document.createElement("p");
+      const appLink = document.createElement("a");
+      appLink.href = "https://t39s.github.io/ttscore/";
+      appLink.target = "_blank";
+      appLink.rel = "noopener noreferrer";
+      appLink.textContent = "https://t39s.github.io/ttscore/";
+      appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.2.30";
-      screen.append(savedAt, version);
+      version.textContent = "Версия 0.2.33";
+      footer.append(dataEnteredLine, appLinkLine, version);
+      screen.append(footer);
       root.append(screen);
       return root;
     }
@@ -3790,7 +3892,7 @@
       return span.innerHTML;
     }
 
-    function buildStandaloneReportHtml(createdAt = new Date()) {
+    function buildStandaloneReportHtml() {
       const [selectedPlayer, otherPlayer] = reportPlayerOrder();
       const reportTitle = `Отчёт о встрече «${state.players[selectedPlayer]} — ${state.players[otherPlayer]}»`;
       const sourceCss = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
@@ -3804,7 +3906,6 @@
         .export-perspective-view[hidden] { display: none; }
         .export-game-content { display: grid; gap: 14px; }
         .export-game-content[hidden] { display: none; }
-        .stat-snapshot-time { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
         @media print {
           html, body, .export-report, .export-report #statScreen.active { height: auto; overflow: visible; }
           .stat-card { break-inside: avoid; box-shadow: none; }
@@ -3812,6 +3913,10 @@
       `;
       const standaloneScript = `
         (() => {
+          ${formatLocalRecordUpdatedAt.toString()}
+          document.querySelectorAll('[data-report-updated-at]').forEach(element => {
+            element.textContent = formatLocalRecordUpdatedAt(element.dataset.reportUpdatedAt);
+          });
           const report = document.querySelector('.export-report');
           const perspectiveSelect = document.querySelector('[data-export-perspective-select]');
           const perspectiveTitle = document.querySelector('[data-export-perspective-title]');
@@ -3854,14 +3959,14 @@
   <style>${sourceCss}\n${standaloneCss}</style>
 </head>
 <body class="stat-page">
-${buildStandaloneReportRoot(createdAt).outerHTML}
+${buildStandaloneReportRoot().outerHTML}
 <script>${standaloneScript}<\/script>
 </body>
 </html>`;
     }
 
-    function createStandaloneReportArtifact(createdAt = new Date()) {
-      const html = buildStandaloneReportHtml(createdAt);
+    function createStandaloneReportArtifact() {
+      const html = buildStandaloneReportHtml();
       const filename = standaloneReportFilename();
       const blob = new Blob([html], { type: "text/html;charset=utf-8" });
       const file = typeof File === "function"
@@ -3911,11 +4016,11 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       );
     }
 
-    function createCurrentStandaloneReportArtifact(createdAt = new Date()) {
+    function createCurrentStandaloneReportArtifact() {
       const originalTitle = document.title;
       try {
         if (!IS_REPORT_PAGE) renderStats();
-        return createStandaloneReportArtifact(createdAt);
+        return createStandaloneReportArtifact();
       } finally {
         if (!IS_REPORT_PAGE) document.title = originalTitle;
       }
@@ -3923,7 +4028,7 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
 
     function createSharePairArtifacts(createdAt = new Date()) {
       const jsonArtifact = createCanonicalJsonArtifact();
-      const htmlArtifact = createCurrentStandaloneReportArtifact(createdAt);
+      const htmlArtifact = createCurrentStandaloneReportArtifact();
       const expectedBase = matchFileBase();
       if (jsonArtifact.filename !== `${expectedBase}.json` || htmlArtifact.filename !== `${expectedBase}.html`) {
         throw new Error("Имена JSON и HTML не согласованы.");
@@ -4239,8 +4344,24 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       renderGameTabSet(els.statGameTabsBeforeRallies, gameIndexes);
     }
 
+    function renderInteractiveReportFooter(showDetails) {
+      els.statDataEnteredLine.hidden = !showDetails;
+      els.statAppLinkLine.hidden = !showDetails;
+      if (showDetails) {
+        els.statDataEnteredAt.dateTime = state.recordUpdatedAt;
+        els.statDataEnteredAt.textContent = formatLocalRecordUpdatedAt(state.recordUpdatedAt);
+      } else {
+        els.statDataEnteredAt.removeAttribute("datetime");
+        els.statDataEnteredAt.textContent = "";
+      }
+    }
+
     function renderStats() {
       const hasMeeting = state.status === "match";
+      const showHandicap = hasMeeting && state.handicap?.enabled && Number(state.handicap?.points) > 0;
+      els.statHeaderHandicap.hidden = !showHandicap;
+      els.statHeaderHandicap.textContent = showHandicap ? reportHandicapText() : "";
+      renderInteractiveReportFooter(IS_PROTECTED_REPORT && hasMeeting);
       if (IS_PROTECTED_REPORT && !hasMeeting) {
         const title = protectedReportLoading ? "Загрузка защищённого отчёта" : "Защищённый отчёт";
         document.title = `${title} — ttScore`;
@@ -4279,9 +4400,6 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
       configureShareButton(els.exportReportButton, "Поделиться файлами встречи");
       els.statStatusDot.style.background = hasMeeting ? "var(--accent)" : "var(--muted)";
       els.statHandicapNote.hidden = !state.handicap?.enabled;
-      const showHandicap = hasMeeting && state.handicap?.enabled && Number(state.handicap?.points) > 0;
-      els.statScoreHandicap.hidden = !showHandicap;
-      els.statScoreHandicap.textContent = showHandicap ? scoreHandicapText() : "";
 
       if (!hasMeeting) {
         els.statAllGamesScore.replaceChildren();
@@ -4311,7 +4429,10 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
     function renderImportPicker() {
       const title = "Посмотреть сохранённый отчёт";
       document.title = `${title} — ttScore`;
+      renderInteractiveReportFooter(false);
       els.statTitle.textContent = title;
+      els.statHeaderHandicap.hidden = true;
+      els.statHeaderHandicap.textContent = "";
       els.statReportControls.hidden = true;
       els.statStatusCard.hidden = true;
       els.statContent.hidden = true;
@@ -4452,6 +4573,13 @@ ${buildStandaloneReportRoot(createdAt).outerHTML}
     }
     els.playerAInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
     els.playerBInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
+    function clearPlayerInput(input) {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    }
+    els.playerAClearButton.addEventListener("click", () => clearPlayerInput(els.playerAInput));
+    els.playerBClearButton.addEventListener("click", () => clearPlayerInput(els.playerBInput));
     els.openJsonButton.addEventListener("click", openImportReportPage);
     els.selectSavedReportButton.addEventListener("click", openImportJsonPicker);
     els.selectAnotherReportButton.addEventListener("click", openImportJsonPicker);
