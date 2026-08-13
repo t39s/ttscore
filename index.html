@@ -804,6 +804,67 @@
       border-radius: 18px;
       background: rgba(5,9,18,.34);
     }
+    .stat-multi-chart-controls {
+      display: grid;
+      gap: 10px;
+    }
+    .stat-multi-chart-control-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .stat-multi-chart-game-buttons,
+    .stat-multi-chart-mode-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .stat-multi-chart-game-buttons[data-party-count="5"],
+    .stat-multi-chart-game-buttons[data-party-count="6"] {
+      display: grid;
+      grid-template-columns: repeat(3, max-content);
+    }
+    .stat-multi-chart-game-button,
+    .stat-multi-chart-mode-button {
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 850;
+    }
+    .stat-multi-chart-game-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 62px;
+    }
+    .stat-multi-chart-game-button.selected,
+    .stat-multi-chart-mode-button.selected {
+      border-color: rgba(75,134,255,.74);
+      background: rgba(75,134,255,.20);
+      color: var(--text);
+    }
+    .stat-multi-chart-line-sample {
+      display: block;
+      width: 30px;
+      height: 14px;
+      flex: 0 0 auto;
+    }
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
     .stat-chart {
       display: block;
       width: 100%;
@@ -1594,7 +1655,7 @@
         <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.2.33</p>
+        <p class="app-version">Версия 0.2.36</p>
       </div>
     </section>
 
@@ -1742,12 +1803,26 @@
           <h2>Партии</h2>
           <div class="stat-tabs" id="statGameTabsBeforeRallies"></div>
         </section>
+
+        <section class="stat-card" id="statMultiChartCard">
+          <h2 id="statMultiChartTitle">Разница в счёте — несколько партий</h2>
+          <div class="stat-multi-chart-controls" id="statMultiChartControls">
+            <p class="stat-multi-chart-control-label">Показывать партии:</p>
+            <div class="stat-multi-chart-game-buttons" id="statMultiChartGameButtons" role="group" aria-label="Показываемые линии партий"></div>
+            <div class="stat-multi-chart-mode-buttons" role="group" aria-label="Режим выбора линий">
+              <button class="stat-multi-chart-mode-button" id="statMultiChartCurrentButton" type="button" data-multi-chart-mode="current">Текущая</button>
+              <button class="stat-multi-chart-mode-button" id="statMultiChartAllButton" type="button" data-multi-chart-mode="all">Все</button>
+            </div>
+            <p class="visually-hidden" id="statMultiChartSelectionStatus" data-multi-chart-live aria-live="polite"></p>
+          </div>
+          <div class="stat-chart-wrap" id="statMultiChart"></div>
+        </section>
       </div>
 
       <footer class="stat-report-footer" id="statReportFooter">
         <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
         <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
-        <p class="app-version">Версия 0.2.33</p>
+        <p class="app-version">Версия 0.2.36</p>
       </footer>
     </section>
   </main>
@@ -1762,8 +1837,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.2.33:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.2.33:importedMeeting";
+    const STORAGE_KEY = "ttScore:0.2.36:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.2.36:importedMeeting";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
     const PROTECTED_REPORT_MAGIC = new Uint8Array([0x54, 0x54, 0x53, 0x31]);
     const PROTECTED_REPORT_VERSION = 1;
@@ -1784,7 +1859,7 @@
     const IS_REPORT_PAGE = PAGE_MODE === "report";
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.2.33:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.2.36:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -1904,6 +1979,9 @@
     let setupHandicapPoints = state.handicap?.enabled ? (state.handicap?.points || 0) : 0;
     let statsSelectedGame = state.gameIndex || 0;
     let statsFollowCurrentGame = true;
+    let multiChartSelectionMode = "current";
+    let multiChartCustomGameIndexes = new Set();
+    let multiChartMeetingId = state.matchId || null;
     let reportPerspectivePlayer = "A";
     let lastMatchId = validMatchId(state.matchId, state.matchDate) ? state.matchId : null;
     let syncChannel = null;
@@ -1998,6 +2076,13 @@
       statGameTabsBeforeRallies: $("statGameTabsBeforeRallies"),
       statChartTitle: $("statChartTitle"),
       statChart: $("statChart"),
+      statMultiChartTitle: $("statMultiChartTitle"),
+      statMultiChartControls: $("statMultiChartControls"),
+      statMultiChartGameButtons: $("statMultiChartGameButtons"),
+      statMultiChartCurrentButton: $("statMultiChartCurrentButton"),
+      statMultiChartAllButton: $("statMultiChartAllButton"),
+      statMultiChartSelectionStatus: $("statMultiChartSelectionStatus"),
+      statMultiChart: $("statMultiChart"),
       statGamePerformanceTitle: $("statGamePerformanceTitle"),
       statGamePerformance: $("statGamePerformance"),
       statLogTitle: $("statLogTitle"),
@@ -3095,6 +3180,237 @@
       container.append(svg);
     }
 
+    const MULTI_CHART_GAME_STYLES = Object.freeze([
+      { color: "#4b86ff", dash: "", marker: "circle" },
+      { color: "#72e0a8", dash: "14 7", marker: "square" },
+      { color: "#ffd166", dash: "3 6", marker: "diamond" },
+      { color: "#ff7f7f", dash: "16 5 3 5", marker: "triangle" },
+      { color: "#b78cff", dash: "9 5", marker: "plus" },
+      { color: "#4dd5e8", dash: "2 5 10 5", marker: "hexagon" },
+      { color: "#f59bd8", dash: "1 5", marker: "cross" }
+    ]);
+
+    function multiChartGameStyle(gameIndex) {
+      return MULTI_CHART_GAME_STYLES[Number(gameIndex)] || MULTI_CHART_GAME_STYLES[0];
+    }
+
+    function appendMultiChartMarker(svg, x, y, style, gameIndex, sample = false) {
+      const radius = sample ? 3.2 : 4.5;
+      const common = {
+        "data-multi-chart-game": Number(gameIndex) + 1,
+        "data-multi-chart-marker": style.marker
+      };
+      let marker;
+      if (style.marker === "square") {
+        marker = svgElement("rect", {
+          ...common,
+          x: x - radius,
+          y: y - radius,
+          width: radius * 2,
+          height: radius * 2,
+          rx: 1,
+          fill: style.color,
+          stroke: "#0b1020",
+          "stroke-width": sample ? 1 : 2
+        });
+      } else if (style.marker === "diamond") {
+        marker = svgElement("polygon", {
+          ...common,
+          points: `${x},${y - radius - 1} ${x + radius + 1},${y} ${x},${y + radius + 1} ${x - radius - 1},${y}`,
+          fill: style.color,
+          stroke: "#0b1020",
+          "stroke-width": sample ? 1 : 2
+        });
+      } else if (style.marker === "triangle") {
+        marker = svgElement("polygon", {
+          ...common,
+          points: `${x},${y - radius - 1} ${x + radius + 1},${y + radius} ${x - radius - 1},${y + radius}`,
+          fill: style.color,
+          stroke: "#0b1020",
+          "stroke-width": sample ? 1 : 2
+        });
+      } else if (style.marker === "plus" || style.marker === "cross") {
+        const diagonal = style.marker === "cross";
+        marker = svgElement("path", {
+          ...common,
+          d: diagonal
+            ? `M ${x - radius} ${y - radius} L ${x + radius} ${y + radius} M ${x + radius} ${y - radius} L ${x - radius} ${y + radius}`
+            : `M ${x - radius} ${y} L ${x + radius} ${y} M ${x} ${y - radius} L ${x} ${y + radius}`,
+          fill: "none",
+          stroke: style.color,
+          "stroke-width": sample ? 2 : 3,
+          "stroke-linecap": "round"
+        });
+      } else if (style.marker === "hexagon") {
+        const half = radius * .56;
+        marker = svgElement("polygon", {
+          ...common,
+          points: `${x - radius},${y} ${x - half},${y - radius} ${x + half},${y - radius} ${x + radius},${y} ${x + half},${y + radius} ${x - half},${y + radius}`,
+          fill: style.color,
+          stroke: "#0b1020",
+          "stroke-width": sample ? 1 : 2
+        });
+      } else {
+        marker = svgElement("circle", {
+          ...common,
+          cx: x,
+          cy: y,
+          r: radius,
+          fill: style.color,
+          stroke: "#0b1020",
+          "stroke-width": sample ? 1 : 2
+        });
+      }
+      svg.append(marker);
+    }
+
+    function multiChartSeriesForGames(gameIndexes, perspective = reportPerspectivePlayer) {
+      const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
+      const start = startScoreForGame();
+      return gameIndexes.map(gameIndex => {
+        const points = [start, ...ralliesForGame(gameIndex).map(rally => rally.scoreAfter)];
+        return {
+          gameIndex,
+          differences: points.map(point =>
+            (Number(point[selectedPlayer]) || 0) - (Number(point[otherPlayer]) || 0)
+          )
+        };
+      });
+    }
+
+    function renderMultiDifferenceChart(container, series, playerName) {
+      container.replaceChildren();
+      if (!series.length) return;
+      const width = 640;
+      const height = 300;
+      const padding = { left: 42, right: 24, top: 22, bottom: 40 };
+      const plotWidth = width - padding.left - padding.right;
+      const plotHeight = height - padding.top - padding.bottom;
+      const maxRallyNumber = Math.max(1, ...series.map(item => item.differences.length - 1));
+      const maxAbsoluteDifference = Math.max(
+        1,
+        ...series.flatMap(item => item.differences.map(value => Math.abs(value)))
+      );
+      const tickStep = Math.max(1, Math.ceil(maxAbsoluteDifference / 4));
+      const scaleLimit = Math.max(tickStep, Math.ceil(maxAbsoluteDifference / tickStep) * tickStep);
+      const xTickStep = Math.max(1, Math.ceil(maxRallyNumber / 6));
+      const xFor = index => padding.left + (Number(index) / maxRallyNumber) * plotWidth;
+      const yFor = value => padding.top + ((scaleLimit - Number(value)) / (scaleLimit * 2)) * plotHeight;
+      const shownParties = series.map(item => item.gameIndex + 1);
+      const description = `Разница в счёте спортсмена ${playerName}. Показаны партии: ${shownParties.join(", ")}. Горизонтальная ось — номер розыгрыша, вертикальная — разница в счёте.`;
+
+      const svg = svgElement("svg", {
+        class: "stat-chart",
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": description
+      });
+      const title = svgElement("title");
+      title.textContent = `Разница в счёте спортсмена ${playerName}`;
+      const desc = svgElement("desc");
+      desc.textContent = description;
+      svg.append(title, desc);
+
+      for (let value = -scaleLimit; value <= scaleLimit; value += tickStep) {
+        const y = yFor(value);
+        svg.append(svgElement("line", {
+          x1: padding.left,
+          y1: y,
+          x2: width - padding.right,
+          y2: y,
+          stroke: value === 0 ? "rgba(255,255,255,.42)" : "rgba(255,255,255,.10)",
+          "stroke-width": value === 0 ? 2 : 1
+        }));
+        const label = svgElement("text", {
+          x: padding.left - 10,
+          y: y + 4,
+          fill: "#aab2c8",
+          "font-size": 12,
+          "text-anchor": "end"
+        });
+        label.textContent = value > 0 ? `+${value}` : String(value);
+        svg.append(label);
+      }
+
+      const xTicks = new Set([0, maxRallyNumber]);
+      for (let value = xTickStep; value < maxRallyNumber; value += xTickStep) xTicks.add(value);
+      [...xTicks].sort((left, right) => left - right).forEach(value => {
+        const x = xFor(value);
+        svg.append(svgElement("line", {
+          x1: x,
+          y1: padding.top,
+          x2: x,
+          y2: height - padding.bottom,
+          stroke: "rgba(255,255,255,.07)",
+          "stroke-width": 1
+        }));
+        const label = svgElement("text", {
+          x,
+          y: height - 14,
+          fill: "#aab2c8",
+          "font-size": 12,
+          "text-anchor": "middle"
+        });
+        label.textContent = String(value);
+        svg.append(label);
+      });
+
+      series.forEach(item => {
+        const style = multiChartGameStyle(item.gameIndex);
+        let pathData = `M ${xFor(0)} ${yFor(item.differences[0])}`;
+        for (let index = 1; index < item.differences.length; index += 1) {
+          pathData += ` L ${xFor(index)} ${yFor(item.differences[index])}`;
+        }
+        const path = svgElement("path", {
+          d: pathData,
+          fill: "none",
+          stroke: style.color,
+          "stroke-width": 4,
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          "data-multi-chart-game": item.gameIndex + 1,
+          class: "stat-multi-chart-series"
+        });
+        if (style.dash) path.setAttribute("stroke-dasharray", style.dash);
+        svg.append(path);
+      });
+      series.forEach(item => {
+        const style = multiChartGameStyle(item.gameIndex);
+        item.differences.forEach((difference, index) => {
+          appendMultiChartMarker(svg, xFor(index), yFor(difference), style, item.gameIndex);
+        });
+      });
+      container.append(svg);
+    }
+
+    function renderMultiScoreChart(container, gameIndexes, perspective = reportPerspectivePlayer) {
+      const [selectedPlayer] = reportPlayerOrder(perspective);
+      const series = multiChartSeriesForGames(gameIndexes, perspective);
+      renderMultiDifferenceChart(container, series, state.players[selectedPlayer]);
+    }
+
+    function createMultiChartLineSample(gameIndex) {
+      const style = multiChartGameStyle(gameIndex);
+      const sample = svgElement("svg", {
+        class: "stat-multi-chart-line-sample",
+        viewBox: "0 0 30 14",
+        "aria-hidden": "true"
+      });
+      const line = svgElement("line", {
+        x1: 1,
+        y1: 7,
+        x2: 29,
+        y2: 7,
+        stroke: style.color,
+        "stroke-width": 3,
+        "stroke-linecap": "round"
+      });
+      if (style.dash) line.setAttribute("stroke-dasharray", style.dash);
+      sample.append(line);
+      appendMultiChartMarker(sample, 15, 7, style, gameIndex, true);
+      return sample;
+    }
+
     function renderRallyLog(container, gameIndex, rallies, perspective = reportPerspectivePlayer) {
       container.replaceChildren();
       const [selectedPlayer, otherPlayer] = reportPlayerOrder(perspective);
@@ -3214,7 +3530,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.2.33"
+          version: "0.2.36"
         },
         match: {
           date: state.matchDate,
@@ -3640,6 +3956,9 @@
         state = buildStateFromCanonicalData(data, analysis);
         statsSelectedGame = state.gameIndex || 0;
         statsFollowCurrentGame = true;
+        multiChartSelectionMode = "current";
+        multiChartCustomGameIndexes.clear();
+        multiChartMeetingId = state.matchId || null;
         reportPerspectivePlayer = "A";
       } catch (error) {
         state = defaultState();
@@ -3805,11 +4124,29 @@
       const bottomGamesCard = snapshotCard("Партии");
       bottomGamesCard.append(createExportGameTabs());
       content.append(bottomGamesCard);
+
+      const multiChartCard = snapshotCard(
+        `Разница в счёте для спортсмена ${state.players[selectedPlayer]} — несколько партий`
+      );
+      const multiChartControls = els.statMultiChartControls.cloneNode(true);
+      multiChartControls.dataset.exportMultiChartControls = perspective;
+      multiChartCard.append(stripElementIds(multiChartControls));
+      const multiChartContainer = document.createElement("div");
+      multiChartContainer.className = "stat-chart-wrap";
+      multiChartContainer.dataset.exportMultiChart = perspective;
+      multiChartContainer.dataset.multiChartPlayerName = state.players[selectedPlayer];
+      multiChartContainer.dataset.multiChartSeries = JSON.stringify(
+        multiChartSeriesForGames(gameIndexes, perspective)
+      );
+      renderMultiScoreChart(multiChartContainer, selectedMultiChartGameIndexes(), perspective);
+      multiChartCard.append(multiChartContainer);
+      content.append(multiChartCard);
       view.append(content);
       return view;
     }
 
     function buildStandaloneReportRoot() {
+      renderMultiChartSelectionControls();
       const root = document.createElement("main");
       root.className = "app export-report";
       root.dataset.playerA = state.players.A;
@@ -3879,7 +4216,7 @@
       appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.2.33";
+      version.textContent = "Версия 0.2.36";
       footer.append(dataEnteredLine, appLinkLine, version);
       screen.append(footer);
       root.append(screen);
@@ -3914,6 +4251,11 @@
       const standaloneScript = `
         (() => {
           ${formatLocalRecordUpdatedAt.toString()}
+          const MULTI_CHART_GAME_STYLES = ${JSON.stringify(MULTI_CHART_GAME_STYLES)};
+          ${multiChartGameStyle.toString()}
+          ${svgElement.toString()}
+          ${appendMultiChartMarker.toString()}
+          ${renderMultiDifferenceChart.toString()}
           document.querySelectorAll('[data-report-updated-at]').forEach(element => {
             element.textContent = formatLocalRecordUpdatedAt(element.dataset.reportUpdatedAt);
           });
@@ -3934,6 +4276,77 @@
           };
           perspectiveSelect.addEventListener('change', () => applyPerspective(perspectiveSelect.value));
           applyPerspective(perspectiveSelect.value);
+
+          const multiChartAvailableGameIndexes = ${JSON.stringify(availableMultiChartGameIndexes())};
+          let multiChartSelectionMode = ${JSON.stringify(multiChartSelectionMode)};
+          let multiChartCustomGameIndexes = new Set(${JSON.stringify([...multiChartCustomGameIndexes])});
+          const selectedMultiChartGameIndexes = () => {
+            if (multiChartSelectionMode === 'all') return [...multiChartAvailableGameIndexes];
+            if (multiChartSelectionMode === 'custom') {
+              multiChartCustomGameIndexes = new Set(
+                [...multiChartCustomGameIndexes].filter(gameIndex => multiChartAvailableGameIndexes.includes(gameIndex))
+              );
+              if (multiChartCustomGameIndexes.size) {
+                return [...multiChartCustomGameIndexes].sort((left, right) => left - right);
+              }
+              multiChartSelectionMode = 'current';
+            }
+            return [multiChartAvailableGameIndexes[multiChartAvailableGameIndexes.length - 1]];
+          };
+          const announceMultiChartSelection = message => {
+            const liveRegions = [...document.querySelectorAll('[data-multi-chart-live]')];
+            liveRegions.forEach(region => { region.textContent = ''; });
+            window.setTimeout(() => liveRegions.forEach(region => { region.textContent = message; }), 0);
+          };
+          const renderExportMultiCharts = () => {
+            const selected = new Set(selectedMultiChartGameIndexes());
+            document.querySelectorAll('[data-export-multi-chart]').forEach(container => {
+              const allSeries = JSON.parse(container.dataset.multiChartSeries);
+              const series = allSeries.filter(item => selected.has(Number(item.gameIndex)));
+              renderMultiDifferenceChart(container, series, container.dataset.multiChartPlayerName);
+            });
+          };
+          const renderExportMultiChartControls = () => {
+            const selected = new Set(selectedMultiChartGameIndexes());
+            document.querySelectorAll('[data-multi-chart-game-toggle]').forEach(button => {
+              const active = selected.has(Number(button.dataset.multiChartGameToggle));
+              button.classList.toggle('selected', active);
+              button.setAttribute('aria-pressed', String(active));
+            });
+            document.querySelectorAll('[data-multi-chart-mode]').forEach(button => {
+              const active = multiChartSelectionMode === button.dataset.multiChartMode;
+              button.classList.toggle('selected', active);
+              button.setAttribute('aria-pressed', String(active));
+            });
+          };
+          const updateExportMultiCharts = () => {
+            renderExportMultiChartControls();
+            renderExportMultiCharts();
+          };
+          document.querySelectorAll('[data-multi-chart-mode]').forEach(button => {
+            button.addEventListener('click', () => {
+              multiChartSelectionMode = button.dataset.multiChartMode === 'all' ? 'all' : 'current';
+              multiChartCustomGameIndexes.clear();
+              updateExportMultiCharts();
+            });
+          });
+          document.querySelectorAll('[data-multi-chart-game-toggle]').forEach(button => {
+            button.addEventListener('click', () => {
+              const gameIndex = Number(button.dataset.multiChartGameToggle);
+              const visible = selectedMultiChartGameIndexes();
+              if (visible.includes(gameIndex) && visible.length === 1) {
+                announceMultiChartSelection('Должна отображаться хотя бы одна партия');
+                return;
+              }
+              const next = new Set(visible);
+              if (next.has(gameIndex)) next.delete(gameIndex);
+              else next.add(gameIndex);
+              multiChartSelectionMode = 'custom';
+              multiChartCustomGameIndexes = next;
+              updateExportMultiCharts();
+            });
+          });
+          updateExportMultiCharts();
 
           const tabs = [...document.querySelectorAll('[data-export-game-tab]')];
           const contents = [...document.querySelectorAll('[data-export-game-content]')];
@@ -4344,6 +4757,96 @@ ${buildStandaloneReportRoot().outerHTML}
       renderGameTabSet(els.statGameTabsBeforeRallies, gameIndexes);
     }
 
+    function resetMultiChartSelection(meetingId = state.matchId || null) {
+      multiChartSelectionMode = "current";
+      multiChartCustomGameIndexes.clear();
+      multiChartMeetingId = meetingId;
+    }
+
+    function availableMultiChartGameIndexes() {
+      if (state.status !== "match") return [];
+      return Array.from({ length: Math.max(1, Number(state.gameIndex) + 1) }, (_, index) => index);
+    }
+
+    function normalizeMultiChartSelection() {
+      const meetingId = state.matchId || null;
+      if (meetingId !== multiChartMeetingId) resetMultiChartSelection(meetingId);
+      if (multiChartSelectionMode !== "custom") return;
+      const available = new Set(availableMultiChartGameIndexes());
+      multiChartCustomGameIndexes = new Set(
+        [...multiChartCustomGameIndexes].filter(gameIndex => available.has(gameIndex))
+      );
+      if (!multiChartCustomGameIndexes.size) multiChartSelectionMode = "current";
+    }
+
+    function selectedMultiChartGameIndexes() {
+      const available = availableMultiChartGameIndexes();
+      if (!available.length) return [];
+      normalizeMultiChartSelection();
+      if (multiChartSelectionMode === "all") return available;
+      if (multiChartSelectionMode === "custom") {
+        return [...multiChartCustomGameIndexes].sort((left, right) => left - right);
+      }
+      return [available[available.length - 1]];
+    }
+
+    function announceMultiChartSelection(message) {
+      els.statMultiChartSelectionStatus.textContent = "";
+      window.setTimeout(() => { els.statMultiChartSelectionStatus.textContent = message; }, 0);
+    }
+
+    function setMultiChartSelectionMode(mode) {
+      multiChartSelectionMode = mode === "all" ? "all" : "current";
+      multiChartCustomGameIndexes.clear();
+      renderStats();
+    }
+
+    function toggleMultiChartGame(gameIndex) {
+      const available = availableMultiChartGameIndexes();
+      if (!available.includes(gameIndex)) return;
+      const visible = selectedMultiChartGameIndexes();
+      if (visible.includes(gameIndex) && visible.length === 1) {
+        announceMultiChartSelection("Должна отображаться хотя бы одна партия");
+        return;
+      }
+      const next = new Set(visible);
+      if (next.has(gameIndex)) next.delete(gameIndex);
+      else next.add(gameIndex);
+      multiChartSelectionMode = "custom";
+      multiChartCustomGameIndexes = next;
+      renderStats();
+    }
+
+    function renderMultiChartSelectionControls() {
+      const available = availableMultiChartGameIndexes();
+      const selected = new Set(selectedMultiChartGameIndexes());
+      els.statMultiChartGameButtons.dataset.partyCount = String(available.length);
+      els.statMultiChartGameButtons.replaceChildren();
+      available.forEach(gameIndex => {
+        const button = document.createElement("button");
+        const active = selected.has(gameIndex);
+        button.type = "button";
+        button.className = "stat-multi-chart-game-button";
+        button.classList.toggle("selected", active);
+        button.dataset.multiChartGameToggle = String(gameIndex);
+        button.setAttribute("aria-pressed", String(active));
+        button.setAttribute("aria-label", `Показывать график партии ${gameIndex + 1}`);
+        const number = document.createElement("span");
+        number.textContent = String(gameIndex + 1);
+        button.append(createMultiChartLineSample(gameIndex), number);
+        button.addEventListener("click", () => toggleMultiChartGame(gameIndex));
+        els.statMultiChartGameButtons.append(button);
+      });
+      [
+        [els.statMultiChartCurrentButton, "current"],
+        [els.statMultiChartAllButton, "all"]
+      ].forEach(([button, mode]) => {
+        const active = multiChartSelectionMode === mode;
+        button.classList.toggle("selected", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
     function renderInteractiveReportFooter(showDetails) {
       els.statDataEnteredLine.hidden = !showDetails;
       els.statAppLinkLine.hidden = !showDetails;
@@ -4403,6 +4906,8 @@ ${buildStandaloneReportRoot().outerHTML}
 
       if (!hasMeeting) {
         els.statAllGamesScore.replaceChildren();
+        els.statMultiChartGameButtons.replaceChildren();
+        els.statMultiChart.replaceChildren();
         els.statStatusText.textContent = "Ожидание данных";
         els.statServerText.hidden = true;
         els.statServerText.textContent = "";
@@ -4416,10 +4921,13 @@ ${buildStandaloneReportRoot().outerHTML}
       els.statServerText.textContent = showServer ? `Подающий: ${state.players[currentServer()]}` : "";
       renderPerformanceTable(els.statMatchPerformance, state.rallies);
       renderGameTabs();
+      renderMultiChartSelectionControls();
 
       const gameRallies = ralliesForGame(statsSelectedGame);
       els.statChartTitle.textContent = `Разница в счёте для спортсмена ${state.players[selectedPlayer]} (партия\u00A0${statsSelectedGame + 1})`;
       renderScoreChart(els.statChart, statsSelectedGame, gameRallies, reportPerspectivePlayer);
+      els.statMultiChartTitle.textContent = `Разница в счёте для спортсмена ${state.players[selectedPlayer]} — несколько партий`;
+      renderMultiScoreChart(els.statMultiChart, selectedMultiChartGameIndexes(), reportPerspectivePlayer);
       els.statGamePerformanceTitle.textContent = `Выиграно розыгрышей (партия\u00A0${statsSelectedGame + 1})`;
       renderPerformanceTable(els.statGamePerformance, gameRallies);
       els.statLogTitle.textContent = `Розыгрыши (партия\u00A0${statsSelectedGame + 1})`;
@@ -4615,6 +5123,8 @@ ${buildStandaloneReportRoot().outerHTML}
       reportPerspectivePlayer = els.statPerspectiveSelect.value === "B" ? "B" : "A";
       renderStats();
     });
+    els.statMultiChartCurrentButton.addEventListener("click", () => setMultiChartSelectionMode("current"));
+    els.statMultiChartAllButton.addEventListener("click", () => setMultiChartSelectionMode("all"));
     els.exportReportButton.addEventListener("click", shareMatchFiles);
     els.modalBackdrop.addEventListener("click", (e) => {
       if (e.target === els.modalBackdrop && activeModal !== "sideChangeChoice" && activeModal !== "matchOver" && activeModal !== "gameOver" && activeModal !== "restoreChoice") closeModal();
