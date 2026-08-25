@@ -315,6 +315,12 @@ function compatibleProjectionPair(teamProjectionEnvelope, individualStateEnvelop
     && teamProjectionEnvelope.projectionProtocolVersion === individualStateEnvelope.projectionProtocolVersion;
 }
 
+function individualStateRemovalPatch(room) {
+  if (!room?.public || !Object.hasOwn(room.public, 'individualState')
+    || room.public.individualState == null) return {};
+  return { 'public/individualState': null };
+}
+
 function makeRules() {
   return {
     gamesToWin: 3,
@@ -825,7 +831,7 @@ async function publishAssignment(roomId) {
   const patch = {
     assignment,
     'public/teamProjection': projection,
-    'public/individualState': null,
+    ...individualStateRemovalPatch(room),
     adminRecoverySnapshot: recovery,
     'public/meta': { schemaVersion: 1, status: 'active' },
   };
