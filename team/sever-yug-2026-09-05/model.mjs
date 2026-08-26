@@ -4,6 +4,18 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function assertObject(value, path) {
+  assert(value && typeof value === "object" && !Array.isArray(value), `${path}: ожидается объект.`);
+}
+
+function assertExactKeys(value, allowed, path) {
+  assertObject(value, path);
+  const unexpected = Object.keys(value).filter(key => !allowed.includes(key));
+  assert(unexpected.length === 0, `${path}: неизвестные поля: ${unexpected.join(", ")}.`);
+  const missing = allowed.filter(key => !Object.prototype.hasOwnProperty.call(value, key));
+  assert(missing.length === 0, `${path}: отсутствуют поля: ${missing.join(", ")}.`);
+}
+
 function requiredString(value, path, maximum = 120) {
   assert(typeof value === "string", `${path}: ожидается строка.`);
   const normalized = value.trim();
@@ -13,8 +25,22 @@ function requiredString(value, path, maximum = 120) {
 }
 
 function optionalString(value, path, maximum = 500) {
-  if (value === null || typeof value === "undefined") return null;
+  if (value === null) return null;
   return requiredString(value, path, maximum);
+}
+
+function validateCalendarDate(value, path) {
+  const date = requiredString(value, path, 10);
+  assert(/^\d{4}-\d{2}-\d{2}$/.test(date), `${path}: ожидается формат YYYY-MM-DD.`);
+  const [year, month, day] = date.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  assert(
+    parsed.getUTCFullYear() === year
+      && parsed.getUTCMonth() === month - 1
+      && parsed.getUTCDate() === day,
+    `${path}: несуществующая календарная дата.`
+  );
+  return date;
 }
 
 function validateLink(value, path) {
@@ -30,15 +56,16 @@ function validateLink(value, path) {
 }
 
 function validatePlayer(player, side, index) {
-  assert(player && typeof player === "object" && !Array.isArray(player), `teams.${side}.players[${index}]: ожидается объект.`);
-  const id = requiredString(player.id, `teams.${side}.players[${index}].id`, 32);
-  const name = requiredString(player.name, `teams.${side}.players[${index}].name`, 100);
+  const path = `teams.${side}.players[${index}]`;
+  assertExactKeys(player, ["id", "name"], path);
+  const id = requiredString(player.id, `${path}.id`, 32);
+  const name = requiredString(player.name, `${path}.name`, 100);
   assert(id.startsWith(side.toLowerCase()), `Игрок ${id}: ID должен начинаться с ${side.toLowerCase()}.`);
   return { id, name };
 }
 
 function validateResult(result, path) {
-  assert(result && typeof result === "object" && !Array.isArray(result), `${path}: завершённой встрече нужен result.`);
+  assertExactKeys(result, ["gamesA", "gamesB"], path);
   const gamesA = Number(result.gamesA);
   const gamesB = Number(result.gamesB);
   assert(Number.isInteger(gamesA) && Number.isInteger(gamesB), `${path}: gamesA и gamesB должны быть целыми числами.`);
@@ -49,26 +76,29 @@ function validateResult(result, path) {
 }
 
 export function prepareMeeting(raw) {
-  assert(raw && typeof raw === "object" && !Array.isArray(raw), "Корень match.json должен быть объектом.");
+  assertExactKeys(
+    raw,
+    ["schemaVersion", "id", "title", "date", "venue", "updatedAt", "winsToFinish", "teams", "matches"],
+    "Корень match.json"
+  );
   assert(raw.schemaVersion === 1, "Поддерживается только schemaVersion=1.");
 
   const id = requiredString(raw.id, "id", 80);
   assert(/^[a-z0-9][a-z0-9-]*$/.test(id), "id должен содержать только строчные латинские буквы, цифры и дефисы.");
   const title = requiredString(raw.title, "title", 160);
-  const date = requiredString(raw.date, "date", 10);
-  assert(/^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(`${date}T00:00:00Z`)), "date должен иметь формат YYYY-MM-DD.");
+  const date = validateCalendarDate(raw.date, "date");
   const venue = optionalString(raw.venue, "venue", 160);
   const updatedAt = requiredString(raw.updatedAt, "updatedAt", 40);
   assert(Number.isFinite(Date.parse(updatedAt)), "updatedAt должен быть корректной датой и временем ISO 8601.");
   const winsToFinish = Number(raw.winsToFinish);
-  assert(winsToFinish === 5, "Для версии 0.1 требуется winsToFinish=5.");
+  assert(winsToFinish === 5, "Для версии 0.1.1 требуется winsToFinish=5.");
 
-  assert(raw.teams && typeof raw.teams === "object", "teams: ожидается объект.");
+  assertExactKeys(raw.teams, ["A", "B"], "teams");
   const teams = {};
   const allPlayerIds = new Set();
   for (const side of ["A", "B"]) {
     const source = raw.teams[side];
-    assert(source && typeof source === "object", `teams.${side}: ожидается объект.`);
+    assertExactKeys(source, ["name", "players"], `teams.${side}`);
     const name = requiredString(source.name, `teams.${side}.name`, 100);
     assert(Array.isArray(source.players) && source.players.length === 3, `teams.${side}.players: требуется ровно три спортсмена.`);
     const players = source.players.map((player, index) => validatePlayer(player, side, index));
@@ -88,11 +118,14 @@ export function prepareMeeting(raw) {
   const matchIds = new Set();
   const orders = new Set();
   const pairs = new Set();
-  let currentCount = 0;
 
   const matches = raw.matches.map((source, index) => {
     const path = `matches[${index}]`;
-    assert(source && typeof source === "object" && !Array.isArray(source), `${path}: ожидается объект.`);
+    assertExactKeys(
+      source,
+      ["id", "order", "playerAId", "playerBId", "status", "result", "liveUrl", "reportUrl"],
+      path
+    );
     const matchId = requiredString(source.id, `${path}.id`, 40);
     assert(!matchIds.has(matchId), `${path}.id: ID ${matchId} повторяется.`);
     matchIds.add(matchId);
@@ -113,11 +146,20 @@ export function prepareMeeting(raw) {
 
     const status = requiredString(source.status, `${path}.status`, 20);
     assert(SOURCE_STATUSES.has(status), `${path}.status: разрешены planned, current и finished.`);
-    if (status === "current") currentCount += 1;
-    const result = status === "finished"
-      ? validateResult(source.result, `${path}.result`)
-      : null;
-    assert(status === "finished" || source.result === null || typeof source.result === "undefined", `${path}.result: результат разрешён только для finished.`);
+    const result = status === "finished" ? validateResult(source.result, `${path}.result`) : null;
+    assert(status === "finished" || source.result === null, `${path}.result: результат разрешён только для finished.`);
+    const liveUrl = validateLink(source.liveUrl, `${path}.liveUrl`);
+    const reportUrl = validateLink(source.reportUrl, `${path}.reportUrl`);
+    if (status === "planned") {
+      assert(liveUrl === null, `${path}.liveUrl: ссылка разрешена только для current или finished.`);
+      assert(reportUrl === null, `${path}.reportUrl: ссылка разрешена только для finished.`);
+    }
+    if (status === "current") {
+      assert(reportUrl === null, `${path}.reportUrl: ссылка разрешена только для finished.`);
+    }
+    if (status === "finished") {
+      assert(reportUrl !== null, `${path}.reportUrl: завершённой встрече нужна ссылка на JSON-отчёт.`);
+    }
 
     return {
       id: matchId,
@@ -127,27 +169,38 @@ export function prepareMeeting(raw) {
       sourceStatus: status,
       status,
       result,
-      liveUrl: validateLink(source.liveUrl, `${path}.liveUrl`),
-      reportUrl: validateLink(source.reportUrl, `${path}.reportUrl`)
+      liveUrl,
+      reportUrl
     };
   }).sort((left, right) => left.order - right.order);
 
-  assert(currentCount <= 1, "Одновременно может быть не более одной current-встречи.");
   assert(pairs.size === 9, "Расписание должно содержать все девять уникальных межкомандных пар.");
 
-  const score = matches.reduce((total, match) => {
-    if (match.result?.winner === "A") total.A += 1;
-    if (match.result?.winner === "B") total.B += 1;
-    return total;
-  }, { A: 0, B: 0 });
-  assert(score.A <= winsToFinish && score.B <= winsToFinish, "Командный счёт не может превышать пять побед.");
-  assert(!(score.A === winsToFinish && score.B === winsToFinish), "Обе команды не могут одновременно иметь пять побед.");
-
-  const winner = score.A === winsToFinish ? "A" : score.B === winsToFinish ? "B" : null;
-  if (winner) {
-    for (const match of matches) {
-      if (match.status !== "finished") match.status = "not_required";
+  const score = { A: 0, B: 0 };
+  let phase = "finished";
+  let winner = null;
+  for (const match of matches) {
+    const path = `Встреча № ${match.order}`;
+    if (winner) {
+      assert(match.sourceStatus === "planned", `${path}: после пятой победы разрешены только planned-встречи.`);
+      match.status = "not_required";
+      continue;
     }
+
+    if (match.sourceStatus === "finished") {
+      assert(phase === "finished", `${path}: finished-встреча не может следовать после current или planned.`);
+      score[match.result.winner] += 1;
+      if (score[match.result.winner] === winsToFinish) winner = match.result.winner;
+      continue;
+    }
+
+    if (match.sourceStatus === "current") {
+      assert(phase === "finished", `${path}: current-встреча должна следовать сразу после блока finished.`);
+      phase = "current";
+      continue;
+    }
+
+    phase = "planned";
   }
 
   return { schemaVersion: 1, id, title, date, venue, updatedAt, winsToFinish, teams, matches, score, winner };

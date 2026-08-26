@@ -26,6 +26,7 @@ const STATUS_LABELS = {
 };
 
 let busy = false;
+let lastSuccessfulLoadAt = null;
 
 function formatDate(date) {
   return new Intl.DateTimeFormat("ru-RU", {
@@ -141,12 +142,23 @@ async function loadMeeting() {
     const response = await fetch(`./match.json?v=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const meeting = prepareMeeting(await response.json());
+    const folderId = decodeURIComponent(location.pathname.split("/").filter(Boolean).at(-1) || "");
+    if (folderId && folderId !== meeting.id) {
+      throw new Error(`id в match.json (${meeting.id}) не совпадает с каталогом страницы (${folderId}).`);
+    }
+    lastSuccessfulLoadAt = new Date();
     render(meeting);
   } catch (error) {
     elements.loading.hidden = true;
     elements.error.hidden = false;
-    elements.error.querySelector("strong").textContent = "Не удалось загрузить данные командной встречи.";
-    elements.error.querySelector("span").textContent = error instanceof Error ? error.message : String(error);
+    const detail = error instanceof Error ? error.message : String(error);
+    if (lastSuccessfulLoadAt && !elements.content.hidden) {
+      elements.error.querySelector("strong").textContent = "Не удалось обновить данные командной встречи.";
+      elements.error.querySelector("span").textContent = `Показаны последние успешно загруженные данные (${formatDateTime(lastSuccessfulLoadAt)}). ${detail}`;
+    } else {
+      elements.error.querySelector("strong").textContent = "Не удалось загрузить данные командной встречи.";
+      elements.error.querySelector("span").textContent = detail;
+    }
   } finally {
     busy = false;
     elements.refresh.disabled = false;
