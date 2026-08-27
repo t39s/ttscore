@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Командная встреча · ttScore Team</title>
+  <link rel="stylesheet" href="./assets/0.2.0/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">ttScore Team · v0.2.0</p>
+      <h1 id="team-match-title">Командная встреча</h1>
+      <p id="team-match-meta" class="meta"></p>
+    </header>
+
+    <div id="loading" class="notice" role="status">
+      <strong>Загрузка командной встречи…</strong>
+    </div>
+
+    <div id="error" class="notice notice--error" role="alert" hidden>
+      <strong></strong>
+      <span></span>
+    </div>
+
+    <div id="content" hidden>
+      <section class="scoreboard" aria-label="Командный счёт">
+        <article class="team">
+          <h2 id="team-a-name" class="team__name"></h2>
+          <ul id="team-a-players" class="team__players"></ul>
+        </article>
+        <div class="score" aria-label="Счёт">
+          <span><span id="team-a-score">0</span><span class="score__separator">:</span><span id="team-b-score">0</span></span>
+        </div>
+        <article class="team team--b">
+          <h2 id="team-b-name" class="team__name"></h2>
+          <ul id="team-b-players" class="team__players"></ul>
+        </article>
+      </section>
+
+      <p id="team-match-status" class="team-match-status" role="status"></p>
+
+      <section aria-labelledby="schedule-heading">
+        <div class="section-heading">
+          <h2 id="schedule-heading">Личные встречи</h2>
+          <button id="refresh" class="refresh" type="button">Обновить</button>
+        </div>
+        <div id="individual-matches" class="individual-matches"></div>
+        <p id="updated" class="updated"></p>
+      </section>
+
+      <p class="public-note">Составы, результаты, live-ссылки и ссылки на отчёты опубликованы открыто.</p>
+    </div>
+  </main>
+
+  <script type="module" src="./assets/0.2.0/app.mjs"></script>
+</body>
+</html>
