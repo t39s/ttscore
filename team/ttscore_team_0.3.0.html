@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Командная встреча · ttScore Team</title>
+  <link rel="stylesheet" href="./assets/0.3.0/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">ttScore Team · v0.3.0</p>
+      <h1 id="team-match-title">Командная встреча</h1>
+      <p id="team-match-meta" class="meta"></p>
+    </header>
+
+    <div id="loading" class="notice" role="status">
+      <strong>Загрузка командной встречи…</strong>
+    </div>
+
+    <div id="error" class="notice notice--error" role="alert" hidden>
+      <strong></strong>
+      <span></span>
+    </div>
+
+    <section id="creator" class="creator" aria-labelledby="creator-heading" hidden>
+      <h2 id="creator-heading">Новая командная встреча</h2>
+      <p class="creator__note">Заполните составы. Страница создаст все личные встречи и сохранит готовый JSON для ручной загрузки в GitHub.</p>
+      <form id="creator-form" class="creator__form">
+        <div class="creator__base-fields">
+          <label>Идентификатор
+            <input id="creator-id" type="text" required maxlength="80" pattern="[a-z0-9][a-z0-9-]*" placeholder="team-match-2026-09-05" autocomplete="off">
+          </label>
+          <label>Дата
+            <input id="creator-date" type="date" required>
+          </label>
+          <label>Место (необязательно)
+            <input id="creator-venue" type="text" maxlength="160" autocomplete="off">
+          </label>
+          <label>Формат
+            <select id="creator-team-size">
+              <option value="2">2 × 2</option>
+              <option value="3" selected>3 × 3</option>
+              <option value="4">4 × 4</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="creator__teams">
+          <fieldset>
+            <legend>Команда A</legend>
+            <label>Название
+              <input id="creator-team-a-name" type="text" required maxlength="100" autocomplete="off">
+            </label>
+            <div id="creator-players-a" class="creator__players"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Команда B</legend>
+            <label>Название
+              <input id="creator-team-b-name" type="text" required maxlength="100" autocomplete="off">
+            </label>
+            <div id="creator-players-b" class="creator__players"></div>
+          </fieldset>
+        </div>
+
+        <label>Live-ссылка первой встречи (необязательно)
+          <input id="creator-first-live-url" type="text" autocomplete="off">
+        </label>
+        <button id="creator-prepare" class="button button--prepare" type="submit">Создать JSON</button>
+      </form>
+
+      <p id="creator-error" class="editor__error" role="alert" hidden></p>
+      <section id="creator-preview" class="preview" aria-labelledby="creator-preview-heading" hidden>
+        <h3 id="creator-preview-heading">Предварительная проверка</h3>
+        <p id="creator-preview-summary"></p>
+        <details><summary>Показать JSON</summary><pre id="creator-preview-json"></pre></details>
+        <button id="creator-download" class="button button--download" type="button">Сохранить JSON</button>
+        <p class="muted">Загрузите файл в <code>team/team-matches/</code>. Имя файла должно остаться точно равным <code>&lt;id&gt;.json</code>.</p>
+      </section>
+    </section>
+
+    <div id="content" hidden>
+      <section class="scoreboard" aria-label="Командный счёт">
+        <article class="team">
+          <h2 id="team-a-name" class="team__name"></h2>
+          <ul id="team-a-players" class="team__players"></ul>
+        </article>
+        <div class="score" aria-label="Счёт">
+          <span><span id="team-a-score">0</span><span class="score__separator">:</span><span id="team-b-score">0</span></span>
+        </div>
+        <article class="team team--b">
+          <h2 id="team-b-name" class="team__name"></h2>
+          <ul id="team-b-players" class="team__players"></ul>
+        </article>
+      </section>
+
+      <p id="team-match-status" class="team-match-status" role="status"></p>
+
+      <section aria-labelledby="schedule-heading">
+        <div class="section-heading">
+          <h2 id="schedule-heading">Личные встречи</h2>
+          <button id="refresh" class="refresh" type="button">Обновить</button>
+        </div>
+        <div id="individual-matches" class="individual-matches"></div>
+        <p id="updated" class="updated"></p>
+      </section>
+
+      <p class="public-note">Составы, результаты, live-ссылки и ссылки на отчёты опубликованы открыто.</p>
+
+      <section id="editor" class="editor" aria-labelledby="editor-heading" hidden>
+        <p class="eyebrow">Локальная подготовка JSON</p>
+        <h2 id="editor-heading">Обновление командной встречи</h2>
+        <p class="editor__note">Страница не отправляет данные в GitHub. Перед подготовкой и скачиванием она проверяет свежесть опубликованного JSON, затем формирует файл для ручной загрузки.</p>
+        <p id="editor-status" class="editor__status" role="status" hidden></p>
+        <dl class="editor__matches">
+          <div><dt>Завершается</dt><dd id="editor-current"></dd></div>
+          <div><dt>Следующая</dt><dd id="editor-next"></dd></div>
+        </dl>
+        <form id="transition-form" class="editor__form">
+          <fieldset>
+            <legend>Итог по партиям</legend>
+            <label>Команда A
+              <select id="games-a" required>
+                <option value="3">3</option><option value="2">2</option><option value="1">1</option><option value="0">0</option>
+              </select>
+            </label>
+            <span class="editor__score-separator">:</span>
+            <label>Команда B
+              <select id="games-b" required>
+                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              </select>
+            </label>
+          </fieldset>
+          <label>Ссылка на отчёт завершённой встречи
+            <input id="report-url" type="text" required autocomplete="off" placeholder="https://example.invalid/report/m01.html">
+          </label>
+          <label>Live-ссылка следующей встречи (необязательно)
+            <input id="next-live-url" type="text" autocomplete="off" placeholder="https://example.invalid/live/m02">
+          </label>
+          <button id="prepare-update" class="button button--prepare" type="submit">Подготовить обновление</button>
+        </form>
+        <p id="editor-error" class="editor__error" role="alert" hidden></p>
+        <section id="preview" class="preview" aria-labelledby="preview-heading" hidden>
+          <h3 id="preview-heading">Предварительная проверка</h3>
+          <p id="preview-summary"></p>
+          <details><summary>Показать JSON</summary><pre id="preview-json"></pre></details>
+          <button id="download-json" class="button button--download" type="button">Сохранить JSON</button>
+          <p class="muted">Загрузите файл в <code>team/team-matches/</code> под точным исходным именем. Если браузер добавил <code>(1)</code>, удалите его перед загрузкой.</p>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="./assets/0.3.0/app.mjs"></script>
+</body>
+</html>
