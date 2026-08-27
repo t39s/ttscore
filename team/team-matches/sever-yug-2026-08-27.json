@@ -4,23 +4,41 @@
   "title": "Командная встреча «Север — Юг»",
   "date": "2026-08-27",
   "venue": "Берлин · клубный зал",
-  "updatedAt": "2026-08-27T18:15:00+02:00",
+  "updatedAt": "2026-08-27T12:26:38.421Z",
   "winsToFinish": 5,
   "teams": {
     "A": {
       "name": "Север",
       "players": [
-        { "id": "a1", "name": "Антон Лебедев" },
-        { "id": "a2", "name": "Борис Орлов" },
-        { "id": "a3", "name": "Виктор Соколов" }
+        {
+          "id": "a1",
+          "name": "Антон Лебедев"
+        },
+        {
+          "id": "a2",
+          "name": "Борис Орлов"
+        },
+        {
+          "id": "a3",
+          "name": "Виктор Соколов"
+        }
       ]
     },
     "B": {
       "name": "Юг",
       "players": [
-        { "id": "b1", "name": "Денис Волков" },
-        { "id": "b2", "name": "Егор Морозов" },
-        { "id": "b3", "name": "Фёдор Крылов" }
+        {
+          "id": "b1",
+          "name": "Денис Волков"
+        },
+        {
+          "id": "b2",
+          "name": "Егор Морозов"
+        },
+        {
+          "id": "b3",
+          "name": "Фёдор Крылов"
+        }
       ]
     }
   },
@@ -31,7 +49,10 @@
       "playerAId": "a1",
       "playerBId": "b1",
       "status": "finished",
-      "result": { "gamesA": 3, "gamesB": 1 },
+      "result": {
+        "gamesA": 3,
+        "gamesB": 1
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m01",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m01.html"
     },
@@ -41,7 +62,10 @@
       "playerAId": "a2",
       "playerBId": "b2",
       "status": "finished",
-      "result": { "gamesA": 2, "gamesB": 3 },
+      "result": {
+        "gamesA": 2,
+        "gamesB": 3
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m02",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m02.html"
     },
@@ -51,7 +75,10 @@
       "playerAId": "a3",
       "playerBId": "b3",
       "status": "finished",
-      "result": { "gamesA": 3, "gamesB": 0 },
+      "result": {
+        "gamesA": 3,
+        "gamesB": 0
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m03",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m03.html"
     },
@@ -61,7 +88,10 @@
       "playerAId": "a1",
       "playerBId": "b2",
       "status": "finished",
-      "result": { "gamesA": 3, "gamesB": 2 },
+      "result": {
+        "gamesA": 3,
+        "gamesB": 2
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m04",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m04.html"
     },
@@ -71,7 +101,10 @@
       "playerAId": "a2",
       "playerBId": "b3",
       "status": "finished",
-      "result": { "gamesA": 1, "gamesB": 3 },
+      "result": {
+        "gamesA": 1,
+        "gamesB": 3
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m05",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m05.html"
     },
@@ -81,7 +114,10 @@
       "playerAId": "a3",
       "playerBId": "b1",
       "status": "finished",
-      "result": { "gamesA": 3, "gamesB": 1 },
+      "result": {
+        "gamesA": 3,
+        "gamesB": 1
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m06",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m06.html"
     },
@@ -90,17 +126,20 @@
       "order": 7,
       "playerAId": "a1",
       "playerBId": "b3",
-      "status": "current",
-      "result": null,
+      "status": "finished",
+      "result": {
+        "gamesA": 2,
+        "gamesB": 3
+      },
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m07",
-      "reportUrl": null
+      "reportUrl": "https://r1.com/report/m7.html"
     },
     {
       "id": "m08",
       "order": 8,
       "playerAId": "a2",
       "playerBId": "b1",
-      "status": "planned",
+      "status": "current",
       "result": null,
       "liveUrl": null,
       "reportUrl": null
