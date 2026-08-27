@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 3,
+  "id": "sk12-r1-2026-0905",
+  "title": "Центр настольного тенниса — Первая ракетка",
+  "date": "2026-09-05",
+  "venue": "ЦНТ",
+  "updatedAt": "2026-08-27T12:56:24.888Z",
+  "winsToFinish": 5,
+  "teams": {
+    "A": {
+      "name": "Центр настольного тенниса",
+      "players": [
+        {
+          "id": "a1",
+          "name": "Моисеев"
+        },
+        {
+          "id": "a2",
+          "name": "Будыко"
+        },
+        {
+          "id": "a3",
+          "name": "Кидасов"
+        }
+      ]
+    },
+    "B": {
+      "name": "Первая ракетка",
+      "players": [
+        {
+          "id": "b1",
+          "name": "Стародубцев"
+        },
+        {
+          "id": "b2",
+          "name": "Бахметьев"
+        },
+        {
+          "id": "b3",
+          "name": "Фадеев"
+        }
+      ]
+    }
+  },
+  "individualMatches": [
+    {
+      "id": "m01",
+      "order": 1,
+      "playerAId": "a1",
+      "playerBId": "b1",
+      "status": "current",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m02",
+      "order": 2,
+      "playerAId": "a2",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m03",
+      "order": 3,
+      "playerAId": "a3",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m04",
+      "order": 4,
+      "playerAId": "a1",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m05",
+      "order": 5,
+      "playerAId": "a2",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m06",
+      "order": 6,
+      "playerAId": "a3",
+      "playerBId": "b1",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m07",
+      "order": 7,
+      "playerAId": "a1",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m08",
+      "order": 8,
+      "playerAId": "a2",
+      "playerBId": "b1",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m09",
+      "order": 9,
+      "playerAId": "a3",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    }
+  ]
+}
