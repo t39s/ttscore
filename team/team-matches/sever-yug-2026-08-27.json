@@ -91,7 +91,7 @@
       "playerAId": "a1",
       "playerBId": "b3",
       "status": "current",
-      "result": { "gamesA": 2, "gamesB": 2 },
+      "result": null,
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m07",
       "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m07.html"
     },
