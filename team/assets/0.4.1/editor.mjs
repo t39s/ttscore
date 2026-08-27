@@ -1,0 +1,97 @@
+import { prepareTeamMatch } from "./model.mjs";
+
+function requiredText(value, name) {
+  if (typeof value !== "string" || value.trim() === "") throw new Error(`${name}: значение обязательно.`);
+  return value.trim();
+}
+
+function optionalText(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value !== "string") throw new Error("Ссылка следующей встречи должна быть строкой.");
+  return value.trim() || null;
+}
+
+function parseGames(value, side, gamesToWin) {
+  const games = Number(value);
+  if (!Number.isInteger(games) || games < 0 || games > gamesToWin) {
+    throw new Error(`Счёт команды ${side}: ожидается целое число от 0 до ${gamesToWin}.`);
+  }
+  return games;
+}
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+export function sourceRevision(raw) {
+  prepareTeamMatch(raw);
+  return canonicalJson(raw);
+}
+
+export function assertSourceUnchanged(expectedRevision, latestRaw) {
+  const actualRevision = sourceRevision(latestRaw);
+  if (actualRevision !== expectedRevision) {
+    throw new Error("Опубликованный JSON изменился после загрузки. Нажмите «Обновить» и введите данные заново.");
+  }
+  return actualRevision;
+}
+
+export function prepareTransition(raw, input, updatedAt) {
+  const before = prepareTeamMatch(raw);
+  if (before.completed) throw new Error("Командная встреча уже завершена.");
+
+  const current = before.individualMatches.filter(match => match.status === "current");
+  if (current.length !== 1) throw new Error("Для обновления должна быть ровно одна текущая личная встреча.");
+
+  const gamesToWin = (before.individualMatchBestOf + 1) / 2;
+  const gamesA = parseGames(input?.gamesA, "A", gamesToWin);
+  const gamesB = parseGames(input?.gamesB, "B", gamesToWin);
+  const aWon = gamesA === gamesToWin && gamesB < gamesToWin;
+  const bWon = gamesB === gamesToWin && gamesA < gamesToWin;
+  if (!aWon && !bWon) throw new Error(`Результат не соответствует формату «Из ${before.individualMatchBestOf} партий».`);
+
+  const reportUrl = requiredText(input?.reportUrl, "Ссылка на отчёт");
+  const nextLiveUrl = optionalText(input?.nextLiveUrl);
+  const normalizedUpdatedAt = requiredText(updatedAt, "updatedAt");
+  if (!Number.isFinite(Date.parse(normalizedUpdatedAt))) throw new Error("updatedAt должен быть корректной датой ISO 8601.");
+
+  const updated = cloneJson(raw);
+  const sourceCurrent = updated.individualMatches.find(match => match.id === current[0].id);
+  sourceCurrent.status = "finished";
+  sourceCurrent.result = { gamesA, gamesB };
+  sourceCurrent.reportUrl = reportUrl;
+  updated.updatedAt = normalizedUpdatedAt;
+
+  const afterFinish = prepareTeamMatch(updated);
+  let next = null;
+  if (!afterFinish.completed) {
+    next = afterFinish.individualMatches.find(match => match.status === "planned");
+    if (next) {
+      const sourceNext = updated.individualMatches.find(match => match.id === next.id);
+      sourceNext.status = "current";
+      sourceNext.liveUrl = nextLiveUrl;
+    }
+  }
+
+  const prepared = prepareTeamMatch(updated);
+  return {
+    data: updated,
+    prepared,
+    serialized: `${JSON.stringify(updated, null, 2)}\n`,
+    filename: `${before.id}.json`,
+    transition: {
+      finishedMatchId: current[0].id,
+      nextMatchId: next?.id ?? null,
+      winner: prepared.winner,
+      draw: prepared.draw
+    }
+  };
+}
