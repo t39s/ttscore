@@ -93,7 +93,7 @@
       "status": "current",
       "result": null,
       "liveUrl": "https://live.example.invalid/sever-yug-2026-08-27/m07",
-      "reportUrl": "https://reports.example.invalid/sever-yug-2026-08-27/m07.html"
+      "reportUrl": null
     },
     {
       "id": "m08",
