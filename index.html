@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0b1020" />
   <meta name="ttscore-build" content="compact-live-scoreboard-2" />
-  <title>ttScore 0.3.3</title>
+  <title>ttScore 0.3.4</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -421,6 +421,45 @@
       font-weight: 900;
       letter-spacing: -.03em;
       line-height: 1.28;
+    }
+    .modal-controls {
+      display: grid;
+      gap: 14px;
+    }
+    .modal-controls[hidden] { display: none; }
+    .modal-control-group {
+      display: grid;
+      gap: 8px;
+    }
+    .modal-control-label {
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .modal-choice-group {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .modal-choice {
+      min-width: 0;
+      min-height: 56px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(34,42,62,.84), rgba(17,23,38,.84));
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 22px rgba(0,0,0,.18);
+    }
+    .modal-choice.selected {
+      border-color: transparent;
+      background: var(--accent);
+      color: #082115;
     }
     .modal-actions { display: grid; gap: 10px; }
     .modal-actions button {
@@ -1427,6 +1466,21 @@
         font-size: 17px;
         line-height: 1.2;
       }
+      .modal-controls {
+        gap: 8px;
+      }
+      .modal-control-group {
+        gap: 5px;
+      }
+      .modal-control-label {
+        font-size: 13px;
+      }
+      .modal-choice {
+        min-height: 44px;
+        padding: 7px 9px;
+        border-radius: 13px;
+        font-size: 14px;
+      }
       .summary-list {
         gap: 4px;
         font-size: 13px;
@@ -1861,7 +1915,7 @@
         <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">По умолчанию данные остаются в браузере. Live-публикация включается отдельно из меню встречи.</p>
-        <p class="app-version">Версия 0.3.3</p>
+        <p class="app-version">Версия 0.3.4</p>
       </div>
     </section>
 
@@ -2037,7 +2091,7 @@
       <footer class="stat-report-footer" id="statReportFooter">
         <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
         <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
-        <p class="app-version">Версия 0.3.3</p>
+        <p class="app-version">Версия 0.3.4</p>
       </footer>
     </section>
 
@@ -2067,7 +2121,7 @@
         <div class="live-scoreboard-server-indicator live-scoreboard-server-right" id="liveScoreboardRightPlayer" aria-label="Подающий справа"></div>
       </div>
       <p class="visually-hidden" id="liveScoreboardServer" hidden></p>
-      <p class="live-scoreboard-footer">Версия 0.3.3</p>
+      <p class="live-scoreboard-footer">Версия 0.3.4</p>
     </section>
   </main>
 
@@ -2076,16 +2130,17 @@
       <h2 id="modalTitle">Заголовок</h2>
       <p id="modalBody">Текст</p>
       <div class="summary-list" id="modalSummary"></div>
+      <div class="modal-controls" id="modalControls" hidden></div>
       <div class="modal-actions" id="modalActions"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.3.3:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.3.3:importedMeeting";
-    const LIVE_PUBLICATION_KEY = "ttScore:0.3.3:livePublication";
-    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.3:publisherLease";
-    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.3:cleanupQueue";
+    const STORAGE_KEY = "ttScore:0.3.4:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.3.4:importedMeeting";
+    const LIVE_PUBLICATION_KEY = "ttScore:0.3.4:livePublication";
+    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.4:publisherLease";
+    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.4:cleanupQueue";
     const LIVE_REPORT_TTL_MS = 23 * 60 * 60 * 1000;
     const LIVE_PUBLISH_DEBOUNCE_MS = 160;
     const LIVE_PUBLISHER_LEASE_MS = 15_000;
@@ -2142,7 +2197,7 @@
     });
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.3.3:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.3.4:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -2369,6 +2424,7 @@
       modalTitle: $("modalTitle"),
       modalBody: $("modalBody"),
       modalSummary: $("modalSummary"),
+      modalControls: $("modalControls"),
       modalActions: $("modalActions"),
       statTitle: $("statTitle"),
       liveViewerStatus: $("liveViewerStatus"),
@@ -2605,7 +2661,7 @@
       const pageUrl = new URL(location.href);
       pageUrl.hash = "";
       return [
-        "ttScore 0.3.3 — compact-live-scoreboard 2",
+        "ttScore 0.3.4 — initial-arrangement-edit 1",
         `Роль: ${role}`,
         `Ошибка: ${message || "Неизвестная ошибка"}`,
         `Время: ${new Date().toISOString()}`,
@@ -3343,7 +3399,7 @@
         if (state.status !== "match") {
           localStorage.removeItem(STORAGE_KEY);
           notifyStateChanged();
-          return;
+          return true;
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           app: "ttScore",
@@ -3352,8 +3408,11 @@
           state: persistableState()
         }));
         notifyStateChanged();
-        scheduleLivePublish(liveReason);
-      } catch (_) {}
+      } catch (_) {
+        return false;
+      }
+      try { scheduleLivePublish(liveReason); } catch (_) {}
+      return true;
     }
 
     function touchRecord() {
@@ -3572,6 +3631,49 @@
         score[state.handicap.player] = state.handicap.points;
       }
       return score;
+    }
+
+    function isPlayerId(value) {
+      return value === "A" || value === "B";
+    }
+
+    function canEditInitialArrangement() {
+      const initialScore = handicapScore();
+      return state.status === "match"
+        && state.gameIndex === 0
+        && Array.isArray(state.games)
+        && state.games.length === 0
+        && state.pendingGame === null
+        && Array.isArray(state.rallies)
+        && state.rallies.length === 0
+        && state.score.A === initialScore.A
+        && state.score.B === initialScore.B;
+    }
+
+    function applyInitialArrangement(nextLeft, nextServer) {
+      if (!canEditInitialArrangement()) return "locked";
+      if (!isPlayerId(nextLeft) || !isPlayerId(nextServer)) return "invalid";
+      if (nextLeft === state.leftPlayer && nextServer === state.currentFirstServer) return "unchanged";
+
+      const previous = {
+        initialLeftPlayer: state.initialLeftPlayer,
+        leftPlayer: state.leftPlayer,
+        initialServer: state.initialServer,
+        currentFirstServer: state.currentFirstServer,
+        recordUpdatedAt: state.recordUpdatedAt
+      };
+
+      state.initialLeftPlayer = nextLeft;
+      state.leftPlayer = nextLeft;
+      state.initialServer = nextServer;
+      state.currentFirstServer = nextServer;
+      touchRecord();
+
+      if (!saveState("state")) {
+        Object.assign(state, previous);
+        return "save-failed";
+      }
+      return "saved";
     }
 
     function addPoint(player) {
@@ -3822,11 +3924,14 @@
       return b;
     }
 
-    function showModal(title, body, actions, summaryRows = []) {
+    function showModal(title, body, actions, summaryRows = [], controls = null) {
       els.modalTitle.textContent = title;
       els.modalBody.textContent = body;
       els.modalBody.classList.remove("modal-heading");
       els.modalBody.style.display = body ? "" : "none";
+      els.modalControls.replaceChildren();
+      els.modalControls.hidden = !controls;
+      if (controls) els.modalControls.append(controls);
       els.modalActions.innerHTML = "";
       fillSummary(els.modalSummary, summaryRows);
       actions.forEach(a => els.modalActions.append(a));
@@ -3835,7 +3940,136 @@
 
     function closeModal() {
       els.modalBackdrop.classList.remove("show");
+      els.modalControls.replaceChildren();
+      els.modalControls.hidden = true;
       activeModal = null;
+    }
+
+    function showInitialArrangementUnavailable(message = "Встреча уже содержит зафиксированный розыгрыш.") {
+      activeModal = "initialArrangementUnavailable";
+      showModal(
+        "Изменение недоступно",
+        message,
+        [makeButton("Закрыть", "secondary", closeModal)]
+      );
+      activeModal = "initialArrangementUnavailable";
+    }
+
+    function showInitialArrangementModal() {
+      if (!canEditInitialArrangement()) {
+        showInitialArrangementUnavailable();
+        return;
+      }
+
+      let draftLeft = state.leftPlayer;
+      let draftServer = state.currentFirstServer;
+      const controls = document.createDocumentFragment();
+      const groups = [];
+
+      function makeChoiceGroup(id, labelText, selectedValue, onSelect) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "modal-control-group";
+
+        const label = document.createElement("div");
+        label.className = "modal-control-label";
+        label.id = `${id}Label`;
+        label.textContent = labelText;
+
+        const choices = document.createElement("div");
+        choices.className = "modal-choice-group";
+        choices.setAttribute("role", "group");
+        choices.setAttribute("aria-labelledby", label.id);
+
+        const buttons = ["A", "B"].map(player => {
+          const button = makeButton(state.players[player], "modal-choice", () => onSelect(player));
+          button.dataset.player = player;
+          choices.append(button);
+          return button;
+        });
+
+        const group = {
+          wrapper,
+          buttons,
+          selectedValue,
+          refresh(value) {
+            this.selectedValue = value;
+            this.buttons.forEach(button => {
+              const selected = button.dataset.player === value;
+              button.classList.toggle("selected", selected);
+              button.setAttribute("aria-pressed", String(selected));
+            });
+          }
+        };
+        group.refresh(selectedValue);
+        wrapper.append(label, choices);
+        groups.push(group);
+        return wrapper;
+      }
+
+      let saveButton = null;
+      const refreshDraft = () => {
+        groups[0]?.refresh(draftLeft);
+        groups[1]?.refresh(draftServer);
+        if (saveButton) {
+          saveButton.disabled = draftLeft === state.leftPlayer
+            && draftServer === state.currentFirstServer;
+        }
+      };
+
+      controls.append(
+        makeChoiceGroup("initialLeftPlayer", "Спортсмен слева", draftLeft, player => {
+          draftLeft = player;
+          refreshDraft();
+        }),
+        makeChoiceGroup("initialServer", "Первый подающий", draftServer, player => {
+          draftServer = player;
+          refreshDraft();
+        })
+      );
+
+      const applyArrangement = () => {
+        const result = applyInitialArrangement(draftLeft, draftServer);
+        if (result === "locked") {
+          showInitialArrangementUnavailable();
+          return;
+        }
+        if (result === "invalid") {
+          showInitialArrangementUnavailable("Выбранные значения начальной расстановки некорректны.");
+          return;
+        }
+        if (result === "unchanged") {
+          closeModal();
+          return;
+        }
+        if (result === "save-failed") {
+          render();
+          activeModal = "initialArrangementSaveError";
+          showModal(
+            "Не удалось сохранить",
+            "Начальная расстановка не изменена. Проверьте доступность локального хранилища браузера и повторите попытку.",
+            [makeButton("Закрыть", "secondary", closeModal)]
+          );
+          activeModal = "initialArrangementSaveError";
+          return;
+        }
+
+        closeModal();
+        updateHandicapPlayerNames();
+        render();
+      };
+
+      saveButton = makeButton("Сохранить", "primary", applyArrangement);
+      saveButton.disabled = true;
+      activeModal = "initialArrangement";
+      showModal(
+        "Начальная расстановка",
+        "Можно изменить до первого розыгрыша.",
+        [saveButton, makeButton("Отмена", "secondary", closeModal)],
+        [],
+        controls
+      );
+      activeModal = "initialArrangement";
+      window.setTimeout(() => els.modalControls.querySelector("button[aria-pressed='true']")?.focus(), 0);
     }
 
     function showRestoreChoice() {
@@ -4037,6 +4271,9 @@
     }
 
     function showMenu() {
+      const arrangementActions = canEditInitialArrangement()
+        ? [makeButton("Изменить начальную расстановку", "secondary", showInitialArrangementModal)]
+        : [];
       const liveActions = livePublicationMatchesCurrentMeeting()
         ? [
             makeButton("Скопировать live-ссылку", "primary", showLiveShareModal),
@@ -4056,6 +4293,7 @@
         "Дополнительно",
         "",
         [
+          ...arrangementActions,
           ...liveActions,
           makeButton("Открыть отчёт о встрече", "primary", openStatistics),
           makeButton("Новая встреча", "secondary", showNewMatchConfirm),
@@ -4798,7 +5036,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.3.3"
+          version: "0.3.4"
         },
         match: {
           date: state.matchDate,
@@ -5493,7 +5731,7 @@
       appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.3.3";
+      version.textContent = "Версия 0.3.4";
       footer.append(dataEnteredLine, appLinkLine, version);
       screen.append(footer);
       root.append(screen);
