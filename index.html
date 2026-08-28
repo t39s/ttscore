@@ -6,8 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0b1020" />
-  <meta name="ttscore-build" content="compact-live-1" />
-  <title>ttScore Live PoC — COMPACT-LIVE 1</title>
+  <meta name="ttscore-build" content="compact-live-scoreboard-2" />
+  <title>ttScore 0.3.3</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -1607,6 +1607,171 @@
       }
     }
     [hidden] { display: none !important; }
+    body.scoreboard-page {
+      color: #111;
+      background: #eeeeec;
+    }
+    body.scoreboard-page .app {
+      width: 100vw;
+      max-width: none;
+      padding: 0;
+    }
+    body.scoreboard-page .topbar { display: none; }
+    #liveScoreboardScreen.active {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .live-scoreboard-status {
+      position: absolute;
+      z-index: 4;
+      top: max(10px, env(safe-area-inset-top));
+      left: max(10px, env(safe-area-inset-left));
+      max-width: min(620px, calc(100% - 20px));
+      min-height: 32px;
+      padding: 6px 12px;
+      border-color: rgba(0,0,0,.18);
+      background: rgba(255,255,255,.94);
+      color: #333;
+      box-shadow: 0 4px 18px rgba(0,0,0,.12);
+    }
+    .live-scoreboard-rotate {
+      display: none;
+      position: absolute;
+      z-index: 3;
+      top: max(10px, env(safe-area-inset-top));
+      left: 50%;
+      margin: 0;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: #444;
+      background: rgba(255,255,255,.9);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .live-scoreboard-layout {
+      display: grid;
+      grid-template-columns: 14fr 36fr 10px 36fr 14fr;
+      grid-template-rows: minmax(0, 1fr) clamp(96px, 14vh, 154px);
+      width: 100%;
+      height: 100%;
+      background: #eeeeec;
+    }
+    .live-scoreboard-game-cell,
+    .live-scoreboard-name-cell,
+    .live-scoreboard-match-cell,
+    .live-scoreboard-server-indicator {
+      min-width: 0;
+      min-height: 0;
+    }
+    .live-scoreboard-game-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-right: 1px solid #aaa;
+      border-left: 1px solid #aaa;
+      background: #fff;
+    }
+    .live-scoreboard-match-cell {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      overflow: hidden;
+      padding-bottom: clamp(38px, 9vh, 100px);
+      background: #eeeeec;
+    }
+    .live-scoreboard-divider {
+      grid-row: 1 / 3;
+      grid-column: 3;
+      background: #ff5a50;
+    }
+    .live-scoreboard-digit {
+      display: block;
+      font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black", sans-serif;
+      font-weight: 900;
+      font-stretch: condensed;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -.045em;
+      line-height: .76;
+      text-align: center;
+      transform: scaleX(.78);
+      transform-origin: center;
+      white-space: nowrap;
+      -webkit-text-stroke: .018em currentColor;
+    }
+    .live-scoreboard-game-score {
+      width: 128%;
+      color: #000;
+      font-size: min(72vh, 48vw);
+    }
+    .live-scoreboard-match-score {
+      width: 138%;
+      color: #ff2012;
+      font-size: min(38vh, 22vw);
+      transform: scaleX(.72);
+    }
+    .live-scoreboard-name-cell,
+    .live-scoreboard-server-indicator {
+      border-top: 1px solid #aaa;
+      background: #f7f7f5;
+    }
+    .live-scoreboard-name-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 8px 14px;
+      border-right: 1px solid #aaa;
+      border-left: 1px solid #aaa;
+    }
+    .live-scoreboard-name {
+      max-width: 100%;
+      overflow: hidden;
+      color: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      font-size: clamp(24px, 3.8vw, 56px);
+      font-weight: 650;
+      letter-spacing: -.025em;
+      line-height: 1;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .live-scoreboard-server-indicator.is-server { background: #000; }
+    .live-scoreboard-match-left { grid-area: 1 / 1; }
+    .live-scoreboard-game-left { grid-area: 1 / 2; }
+    .live-scoreboard-game-right { grid-area: 1 / 4; }
+    .live-scoreboard-match-right { grid-area: 1 / 5; }
+    .live-scoreboard-server-left { grid-area: 2 / 1; }
+    .live-scoreboard-name-left { grid-area: 2 / 2; }
+    .live-scoreboard-name-right { grid-area: 2 / 4; }
+    .live-scoreboard-server-right { grid-area: 2 / 5; }
+    .live-scoreboard-footer {
+      position: absolute;
+      z-index: 2;
+      top: max(8px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      margin: 0;
+      color: #888;
+      font-size: 12px;
+      line-height: 1;
+    }
+    @media (orientation: portrait) {
+      .live-scoreboard-rotate { display: block; }
+      .live-scoreboard-layout {
+        grid-template-columns: 12fr 38fr 7px 38fr 12fr;
+        grid-template-rows: minmax(0, 1fr) clamp(92px, 12vh, 132px);
+      }
+      .live-scoreboard-name { font-size: clamp(20px, 4.6vw, 40px); }
+      .live-scoreboard-game-score { font-size: min(58vh, 50vw); }
+      .live-scoreboard-match-score { font-size: min(28vh, 20vw); }
+    }
   </style>
 </head>
 <body>
@@ -1696,7 +1861,7 @@
         <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">По умолчанию данные остаются в браузере. Live-публикация включается отдельно из меню встречи.</p>
-        <p class="app-version">PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36</p>
+        <p class="app-version">Версия 0.3.3</p>
       </div>
     </section>
 
@@ -1872,8 +2037,37 @@
       <footer class="stat-report-footer" id="statReportFooter">
         <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
         <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
-        <p class="app-version">PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36</p>
+        <p class="app-version">Версия 0.3.3</p>
       </footer>
+    </section>
+
+    <section id="liveScoreboardScreen" class="screen" aria-live="polite">
+      <div class="live-status live-scoreboard-status" id="liveScoreboardStatus" data-state="starting">
+        <span class="live-status-message" id="liveScoreboardStatusText">Подключение к онлайн-табло…</span>
+        <button class="live-status-copy" id="copyLiveScoreboardErrorButton" type="button" hidden>Скопировать ошибку</button>
+      </div>
+      <p class="live-scoreboard-rotate">Для крупного табло поверните планшет горизонтально</p>
+      <div class="live-scoreboard-layout" aria-label="Онлайн-табло встречи">
+        <div class="live-scoreboard-match-cell live-scoreboard-match-left">
+          <span class="live-scoreboard-digit live-scoreboard-match-score" id="liveScoreboardLeftGames" aria-label="Счёт встречи: 0">0</span>
+        </div>
+        <div class="live-scoreboard-game-cell live-scoreboard-game-left">
+          <span class="live-scoreboard-digit live-scoreboard-game-score" id="liveScoreboardLeftScore" aria-label="Очки в партии: 0">0</span>
+        </div>
+        <div class="live-scoreboard-divider" aria-hidden="true"></div>
+        <div class="live-scoreboard-game-cell live-scoreboard-game-right">
+          <span class="live-scoreboard-digit live-scoreboard-game-score" id="liveScoreboardRightScore" aria-label="Очки в партии: 0">0</span>
+        </div>
+        <div class="live-scoreboard-match-cell live-scoreboard-match-right">
+          <span class="live-scoreboard-digit live-scoreboard-match-score" id="liveScoreboardRightGames" aria-label="Счёт встречи: 0">0</span>
+        </div>
+        <div class="live-scoreboard-server-indicator live-scoreboard-server-left" id="liveScoreboardLeftPlayer" aria-label="Подающий слева"></div>
+        <div class="live-scoreboard-name-cell live-scoreboard-name-left"><span class="live-scoreboard-name" id="liveScoreboardLeftName">Спортсмен A</span></div>
+        <div class="live-scoreboard-name-cell live-scoreboard-name-right"><span class="live-scoreboard-name" id="liveScoreboardRightName">Спортсмен B</span></div>
+        <div class="live-scoreboard-server-indicator live-scoreboard-server-right" id="liveScoreboardRightPlayer" aria-label="Подающий справа"></div>
+      </div>
+      <p class="visually-hidden" id="liveScoreboardServer" hidden></p>
+      <p class="live-scoreboard-footer">Версия 0.3.3</p>
     </section>
   </main>
 
@@ -1887,11 +2081,11 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:live-report-poc:0.1:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:live-report-poc:0.1:importedMeeting";
-    const LIVE_PUBLICATION_KEY = "ttScore:live-report-poc:0.2:livePublication";
-    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:live-report-poc:0.2:publisherLease";
-    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:live-report-poc:0.2:cleanupQueue";
+    const STORAGE_KEY = "ttScore:0.3.3:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.3.3:importedMeeting";
+    const LIVE_PUBLICATION_KEY = "ttScore:0.3.3:livePublication";
+    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.3:publisherLease";
+    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.3:cleanupQueue";
     const LIVE_REPORT_TTL_MS = 23 * 60 * 60 * 1000;
     const LIVE_PUBLISH_DEBOUNCE_MS = 160;
     const LIVE_PUBLISHER_LEASE_MS = 15_000;
@@ -1928,16 +2122,27 @@
     const livePublisherUid = pageParams.get("publisher") || "";
     const protectedReportKeyText = location.hash.length > 1 ? location.hash.slice(1) : "";
     const IS_LIVE_REPORT = requestedPage === "report" && requestedSource === "live";
+    const IS_LIVE_SCOREBOARD = requestedPage === "scoreboard" && requestedSource === "live";
     const IS_PROTECTED_REPORT = !!protectedReportKeyText
       && requestedSource !== "picker"
       && requestedSource !== "import"
       && requestedSource !== "live";
     const IS_REMOTE_REPORT = IS_PROTECTED_REPORT || IS_LIVE_REPORT;
-    const PAGE_MODE = requestedPage === "report" || IS_REMOTE_REPORT ? "report" : "score";
+    const PAGE_MODE = IS_LIVE_SCOREBOARD
+      ? "scoreboard"
+      : (requestedPage === "report" || IS_REMOTE_REPORT ? "report" : "score");
     const IS_REPORT_PAGE = PAGE_MODE === "report";
+    const IS_SCOREBOARD_PAGE = PAGE_MODE === "scoreboard";
+    const PAGE_CAPABILITIES = Object.freeze({
+      readsLocalMeeting: PAGE_MODE !== "scoreboard" && !IS_REMOTE_REPORT,
+      writesLocalMeeting: PAGE_MODE === "score",
+      readsLiveState: IS_LIVE_REPORT || IS_LIVE_SCOREBOARD,
+      readsLiveCheckpoint: IS_LIVE_REPORT,
+      writesLiveState: PAGE_MODE === "score"
+    });
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:live-report-poc:0.1:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.3.3:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -2037,22 +2242,23 @@
     });
 
     const importedSessionResult = IS_IMPORTED_REPORT ? loadImportedSessionMeeting() : null;
-    const storedMeeting = IS_REMOTE_REPORT
+    const storedMeeting = IS_REMOTE_REPORT || IS_SCOREBOARD_PAGE
       ? null
       : IS_IMPORTED_REPORT
       ? (importedSessionResult?.meeting || null)
       : (IS_IMPORT_PICKER ? null : loadStoredMeeting());
-    let pendingRestoreState = !IS_REPORT_PAGE && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
+    let pendingRestoreState = PAGE_CAPABILITIES.writesLocalMeeting && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
     let state = storedMeeting && (IS_REPORT_PAGE || !storedMeeting.needsConfirmation) ? storedMeeting.state : defaultState();
     let importedCanonicalSource = importedSessionResult?.source || null;
     let importLoadError = importedSessionResult?.error || "";
     let protectedReportLoading = IS_PROTECTED_REPORT;
     let liveReportLoading = IS_LIVE_REPORT;
+    let liveScoreboardLoading = IS_LIVE_SCOREBOARD;
     let liveViewerRevision = 0;
     let liveViewerCheckpointRevision = 0;
     let liveViewerCheckpointState = null;
     let liveViewerUnsubscribe = null;
-    let livePublication = loadLivePublication();
+    let livePublication = PAGE_CAPABILITIES.writesLiveState ? loadLivePublication() : null;
     let livePublishState = livePublication ? "offline" : "off";
     let livePublishError = "";
     let liveViewerError = "";
@@ -2062,6 +2268,7 @@
     let livePendingPublishKind = "state";
     let liveStopping = false;
     let liveFirebasePromise = null;
+    let liveAuthPromise = null;
     let liveLeaseRenewTimer = null;
     const liveTabId = createLiveTabId();
     const MAX_UNDO = 50;
@@ -2081,7 +2288,7 @@
     let lastMatchId = validMatchId(state.matchId, state.matchDate) ? state.matchId : null;
     let syncChannel = null;
     try {
-      if ("BroadcastChannel" in window) syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
+      if (!IS_SCOREBOARD_PAGE && "BroadcastChannel" in window) syncChannel = new BroadcastChannel(SYNC_CHANNEL_NAME);
     } catch (_) {}
 
     const $ = (id) => document.getElementById(id);
@@ -2090,6 +2297,19 @@
       setupScreen: $("setupScreen"),
       matchScreen: $("matchScreen"),
       statScreen: $("statScreen"),
+      liveScoreboardScreen: $("liveScoreboardScreen"),
+      liveScoreboardStatus: $("liveScoreboardStatus"),
+      liveScoreboardStatusText: $("liveScoreboardStatusText"),
+      copyLiveScoreboardErrorButton: $("copyLiveScoreboardErrorButton"),
+      liveScoreboardLeftPlayer: $("liveScoreboardLeftPlayer"),
+      liveScoreboardRightPlayer: $("liveScoreboardRightPlayer"),
+      liveScoreboardLeftName: $("liveScoreboardLeftName"),
+      liveScoreboardRightName: $("liveScoreboardRightName"),
+      liveScoreboardLeftGames: $("liveScoreboardLeftGames"),
+      liveScoreboardRightGames: $("liveScoreboardRightGames"),
+      liveScoreboardLeftScore: $("liveScoreboardLeftScore"),
+      liveScoreboardRightScore: $("liveScoreboardRightScore"),
+      liveScoreboardServer: $("liveScoreboardServer"),
       subtitle: $("subtitle"),
       formatPill: $("formatPill"),
       matchDateInput: $("matchDateInput"),
@@ -2213,18 +2433,17 @@
 
     async function loadLiveFirebase() {
       if (!firebaseConfigReady()) {
-        throw new Error("Firebase не настроен. Заполните LIVE_FIREBASE_CONFIG по инструкции PoC.");
+        throw new Error("Firebase не настроен. Заполните LIVE_FIREBASE_CONFIG по инструкции Firebase Live.");
       }
       if (!liveFirebasePromise) {
         liveFirebasePromise = (async () => {
           const base = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
-          const [appModule, authModule, databaseModule, appCheckModule] = await Promise.all([
+          const [appModule, databaseModule, appCheckModule] = await Promise.all([
             import(`${base}/firebase-app.js`),
-            import(`${base}/firebase-auth.js`),
             import(`${base}/firebase-database.js`),
             import(`${base}/firebase-app-check.js`)
           ]);
-          const appName = "ttscore-live-report-poc";
+          const appName = "ttscore-live-report";
           const app = appModule.getApps().find(candidate => candidate.name === appName)
             || appModule.initializeApp(LIVE_FIREBASE_CONFIG, appName);
           if (appCheckConfigured()) {
@@ -2235,9 +2454,7 @@
           }
           return {
             app,
-            authModule,
             databaseModule,
-            auth: authModule.getAuth(app),
             database: databaseModule.getDatabase(app)
           };
         })().catch(error => {
@@ -2250,14 +2467,25 @@
 
     async function ensureLiveAuthor({ allowCreate = false } = {}) {
       const firebase = await loadLiveFirebase();
-      await firebase.authModule.setPersistence(firebase.auth, firebase.authModule.browserLocalPersistence);
-      if (typeof firebase.auth.authStateReady === "function") await firebase.auth.authStateReady();
-      let user = firebase.auth.currentUser;
-      if (!user && allowCreate) user = (await firebase.authModule.signInAnonymously(firebase.auth)).user;
+      if (!liveAuthPromise) {
+        liveAuthPromise = (async () => {
+          const base = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+          const authModule = await import(`${base}/firebase-auth.js`);
+          return { authModule, auth: authModule.getAuth(firebase.app) };
+        })().catch(error => {
+          liveAuthPromise = null;
+          throw error;
+        });
+      }
+      const { authModule, auth } = await liveAuthPromise;
+      await authModule.setPersistence(auth, authModule.browserLocalPersistence);
+      if (typeof auth.authStateReady === "function") await auth.authStateReady();
+      let user = auth.currentUser;
+      if (!user && allowCreate) user = (await authModule.signInAnonymously(auth)).user;
       if (!user?.uid) {
         throw new Error("Исходная анонимная сессия автора не восстановлена. Не создаём новый UID автоматически.");
       }
-      return { ...firebase, user };
+      return { ...firebase, authModule, auth, user };
     }
 
     function loadLivePublication() {
@@ -2348,15 +2576,23 @@
         && livePublication.matchDate === state.matchDate;
     }
 
-    function liveReportUrl(publication = livePublication) {
+    function liveViewerUrl(page, publication = livePublication) {
       if (!publication) return "";
       const url = new URL(location.href);
       url.search = "";
       url.hash = publication.keyText;
-      url.searchParams.set("page", "report");
+      url.searchParams.set("page", page === "scoreboard" ? "scoreboard" : "report");
       url.searchParams.set("source", "live");
       url.searchParams.set("publisher", publication.publisherUid);
       return url.toString();
+    }
+
+    function liveReportUrl(publication = livePublication) {
+      return liveViewerUrl("report", publication);
+    }
+
+    function liveScoreboardUrl(publication = livePublication) {
+      return liveViewerUrl("scoreboard", publication);
     }
 
     function setLivePublishState(nextState, message = "") {
@@ -2369,7 +2605,7 @@
       const pageUrl = new URL(location.href);
       pageUrl.hash = "";
       return [
-        "ttScore Live Report PoC — compact-live 1",
+        "ttScore 0.3.3 — compact-live-scoreboard 2",
         `Роль: ${role}`,
         `Ошибка: ${message || "Неизвестная ошибка"}`,
         `Время: ${new Date().toISOString()}`,
@@ -2777,14 +3013,19 @@
 
     function showLiveShareModal() {
       if (!livePublicationMatchesCurrentMeeting()) return;
-      const url = liveReportUrl();
+      const reportUrl = liveReportUrl();
+      const scoreboardUrl = liveScoreboardUrl();
       activeModal = "liveShare";
       showModal(
         "Live-отчёт включён",
-        `Ссылка работает до 24 часов. Ключ расшифрования находится после # и не отправляется в Firebase.\n\n${url}`,
+        "Ссылки работают до 24 часов. Ключ расшифрования находится после # и не отправляется в Firebase.",
         [
-          makeButton("Скопировать ссылку", "primary", async () => {
-            await writeTextToClipboard(url);
+          makeButton("Скопировать ссылку на онлайн-табло", "primary", async () => {
+            await writeTextToClipboard(scoreboardUrl);
+            closeModal();
+          }),
+          makeButton("Скопировать ссылку на live-отчёт", "secondary", async () => {
+            await writeTextToClipboard(reportUrl);
             closeModal();
           }),
           makeButton("Закрыть", "secondary", closeModal)
@@ -2822,7 +3063,7 @@
       if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Компактное live-состояние отсутствует.");
       const allowed = ["envelopeVersion", "schemaVersion", "revision", "checkpointRevision", "updatedAt", "expiresAt", "reason", "encryptedPayload"];
       if (Object.keys(value).some(key => !allowed.includes(key)) || allowed.some(key => !(key in value))) {
-        throw new Error("Конверт компактного live-состояния не соответствует версии PoC.");
+        throw new Error("Конверт компактного live-состояния не соответствует версии live-протокола.");
       }
       if (value.envelopeVersion !== LIVE_ENVELOPE_VERSION || value.schemaVersion !== LIVE_STATE_SCHEMA_VERSION) {
         throw new Error("Версия компактного live-состояния не поддерживается.");
@@ -2842,7 +3083,7 @@
       if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Контрольная точка live-отчёта отсутствует.");
       const allowed = ["envelopeVersion", "schemaVersion", "revision", "sourceStateRevision", "updatedAt", "expiresAt", "reason", "encryptedPayload"];
       if (Object.keys(value).some(key => !allowed.includes(key)) || allowed.some(key => !(key in value))) {
-        throw new Error("Конверт контрольной точки не соответствует версии PoC.");
+        throw new Error("Конверт контрольной точки не соответствует версии live-протокола.");
       }
       if (value.envelopeVersion !== LIVE_ENVELOPE_VERSION || value.schemaVersion !== 1) {
         throw new Error("Версия контрольной точки не поддерживается.");
@@ -2893,6 +3134,15 @@
       els.liveViewerStatus.dataset.state = nextState;
       els.liveViewerStatusText.textContent = text;
       els.copyLiveViewerErrorButton.hidden = !liveViewerError;
+    }
+
+    function setLiveScoreboardStatus(nextState, text) {
+      if (!els.liveScoreboardStatus) return;
+      liveViewerError = nextState === "error" || nextState === "offline" ? text : "";
+      els.liveScoreboardStatus.hidden = nextState === "live";
+      els.liveScoreboardStatus.dataset.state = nextState;
+      els.liveScoreboardStatusText.textContent = text;
+      els.copyLiveScoreboardErrorButton.hidden = !liveViewerError;
     }
 
     async function startLiveReportSubscription() {
@@ -2988,6 +3238,62 @@
         liveReportLoading = false;
         importLoadError = error?.message || "Не удалось открыть live-отчёт.";
         setLiveViewerStatus("error", importLoadError);
+        render();
+      }
+    }
+
+    async function startLiveScoreboardSubscription() {
+      liveScoreboardLoading = true;
+      importLoadError = "";
+      setLiveScoreboardStatus("starting", "Подключение к онлайн-табло…");
+      render();
+      try {
+        if (!/^[A-Za-z0-9_-]{1,128}$/.test(livePublisherUid)) throw new Error("В ссылке отсутствует корректный идентификатор автора.");
+        const keyBytes = decodeProtectedReportKey(protectedReportKeyText);
+        const reportId = await deriveProtectedReportId(keyBytes);
+        const firebase = await loadLiveFirebase();
+        const stateRef = firebase.databaseModule.ref(firebase.database, `${LIVE_ROOT_PATH}/${livePublisherUid}/${reportId}/state`);
+        liveViewerUnsubscribe = firebase.databaseModule.onValue(stateRef, async snapshot => {
+          try {
+            const envelope = validateLiveStateEnvelope(snapshot.val());
+            const observedRevision = envelope.revision;
+            if (observedRevision < liveViewerRevision) return;
+            const stateBytes = decodeBase64UrlBytes(
+              envelope.encryptedPayload,
+              LIVE_STATE_MAX_JSON_BYTES + PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES
+            );
+            const compactJson = await decryptProtectedReport(
+              stateBytes,
+              keyBytes,
+              liveEncryptionContext(reportId, "state", observedRevision)
+            );
+            const compactValue = JSON.parse(compactJson);
+            if (observedRevision < liveViewerRevision) return;
+            state = buildStateFromCompactLiveState(compactValue, null);
+            liveViewerRevision = observedRevision;
+            liveScoreboardLoading = false;
+            importLoadError = "";
+            setLiveScoreboardStatus("live", `Live · счёт ${liveViewerRevision}`);
+            render();
+          } catch (error) {
+            liveScoreboardLoading = false;
+            importLoadError = error?.message || "Не удалось обработать данные онлайн-табло.";
+            setLiveScoreboardStatus("error", importLoadError);
+            render();
+          }
+        }, error => {
+          liveScoreboardLoading = false;
+          const permissionDenied = /permission[-_]denied/i.test(error?.code || "");
+          importLoadError = permissionDenied
+            ? "Firebase запретил чтение. Возможные причины: записи нет, истёк срок, не опубликованы Rules или App Check отклоняет домен."
+            : `${error?.message || "Соединение с онлайн-табло прервано."}${error?.code ? ` (${error.code})` : ""}`;
+          setLiveScoreboardStatus("offline", importLoadError);
+          render();
+        });
+      } catch (error) {
+        liveScoreboardLoading = false;
+        importLoadError = error?.message || "Не удалось открыть онлайн-табло.";
+        setLiveScoreboardStatus("error", importLoadError);
         render();
       }
     }
@@ -3213,12 +3519,41 @@
       return Math.floor(serveStartTotal() / 2);
     }
 
-    function currentServer() {
-      const total = state.score.A + state.score.B;
-      const deuce = state.score.A >= 10 && state.score.B >= 10;
+    function currentServerForState(snapshot) {
+      const total = snapshot.score.A + snapshot.score.B;
+      const deuce = snapshot.score.A >= 10 && snapshot.score.B >= 10;
       const block = deuce ? total : Math.floor(total / 2);
-      const adjustedBlock = block - serveStartBlock();
-      return adjustedBlock % 2 === 0 ? state.currentFirstServer : other(state.currentFirstServer);
+      const handicapPoints = snapshot.handicap?.enabled ? Number(snapshot.handicap.points) || 0 : 0;
+      const adjustedBlock = block - Math.floor(handicapPoints / 2);
+      return adjustedBlock % 2 === 0 ? snapshot.currentFirstServer : other(snapshot.currentFirstServer);
+    }
+
+    function currentServer() {
+      return currentServerForState(state);
+    }
+
+    function buildLiveScoreboardViewModel(snapshot) {
+      if (!snapshot || snapshot.status !== "match") return null;
+      const left = snapshot.leftPlayer === "B" ? "B" : "A";
+      const right = other(left);
+      const completedGames = Array.isArray(snapshot.games) ? snapshot.games : [];
+      const matchScore = player => completedGames.filter(game => game?.winner === player).length;
+      const pendingGame = !!snapshot.pendingGame;
+      return Object.freeze({
+        left: Object.freeze({
+          player: left,
+          name: snapshot.players[left],
+          gameScore: snapshot.score[left],
+          matchScore: matchScore(left)
+        }),
+        right: Object.freeze({
+          player: right,
+          name: snapshot.players[right],
+          gameScore: snapshot.score[right],
+          matchScore: matchScore(right)
+        }),
+        server: pendingGame ? null : currentServerForState(snapshot)
+      });
     }
 
     function pointsUntilServeChange() {
@@ -4463,7 +4798,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "live-report-poc-0.2"
+          version: "0.3.3"
         },
         match: {
           date: state.matchDate,
@@ -5158,7 +5493,7 @@
       appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36";
+      version.textContent = "Версия 0.3.3";
       footer.append(dataEnteredLine, appLinkLine, version);
       screen.append(footer);
       root.append(screen);
@@ -5957,13 +6292,60 @@ ${buildStandaloneReportRoot().outerHTML}
       }
     }
 
+    function renderLiveScoreboard() {
+      const view = buildLiveScoreboardViewModel(state);
+      document.title = "Онлайн-табло — ttScore";
+      if (!view) {
+        els.liveScoreboardLeftName.textContent = "Спортсмен A";
+        els.liveScoreboardRightName.textContent = "Спортсмен B";
+        els.liveScoreboardLeftGames.textContent = "0";
+        els.liveScoreboardRightGames.textContent = "0";
+        els.liveScoreboardLeftScore.textContent = "0";
+        els.liveScoreboardRightScore.textContent = "0";
+        els.liveScoreboardServer.hidden = true;
+        els.liveScoreboardLeftPlayer.classList.remove("is-server");
+        els.liveScoreboardRightPlayer.classList.remove("is-server");
+        els.liveScoreboardLeftPlayer.setAttribute("aria-hidden", "true");
+        els.liveScoreboardRightPlayer.setAttribute("aria-hidden", "true");
+        return;
+      }
+      els.liveScoreboardLeftName.textContent = view.left.name;
+      els.liveScoreboardRightName.textContent = view.right.name;
+      els.liveScoreboardLeftGames.textContent = String(view.left.matchScore);
+      els.liveScoreboardRightGames.textContent = String(view.right.matchScore);
+      els.liveScoreboardLeftScore.textContent = String(view.left.gameScore);
+      els.liveScoreboardRightScore.textContent = String(view.right.gameScore);
+      els.liveScoreboardLeftScore.setAttribute("aria-label", `Очки в партии: ${view.left.gameScore}`);
+      els.liveScoreboardRightScore.setAttribute("aria-label", `Очки в партии: ${view.right.gameScore}`);
+      els.liveScoreboardLeftGames.setAttribute("aria-label", `Счёт встречи: ${view.left.matchScore}`);
+      els.liveScoreboardRightGames.setAttribute("aria-label", `Счёт встречи: ${view.right.matchScore}`);
+      const serverName = view.server ? state.players[view.server] : "";
+      els.liveScoreboardServer.hidden = !view.server;
+      els.liveScoreboardServer.textContent = view.server ? `Подающий: ${serverName}` : "";
+      els.liveScoreboardLeftPlayer.classList.toggle("is-server", view.server === view.left.player);
+      els.liveScoreboardRightPlayer.classList.toggle("is-server", view.server === view.right.player);
+      els.liveScoreboardLeftPlayer.setAttribute("aria-hidden", String(view.server !== view.left.player));
+      els.liveScoreboardRightPlayer.setAttribute("aria-hidden", String(view.server !== view.right.player));
+    }
+
     function render() {
       document.body.classList.toggle("stat-page", IS_REPORT_PAGE);
+      document.body.classList.toggle("scoreboard-page", IS_SCOREBOARD_PAGE);
+      if (IS_SCOREBOARD_PAGE) {
+        document.body.classList.remove("in-match");
+        els.setupScreen.classList.remove("active");
+        els.matchScreen.classList.remove("active");
+        els.statScreen.classList.remove("active");
+        els.liveScoreboardScreen.classList.add("active");
+        renderLiveScoreboard();
+        return;
+      }
       if (IS_IMPORT_PICKER) {
         document.body.classList.remove("in-match");
         els.setupScreen.classList.remove("active");
         els.matchScreen.classList.remove("active");
         els.statScreen.classList.add("active");
+        els.liveScoreboardScreen.classList.remove("active");
         renderImportPicker();
         return;
       }
@@ -5972,6 +6354,7 @@ ${buildStandaloneReportRoot().outerHTML}
         els.setupScreen.classList.remove("active");
         els.matchScreen.classList.remove("active");
         els.statScreen.classList.add("active");
+        els.liveScoreboardScreen.classList.remove("active");
         renderStats();
         return;
       }
@@ -5981,6 +6364,7 @@ ${buildStandaloneReportRoot().outerHTML}
       els.setupScreen.classList.toggle("active", !inMatch);
       els.matchScreen.classList.toggle("active", inMatch);
       els.statScreen.classList.remove("active");
+      els.liveScoreboardScreen.classList.remove("active");
       els.formatPill.textContent = `Из ${inMatch ? state.format : setupFormat} партий`;
       if (inMatch) renderMatch();
       else {
@@ -5989,6 +6373,20 @@ ${buildStandaloneReportRoot().outerHTML}
       }
     }
 
+    function updateHandicapPlayerNames(){
+      const a=els.playerAInput.value||"Спортсмен A";
+      const b=els.playerBInput.value||"Спортсмен B";
+      els.handicapPlayerSelect.options[1].text=a;
+      els.handicapPlayerSelect.options[2].text=b;
+    }
+
+    function clearPlayerInput(input) {
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+    }
+
+    if (PAGE_CAPABILITIES.writesLocalMeeting) {
     els.formatButtons.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-format]");
       if (!btn) return;
@@ -6019,25 +6417,11 @@ ${buildStandaloneReportRoot().outerHTML}
       renderSetup();
     });
 
-    function updateHandicapPlayerNames(){
-      const a=els.playerAInput.value||"Спортсмен A";
-      const b=els.playerBInput.value||"Спортсмен B";
-      els.handicapPlayerSelect.options[1].text=a;
-      els.handicapPlayerSelect.options[2].text=b;
-    }
     els.playerAInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
     els.playerBInput.addEventListener("input", ()=>{updateHandicapPlayerNames(); renderSetup();});
-    function clearPlayerInput(input) {
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      input.focus();
-    }
     els.playerAClearButton.addEventListener("click", () => clearPlayerInput(els.playerAInput));
     els.playerBClearButton.addEventListener("click", () => clearPlayerInput(els.playerBInput));
     els.openJsonButton.addEventListener("click", openImportReportPage);
-    els.selectSavedReportButton.addEventListener("click", openImportJsonPicker);
-    els.selectAnotherReportButton.addEventListener("click", openImportJsonPicker);
-    els.importJsonInput.addEventListener("change", handleImportJsonSelection);
     els.matchDateInput.addEventListener("input", () => {
       setupMatchDate = els.matchDateInput.value;
       els.matchDateDisplay.textContent = formatMatchDateDisplay(setupMatchDate);
@@ -6064,13 +6448,20 @@ ${buildStandaloneReportRoot().outerHTML}
     els.copyLivePublishErrorButton.addEventListener("click", event => {
       void copyLiveDiagnostic("автор", livePublishError || els.livePublishStatusText.textContent, event.currentTarget);
     });
-    els.copyLiveViewerErrorButton.addEventListener("click", event => {
-      void copyLiveDiagnostic("зритель", liveViewerError || els.liveViewerStatusText.textContent, event.currentTarget);
-    });
     els.ackSideNotice.addEventListener("click", acknowledgeSideNotice);
     els.nextGameButton.addEventListener("click", startNextGame);
     els.copyProtocolButton.addEventListener("click", copyResult);
     els.newMatchButton.addEventListener("click", () => showNewMatchConfirm(showMatchOver));
+    }
+    els.copyLiveViewerErrorButton.addEventListener("click", event => {
+      void copyLiveDiagnostic("зритель", liveViewerError || els.liveViewerStatusText.textContent, event.currentTarget);
+    });
+    els.copyLiveScoreboardErrorButton.addEventListener("click", event => {
+      void copyLiveDiagnostic("онлайн-табло", liveViewerError || els.liveScoreboardStatusText.textContent, event.currentTarget);
+    });
+    els.selectSavedReportButton.addEventListener("click", openImportJsonPicker);
+    els.selectAnotherReportButton.addEventListener("click", openImportJsonPicker);
+    els.importJsonInput.addEventListener("change", handleImportJsonSelection);
     els.statPerspectiveSelect.addEventListener("change", () => {
       reportPerspectivePlayer = els.statPerspectiveSelect.value === "B" ? "B" : "A";
       renderStats();
@@ -6083,12 +6474,13 @@ ${buildStandaloneReportRoot().outerHTML}
     });
 
     window.addEventListener("pagehide", () => {
-      if (!IS_REPORT_PAGE && state.status === "match") saveState();
-      releaseLivePublisherLease();
+      if (PAGE_CAPABILITIES.writesLocalMeeting && state.status === "match") saveState();
+      if (typeof liveViewerUnsubscribe === "function") liveViewerUnsubscribe();
+      if (PAGE_CAPABILITIES.writesLiveState) releaseLivePublisherLease();
     });
 
     window.addEventListener("beforeunload", () => {
-      if (!IS_REPORT_PAGE && state.status === "match") saveState();
+      if (PAGE_CAPABILITIES.writesLocalMeeting && state.status === "match") saveState();
     });
 
     window.addEventListener("online", () => {
@@ -6105,8 +6497,8 @@ ${buildStandaloneReportRoot().outerHTML}
     });
 
     document.addEventListener("visibilitychange", () => {
-      if (!IS_REPORT_PAGE && document.visibilityState === "hidden" && state.status === "match") saveState();
-      if (!IS_REPORT_PAGE && document.visibilityState === "visible" && state.status === "match") requestWakeLock();
+      if (PAGE_CAPABILITIES.writesLocalMeeting && document.visibilityState === "hidden" && state.status === "match") saveState();
+      if (PAGE_CAPABILITIES.writesLocalMeeting && document.visibilityState === "visible" && state.status === "match") requestWakeLock();
     });
 
     window.addEventListener("storage", event => {
@@ -6124,11 +6516,12 @@ ${buildStandaloneReportRoot().outerHTML}
 
     updateHandicapPlayerNames();
     render();
-    if (!IS_REPORT_PAGE) void cleanupQueuedLivePublications();
+    if (PAGE_CAPABILITIES.writesLiveState) void cleanupQueuedLivePublications();
     if (IS_LIVE_REPORT) startLiveReportSubscription();
+    else if (IS_LIVE_SCOREBOARD) startLiveScoreboardSubscription();
     else if (IS_PROTECTED_REPORT) loadProtectedReport();
-    if (!IS_REPORT_PAGE && !pendingRestoreState && livePublicationMatchesCurrentMeeting()) void resumeLivePublication();
-    if (!IS_REPORT_PAGE && pendingRestoreState) showRestoreChoice();
+    if (PAGE_CAPABILITIES.writesLiveState && !pendingRestoreState && livePublicationMatchesCurrentMeeting()) void resumeLivePublication();
+    if (PAGE_CAPABILITIES.writesLocalMeeting && pendingRestoreState) showRestoreChoice();
   </script>
 </body>
 </html>
