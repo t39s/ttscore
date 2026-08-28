@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0b1020" />
   <meta name="ttscore-build" content="compact-live-scoreboard-2" />
-  <title>ttScore 0.3.4</title>
+  <title>ttScore 0.3.5</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -1915,7 +1915,7 @@
         <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
         <p class="tiny">По умолчанию данные остаются в браузере. Live-публикация включается отдельно из меню встречи.</p>
-        <p class="app-version">Версия 0.3.4</p>
+        <p class="app-version">Версия 0.3.5</p>
       </div>
     </section>
 
@@ -2091,7 +2091,7 @@
       <footer class="stat-report-footer" id="statReportFooter">
         <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
         <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
-        <p class="app-version">Версия 0.3.4</p>
+        <p class="app-version">Версия 0.3.5</p>
       </footer>
     </section>
 
@@ -2121,7 +2121,7 @@
         <div class="live-scoreboard-server-indicator live-scoreboard-server-right" id="liveScoreboardRightPlayer" aria-label="Подающий справа"></div>
       </div>
       <p class="visually-hidden" id="liveScoreboardServer" hidden></p>
-      <p class="live-scoreboard-footer">Версия 0.3.4</p>
+      <p class="live-scoreboard-footer">Версия 0.3.5</p>
     </section>
   </main>
 
@@ -2136,11 +2136,11 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.3.4:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.3.4:importedMeeting";
-    const LIVE_PUBLICATION_KEY = "ttScore:0.3.4:livePublication";
-    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.4:publisherLease";
-    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.4:cleanupQueue";
+    const STORAGE_KEY = "ttScore:0.3.5:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:0.3.5:importedMeeting";
+    const LIVE_PUBLICATION_KEY = "ttScore:0.3.5:livePublication";
+    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.5:publisherLease";
+    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.5:cleanupQueue";
     const LIVE_REPORT_TTL_MS = 23 * 60 * 60 * 1000;
     const LIVE_PUBLISH_DEBOUNCE_MS = 160;
     const LIVE_PUBLISHER_LEASE_MS = 15_000;
@@ -2197,7 +2197,7 @@
     });
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.3.4:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:0.3.5:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -2661,7 +2661,7 @@
       const pageUrl = new URL(location.href);
       pageUrl.hash = "";
       return [
-        "ttScore 0.3.4 — initial-arrangement-edit 1",
+        "ttScore 0.3.5 — first-server-normalization 1",
         `Роль: ${role}`,
         `Ошибка: ${message || "Неизвестная ошибка"}`,
         `Время: ${new Date().toISOString()}`,
@@ -3367,7 +3367,6 @@
       restored.format = [3, 5, 7].includes(Number(restored.format)) ? Number(restored.format) : 5;
       restored.initialServer = restored.initialServer === "B" ? "B" : "A";
       restored.initialLeftPlayer = restored.initialLeftPlayer === "B" ? "B" : "A";
-      restored.currentFirstServer = restored.currentFirstServer === "B" ? "B" : restored.initialServer;
       restored.leftPlayer = restored.leftPlayer === "B" ? "B" : "A";
       restored.handicap = restored.handicap && typeof restored.handicap === "object"
         ? restored.handicap
@@ -3376,6 +3375,9 @@
       restored.handicap.player = restored.handicap.player === "B" ? "B" : "A";
       restored.handicap.points = Math.min(10, Math.max(0, Number(restored.handicap.points) || 0));
       restored.gameIndex = Math.max(0, Number(restored.gameIndex) || 0);
+      restored.currentFirstServer = restored.gameIndex % 2 === 0
+        ? restored.initialServer
+        : other(restored.initialServer);
       restored.games = Array.isArray(restored.games) ? restored.games : [];
       restored.pendingGame = typeof restored.pendingGame === "undefined" ? null : restored.pendingGame;
       restored.rallies = Array.isArray(restored.rallies)
@@ -5036,7 +5038,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.3.4"
+          version: "0.3.5"
         },
         match: {
           date: state.matchDate,
@@ -5731,7 +5733,7 @@
       appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.3.4";
+      version.textContent = "Версия 0.3.5";
       footer.append(dataEnteredLine, appLinkLine, version);
       screen.append(footer);
       root.append(screen);
