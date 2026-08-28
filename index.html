@@ -6,7 +6,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0b1020" />
-  <title>ttScore</title>
+  <meta name="ttscore-build" content="compact-live-1" />
+  <title>ttScore Live PoC — COMPACT-LIVE 1</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -153,6 +154,46 @@
     }
     .secondary { color: var(--text); border: 1px solid var(--line); }
     .danger { background: rgba(255,107,107,.16); color: #ffd0d0; }
+
+    .live-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid rgba(114,224,168,.32);
+      border-radius: 14px;
+      background: rgba(114,224,168,.08);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .live-status::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: var(--muted);
+    }
+    .live-status[data-state="live"]::before { background: var(--accent); }
+    .live-status[data-state="offline"]::before,
+    .live-status[data-state="error"]::before { background: var(--danger); }
+    .live-status[data-state="starting"]::before { background: var(--warning); }
+    .live-status-message { min-width: 0; overflow-wrap: anywhere; }
+    .live-status-copy {
+      min-height: 30px;
+      margin-left: auto;
+      padding: 5px 8px;
+      flex: 0 0 auto;
+      border: 1px solid currentColor;
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 11px;
+    }
+    .stat-live-status { margin-top: 10px; }
 
     .status-card { display: none; }
     .status-title { font-size: 13px; color: var(--muted); font-weight: 700; }
@@ -1654,13 +1695,18 @@
 
         <button class="primary" id="startButton" type="button">Начать встречу из 5 партий</button>
         <button class="secondary" id="openJsonButton" type="button">Посмотреть сохранённый отчёт</button>
-        <p class="tiny">Все данные хранятся только в браузере на этом устройстве и не отправляются на сервер.</p>
-        <p class="app-version">Версия 0.2.36</p>
+        <p class="tiny">По умолчанию данные остаются в браузере. Live-публикация включается отдельно из меню встречи.</p>
+        <p class="app-version">PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36</p>
       </div>
     </section>
 
     <section id="matchScreen" class="screen">
       <div class="match-brand-line" aria-label="ttScore — счётчик для настольного тенниса"><span class="match-brand-name">ttScore</span><span class="match-brand-description"> — счётчик для настольного тенниса</span></div>
+
+      <div class="live-status" id="livePublishStatus" data-state="off" hidden>
+        <span class="live-status-message" id="livePublishStatusText">Live-публикация выключена</span>
+        <button class="live-status-copy" id="copyLivePublishErrorButton" type="button" hidden>Скопировать ошибку</button>
+      </div>
 
       <div class="card status-card">
         <div>
@@ -1743,6 +1789,10 @@
         <h1 class="stat-title" id="statTitle">Отчёт о встрече «Спортсмен A — Спортсмен B»</h1>
         <p class="stat-server-line" id="statHeaderHandicap" hidden></p>
       </header>
+      <div class="live-status stat-live-status" id="liveViewerStatus" data-state="starting" hidden>
+        <span class="live-status-message" id="liveViewerStatusText">Подключение к live-отчёту…</span>
+        <button class="live-status-copy" id="copyLiveViewerErrorButton" type="button" hidden>Скопировать ошибку</button>
+      </div>
       <div class="stat-report-controls" id="statReportControls" hidden>
         <label class="stat-perspective-label" for="statPerspectiveSelect"><span>С позиции</span><span>спортсмена:</span></label>
         <select class="stat-perspective-select" id="statPerspectiveSelect" aria-label="С позиции спортсмена">
@@ -1822,7 +1872,7 @@
       <footer class="stat-report-footer" id="statReportFooter">
         <p id="statDataEnteredLine" hidden>Данные введены: <time id="statDataEnteredAt"></time></p>
         <p id="statAppLinkLine" hidden><a href="https://t39s.github.io/ttscore/" target="_blank" rel="noopener noreferrer">https://t39s.github.io/ttscore/</a></p>
-        <p class="app-version">Версия 0.2.36</p>
+        <p class="app-version">PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36</p>
       </footer>
     </section>
   </main>
@@ -1837,8 +1887,30 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "ttScore:0.2.36:currentMeeting";
-    const IMPORT_SESSION_KEY = "ttScore:0.2.36:importedMeeting";
+    const STORAGE_KEY = "ttScore:live-report-poc:0.1:currentMeeting";
+    const IMPORT_SESSION_KEY = "ttScore:live-report-poc:0.1:importedMeeting";
+    const LIVE_PUBLICATION_KEY = "ttScore:live-report-poc:0.2:livePublication";
+    const LIVE_PUBLISHER_LEASE_KEY = "ttScore:live-report-poc:0.2:publisherLease";
+    const LIVE_CLEANUP_QUEUE_KEY = "ttScore:live-report-poc:0.2:cleanupQueue";
+    const LIVE_REPORT_TTL_MS = 23 * 60 * 60 * 1000;
+    const LIVE_PUBLISH_DEBOUNCE_MS = 160;
+    const LIVE_PUBLISHER_LEASE_MS = 15_000;
+    const LIVE_PUBLISHER_LEASE_RENEW_MS = 5_000;
+    const LIVE_ROOT_PATH = "liveReportsV2";
+    const LIVE_ENVELOPE_VERSION = 2;
+    const LIVE_STATE_SCHEMA_VERSION = 1;
+    const LIVE_STATE_MAX_JSON_BYTES = 16 * 1024;
+    const FIREBASE_SDK_VERSION = "12.17.1";
+    const LIVE_FIREBASE_CONFIG = Object.freeze({
+      apiKey: "AIzaSyAl_-dvsuM7g4hvuUZtt3mNcMc7a0Kztnw",
+      authDomain: "ttscore-live.firebaseapp.com",
+      databaseURL: "https://ttscore-live-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ttscore-live",
+      storageBucket: "ttscore-live.firebasestorage.app",
+      messagingSenderId: "168758785361",
+      appId: "1:168758785361:web:485fd3b6b00aaade544f70"
+    });
+    const LIVE_APP_CHECK_SITE_KEY = "REPLACE_WITH_RECAPTCHA_ENTERPRISE_SITE_KEY";
     const RESTORE_CONFIRMATION_AGE_MS = 120_000;
     const PROTECTED_REPORT_MAGIC = new Uint8Array([0x54, 0x54, 0x53, 0x31]);
     const PROTECTED_REPORT_VERSION = 1;
@@ -1853,13 +1925,19 @@
     const pageParams = new URLSearchParams(location.search);
     const requestedPage = pageParams.get("page");
     const requestedSource = pageParams.get("source");
+    const livePublisherUid = pageParams.get("publisher") || "";
     const protectedReportKeyText = location.hash.length > 1 ? location.hash.slice(1) : "";
-    const IS_PROTECTED_REPORT = !!protectedReportKeyText && requestedSource !== "picker" && requestedSource !== "import";
-    const PAGE_MODE = requestedPage === "report" || IS_PROTECTED_REPORT ? "report" : "score";
+    const IS_LIVE_REPORT = requestedPage === "report" && requestedSource === "live";
+    const IS_PROTECTED_REPORT = !!protectedReportKeyText
+      && requestedSource !== "picker"
+      && requestedSource !== "import"
+      && requestedSource !== "live";
+    const IS_REMOTE_REPORT = IS_PROTECTED_REPORT || IS_LIVE_REPORT;
+    const PAGE_MODE = requestedPage === "report" || IS_REMOTE_REPORT ? "report" : "score";
     const IS_REPORT_PAGE = PAGE_MODE === "report";
     const IS_IMPORT_PICKER = IS_REPORT_PAGE && requestedSource === "picker";
     const IS_IMPORTED_REPORT = IS_REPORT_PAGE && requestedSource === "import";
-    const SYNC_CHANNEL_NAME = "ttScore:0.2.36:meeting";
+    const SYNC_CHANNEL_NAME = "ttScore:live-report-poc:0.1:meeting";
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -1959,7 +2037,7 @@
     });
 
     const importedSessionResult = IS_IMPORTED_REPORT ? loadImportedSessionMeeting() : null;
-    const storedMeeting = IS_PROTECTED_REPORT
+    const storedMeeting = IS_REMOTE_REPORT
       ? null
       : IS_IMPORTED_REPORT
       ? (importedSessionResult?.meeting || null)
@@ -1969,6 +2047,23 @@
     let importedCanonicalSource = importedSessionResult?.source || null;
     let importLoadError = importedSessionResult?.error || "";
     let protectedReportLoading = IS_PROTECTED_REPORT;
+    let liveReportLoading = IS_LIVE_REPORT;
+    let liveViewerRevision = 0;
+    let liveViewerCheckpointRevision = 0;
+    let liveViewerCheckpointState = null;
+    let liveViewerUnsubscribe = null;
+    let livePublication = loadLivePublication();
+    let livePublishState = livePublication ? "offline" : "off";
+    let livePublishError = "";
+    let liveViewerError = "";
+    let livePublishTimer = null;
+    let livePublishInFlight = false;
+    let livePublishPending = false;
+    let livePendingPublishKind = "state";
+    let liveStopping = false;
+    let liveFirebasePromise = null;
+    let liveLeaseRenewTimer = null;
+    const liveTabId = createLiveTabId();
     const MAX_UNDO = 50;
     let historyStack = [];
     let setupFormat = state.format || 5;
@@ -2038,6 +2133,9 @@
       speechStateLabel: $("speechStateLabel"),
       speechRepeatButton: $("speechRepeatButton"),
       menuButton: $("menuButton"),
+      livePublishStatus: $("livePublishStatus"),
+      livePublishStatusText: $("livePublishStatusText"),
+      copyLivePublishErrorButton: $("copyLivePublishErrorButton"),
       gameOverNotice: $("gameOverNotice"),
       gameOverTitle: $("gameOverTitle"),
       gameOverText: $("gameOverText"),
@@ -2053,6 +2151,9 @@
       modalSummary: $("modalSummary"),
       modalActions: $("modalActions"),
       statTitle: $("statTitle"),
+      liveViewerStatus: $("liveViewerStatus"),
+      liveViewerStatusText: $("liveViewerStatusText"),
+      copyLiveViewerErrorButton: $("copyLiveViewerErrorButton"),
       statHeaderHandicap: $("statHeaderHandicap"),
       statReportControls: $("statReportControls"),
       statPerspectiveSelect: $("statPerspectiveSelect"),
@@ -2090,6 +2191,806 @@
     };
 
     function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function createLiveTabId() {
+      const bytes = new Uint8Array(12);
+      if (globalThis.crypto?.getRandomValues) crypto.getRandomValues(bytes);
+      else bytes.forEach((_, index) => { bytes[index] = Math.floor(Math.random() * 256); });
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function firebaseConfigReady() {
+      return Object.values(LIVE_FIREBASE_CONFIG).every(value => (
+        typeof value === "string" && value.length > 0 && !value.startsWith("REPLACE_WITH_")
+      )) && /^https:\/\//.test(LIVE_FIREBASE_CONFIG.databaseURL);
+    }
+
+    function appCheckConfigured() {
+      return typeof LIVE_APP_CHECK_SITE_KEY === "string"
+        && LIVE_APP_CHECK_SITE_KEY.length > 0
+        && !LIVE_APP_CHECK_SITE_KEY.startsWith("REPLACE_WITH_");
+    }
+
+    async function loadLiveFirebase() {
+      if (!firebaseConfigReady()) {
+        throw new Error("Firebase не настроен. Заполните LIVE_FIREBASE_CONFIG по инструкции PoC.");
+      }
+      if (!liveFirebasePromise) {
+        liveFirebasePromise = (async () => {
+          const base = `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+          const [appModule, authModule, databaseModule, appCheckModule] = await Promise.all([
+            import(`${base}/firebase-app.js`),
+            import(`${base}/firebase-auth.js`),
+            import(`${base}/firebase-database.js`),
+            import(`${base}/firebase-app-check.js`)
+          ]);
+          const appName = "ttscore-live-report-poc";
+          const app = appModule.getApps().find(candidate => candidate.name === appName)
+            || appModule.initializeApp(LIVE_FIREBASE_CONFIG, appName);
+          if (appCheckConfigured()) {
+            appCheckModule.initializeAppCheck(app, {
+              provider: new appCheckModule.ReCaptchaEnterpriseProvider(LIVE_APP_CHECK_SITE_KEY),
+              isTokenAutoRefreshEnabled: true
+            });
+          }
+          return {
+            app,
+            authModule,
+            databaseModule,
+            auth: authModule.getAuth(app),
+            database: databaseModule.getDatabase(app)
+          };
+        })().catch(error => {
+          liveFirebasePromise = null;
+          throw error;
+        });
+      }
+      return liveFirebasePromise;
+    }
+
+    async function ensureLiveAuthor({ allowCreate = false } = {}) {
+      const firebase = await loadLiveFirebase();
+      await firebase.authModule.setPersistence(firebase.auth, firebase.authModule.browserLocalPersistence);
+      if (typeof firebase.auth.authStateReady === "function") await firebase.auth.authStateReady();
+      let user = firebase.auth.currentUser;
+      if (!user && allowCreate) user = (await firebase.authModule.signInAnonymously(firebase.auth)).user;
+      if (!user?.uid) {
+        throw new Error("Исходная анонимная сессия автора не восстановлена. Не создаём новый UID автоматически.");
+      }
+      return { ...firebase, user };
+    }
+
+    function loadLivePublication() {
+      try {
+        const value = JSON.parse(localStorage.getItem(LIVE_PUBLICATION_KEY) || "null");
+        if (!value || value.version !== 2) return null;
+        if (!validMatchId(value.matchId, value.matchDate)) return null;
+        if (!/^[A-Za-z0-9_-]{1,128}$/.test(value.publisherUid || "")) return null;
+        if (!/^[A-Za-z0-9_-]{16}$/.test(value.reportId || "")) return null;
+        decodeProtectedReportKey(value.keyText);
+        if (!Number.isFinite(value.expiresAt)) return null;
+        if (value.expiresAt <= Date.now()) {
+          queueLiveCleanup(value);
+          localStorage.removeItem(LIVE_PUBLICATION_KEY);
+          return null;
+        }
+        value.desiredStateRevision = Math.max(0, Number(value.desiredStateRevision) || 0);
+        value.lastPublishedStateRevision = Math.max(0, Number(value.lastPublishedStateRevision) || 0);
+        value.lastCheckpointRevision = Math.max(0, Number(value.lastCheckpointRevision) || 0);
+        value.pendingCheckpointKind = /^(game|match|rollback)$/.test(value.pendingCheckpointKind || "")
+          ? value.pendingCheckpointKind
+          : "state";
+        value.pendingCheckpointRevision = Math.max(0, Number(value.pendingCheckpointRevision) || 0);
+        if (value.lastCheckpointRevision > value.lastPublishedStateRevision) return null;
+        return value;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function loadLiveCleanupQueue() {
+      try {
+        const value = JSON.parse(localStorage.getItem(LIVE_CLEANUP_QUEUE_KEY) || "[]");
+        return Array.isArray(value) ? value.filter(item => (
+          item && /^[A-Za-z0-9_-]{1,128}$/.test(item.publisherUid || "") && /^[A-Za-z0-9_-]{16}$/.test(item.reportId || "")
+        )) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function queueLiveCleanup(publication) {
+      if (!publication || !/^[A-Za-z0-9_-]{1,128}$/.test(publication.publisherUid || "")
+          || !/^[A-Za-z0-9_-]{16}$/.test(publication.reportId || "")) return;
+      const queue = loadLiveCleanupQueue();
+      if (!queue.some(item => item.publisherUid === publication.publisherUid && item.reportId === publication.reportId)) {
+        queue.push({ publisherUid: publication.publisherUid, reportId: publication.reportId });
+        localStorage.setItem(LIVE_CLEANUP_QUEUE_KEY, JSON.stringify(queue.slice(-20)));
+      }
+    }
+
+    async function cleanupQueuedLivePublications() {
+      const queue = loadLiveCleanupQueue();
+      if (!queue.length) return;
+      try {
+        const firebase = await ensureLiveAuthor();
+        const remaining = [];
+        for (const item of queue) {
+          if (item.publisherUid !== firebase.user.uid) {
+            remaining.push(item);
+            continue;
+          }
+          try {
+            const reportRef = firebase.databaseModule.ref(
+              firebase.database,
+              `${LIVE_ROOT_PATH}/${item.publisherUid}/${item.reportId}`
+            );
+            await firebase.databaseModule.remove(reportRef);
+          } catch (_) {
+            remaining.push(item);
+          }
+        }
+        if (remaining.length) localStorage.setItem(LIVE_CLEANUP_QUEUE_KEY, JSON.stringify(remaining));
+        else localStorage.removeItem(LIVE_CLEANUP_QUEUE_KEY);
+      } catch (_) {}
+    }
+
+    function storeLivePublication(value) {
+      livePublication = value;
+      if (value) localStorage.setItem(LIVE_PUBLICATION_KEY, JSON.stringify(value));
+      else localStorage.removeItem(LIVE_PUBLICATION_KEY);
+    }
+
+    function livePublicationMatchesCurrentMeeting() {
+      return !!livePublication
+        && state.status === "match"
+        && livePublication.matchId === state.matchId
+        && livePublication.matchDate === state.matchDate;
+    }
+
+    function liveReportUrl(publication = livePublication) {
+      if (!publication) return "";
+      const url = new URL(location.href);
+      url.search = "";
+      url.hash = publication.keyText;
+      url.searchParams.set("page", "report");
+      url.searchParams.set("source", "live");
+      url.searchParams.set("publisher", publication.publisherUid);
+      return url.toString();
+    }
+
+    function setLivePublishState(nextState, message = "") {
+      livePublishState = nextState;
+      livePublishError = nextState === "error" ? message : "";
+      renderLivePublishStatus(message);
+    }
+
+    function liveDiagnosticText(role, message) {
+      const pageUrl = new URL(location.href);
+      pageUrl.hash = "";
+      return [
+        "ttScore Live Report PoC — compact-live 1",
+        `Роль: ${role}`,
+        `Ошибка: ${message || "Неизвестная ошибка"}`,
+        `Время: ${new Date().toISOString()}`,
+        `Страница: ${pageUrl.toString()}`,
+        `Проект Firebase: ${LIVE_FIREBASE_CONFIG.projectId}`,
+        `Realtime Database: ${LIVE_FIREBASE_CONFIG.databaseURL}`,
+        `Сеть браузера: ${navigator.onLine ? "online" : "offline"}`
+      ].join("\n");
+    }
+
+    async function copyLiveDiagnostic(role, message, button = null) {
+      const originalLabel = button?.textContent || "Скопировать ошибку";
+      try {
+        await writeTextToClipboard(liveDiagnosticText(role, message));
+        if (button) button.textContent = "Скопировано";
+      } catch (_) {
+        if (button) button.textContent = "Не удалось скопировать";
+      } finally {
+        if (button) window.setTimeout(() => { button.textContent = originalLabel; }, 1800);
+      }
+    }
+
+    function showCopyableLiveError(title, message, role = "автор") {
+      activeModal = "liveError";
+      showModal(
+        title,
+        message,
+        [
+          makeButton("Скопировать ошибку", "primary", event => {
+            void copyLiveDiagnostic(role, message, event.currentTarget);
+          }),
+          makeButton("Закрыть", "secondary", closeModal)
+        ]
+      );
+      activeModal = "liveError";
+    }
+
+    function renderLivePublishStatus(message = "") {
+      if (!els.livePublishStatus) return;
+      const visible = state.status === "match" && (livePublicationMatchesCurrentMeeting() || livePublishState !== "off");
+      els.livePublishStatus.hidden = !visible;
+      els.livePublishStatus.dataset.state = livePublishState;
+      const labels = {
+        off: "Live-публикация выключена",
+        starting: "Запуск live-публикации…",
+        live: "Live-отчёт обновляется в реальном времени",
+        offline: "Нет связи с Firebase; локальный счёт продолжает работать",
+        stopping: "Остановка live-публикации…",
+        error: "Ошибка live-публикации"
+      };
+      els.livePublishStatusText.textContent = message || labels[livePublishState] || labels.off;
+      els.copyLivePublishErrorButton.hidden = livePublishState !== "error" && livePublishState !== "offline";
+    }
+
+    function currentLiveLease() {
+      try {
+        const lease = JSON.parse(localStorage.getItem(LIVE_PUBLISHER_LEASE_KEY) || "null");
+        return lease && typeof lease === "object" ? lease : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function claimLivePublisherLease() {
+      const current = currentLiveLease();
+      if (current && current.tabId !== liveTabId && Number(current.expiresAt) > Date.now()) return false;
+      localStorage.setItem(LIVE_PUBLISHER_LEASE_KEY, JSON.stringify({
+        tabId: liveTabId,
+        matchId: state.matchId,
+        expiresAt: Date.now() + LIVE_PUBLISHER_LEASE_MS
+      }));
+      const claimed = currentLiveLease()?.tabId === liveTabId;
+      if (claimed && !liveLeaseRenewTimer) {
+        liveLeaseRenewTimer = window.setInterval(() => {
+          if (!livePublicationMatchesCurrentMeeting()) return releaseLivePublisherLease();
+          localStorage.setItem(LIVE_PUBLISHER_LEASE_KEY, JSON.stringify({
+            tabId: liveTabId,
+            matchId: state.matchId,
+            expiresAt: Date.now() + LIVE_PUBLISHER_LEASE_MS
+          }));
+        }, LIVE_PUBLISHER_LEASE_RENEW_MS);
+      }
+      return claimed;
+    }
+
+    function releaseLivePublisherLease() {
+      if (liveLeaseRenewTimer) window.clearInterval(liveLeaseRenewTimer);
+      liveLeaseRenewTimer = null;
+      if (currentLiveLease()?.tabId === liveTabId) localStorage.removeItem(LIVE_PUBLISHER_LEASE_KEY);
+    }
+
+    function livePublishKindPriority(kind) {
+      return ({ state: 1, game: 2, match: 3, rollback: 3 })[kind] || 1;
+    }
+
+    function mergeLivePublishKind(current, incoming) {
+      return livePublishKindPriority(incoming) >= livePublishKindPriority(current) ? incoming : current;
+    }
+
+    function buildCompactLiveState() {
+      return {
+        schemaVersion: LIVE_STATE_SCHEMA_VERSION,
+        matchId: state.matchId,
+        matchDate: state.matchDate,
+        recordCreatedAt: state.recordCreatedAt,
+        recordUpdatedAt: state.recordUpdatedAt,
+        status: state.status,
+        players: clone(state.players),
+        format: state.format,
+        initialServer: state.initialServer,
+        initialLeftPlayer: state.initialLeftPlayer,
+        currentFirstServer: state.currentFirstServer,
+        leftPlayer: state.leftPlayer,
+        handicap: clone(state.handicap),
+        gameIndex: state.gameIndex,
+        score: clone(state.score),
+        games: clone(state.games),
+        pendingGame: state.pendingGame ? clone(state.pendingGame) : null,
+        sideChangeAcknowledgedForGame: !!state.sideChangeAcknowledgedForGame
+      };
+    }
+
+    function liveEncryptionContext(reportId, kind, revision) {
+      return `ttscore-live-v2\0${reportId}\0${kind}\0${revision}`;
+    }
+
+    async function encryptLiveJson(value, keyBytes, reportId, kind, revision, maximumJsonBytes) {
+      const json = JSON.stringify(value);
+      if (new TextEncoder().encode(json).length > maximumJsonBytes) {
+        throw new Error(kind === "state" ? "Компактное live-состояние превышает 16 КиБ." : "Полный live-отчёт превышает 1 МиБ.");
+      }
+      const iv = crypto.getRandomValues(new Uint8Array(PROTECTED_REPORT_IV_BYTES));
+      return encodeBase64Url(await encryptProtectedReport(
+        json,
+        keyBytes,
+        iv,
+        liveEncryptionContext(reportId, kind, revision)
+      ));
+    }
+
+    function scheduleLivePublish(kind = "state", { immediate = false } = {}) {
+      if (IS_REPORT_PAGE || liveStopping || !livePublicationMatchesCurrentMeeting()) return Promise.resolve();
+      livePendingPublishKind = mergeLivePublishKind(
+        mergeLivePublishKind(livePendingPublishKind, livePublication.pendingCheckpointKind || "state"),
+        kind
+      );
+      const desiredStateRevision = Math.max(
+        Number(livePublication.desiredStateRevision || 0),
+        Number(livePublication.lastPublishedStateRevision || 0)
+      ) + 1;
+      const schedulesCheckpoint = kind !== "state";
+      storeLivePublication({
+        ...livePublication,
+        desiredStateRevision,
+        pendingCheckpointKind: schedulesCheckpoint
+          ? mergeLivePublishKind(livePublication.pendingCheckpointKind || "state", kind)
+          : (livePublication.pendingCheckpointKind || "state"),
+        pendingCheckpointRevision: schedulesCheckpoint
+          ? desiredStateRevision
+          : Number(livePublication.pendingCheckpointRevision || 0)
+      });
+      livePublishPending = true;
+      if (livePublishTimer) window.clearTimeout(livePublishTimer);
+      livePublishTimer = null;
+      if (immediate) return publishLiveUpdate();
+      livePublishTimer = window.setTimeout(() => {
+        livePublishTimer = null;
+        void publishLiveUpdate();
+      }, LIVE_PUBLISH_DEBOUNCE_MS);
+      return Promise.resolve();
+    }
+
+    async function publishLiveUpdate() {
+      if (liveStopping || !livePublicationMatchesCurrentMeeting() || livePublishInFlight) return;
+      if (!claimLivePublisherLease()) {
+        setLivePublishState("error", "Live-публикация уже выполняется в другой вкладке.");
+        return;
+      }
+      if (Date.now() >= livePublication.expiresAt) {
+        setLivePublishState("error", "Срок live-ссылки истёк. Создайте новую публикацию.");
+        return;
+      }
+      livePublishInFlight = true;
+      livePublishPending = false;
+      const publishKind = mergeLivePublishKind(livePendingPublishKind, livePublication.pendingCheckpointKind || "state");
+      livePendingPublishKind = "state";
+      try {
+        const firebase = await ensureLiveAuthor();
+        if (firebase.user.uid !== livePublication.publisherUid) {
+          throw new Error("Анонимная учётная запись автора изменилась; прежнюю публикацию нельзя обновить.");
+        }
+        const keyBytes = decodeProtectedReportKey(livePublication.keyText);
+        const stateRevision = Math.max(
+          1,
+          Number(livePublication.desiredStateRevision || 0),
+          Number(livePublication.lastPublishedStateRevision || 0) + 1
+        );
+        const createsCheckpoint = publishKind !== "state";
+        const checkpointRevision = createsCheckpoint
+          ? stateRevision
+          : Number(livePublication.lastCheckpointRevision || 0);
+        const encryptedPayload = await encryptLiveJson(
+          buildCompactLiveState(),
+          keyBytes,
+          livePublication.reportId,
+          "state",
+          stateRevision,
+          LIVE_STATE_MAX_JSON_BYTES
+        );
+        const reportRef = firebase.databaseModule.ref(
+          firebase.database,
+          `${LIVE_ROOT_PATH}/${livePublication.publisherUid}/${livePublication.reportId}`
+        );
+        const stateEnvelope = {
+          envelopeVersion: LIVE_ENVELOPE_VERSION,
+          schemaVersion: LIVE_STATE_SCHEMA_VERSION,
+          revision: stateRevision,
+          checkpointRevision,
+          updatedAt: firebase.databaseModule.serverTimestamp(),
+          expiresAt: livePublication.expiresAt,
+          reason: publishKind,
+          encryptedPayload
+        };
+        let checkpointEnvelope = null;
+        if (createsCheckpoint) {
+          const checkpointPayload = await encryptLiveJson(
+            buildCanonicalMatchData(),
+            keyBytes,
+            livePublication.reportId,
+            "checkpoint",
+            checkpointRevision,
+            MAX_CANONICAL_JSON_BYTES
+          );
+          checkpointEnvelope = {
+            envelopeVersion: LIVE_ENVELOPE_VERSION,
+            schemaVersion: 1,
+            revision: checkpointRevision,
+            sourceStateRevision: stateRevision,
+            updatedAt: firebase.databaseModule.serverTimestamp(),
+            expiresAt: livePublication.expiresAt,
+            reason: publishKind,
+            encryptedPayload: checkpointPayload
+          };
+        }
+        const initialPublication = Number(livePublication.lastPublishedStateRevision || 0) === 0;
+        if (initialPublication) {
+          await firebase.databaseModule.set(reportRef, {
+            meta: {
+              envelopeVersion: LIVE_ENVELOPE_VERSION,
+              schemaVersion: LIVE_STATE_SCHEMA_VERSION,
+              expiresAt: livePublication.expiresAt
+            },
+            state: stateEnvelope,
+            ...(checkpointEnvelope ? { checkpoint: checkpointEnvelope } : {})
+          });
+        } else if (createsCheckpoint) {
+          await firebase.databaseModule.update(reportRef, {
+            state: stateEnvelope,
+            checkpoint: checkpointEnvelope
+          });
+        } else {
+          const stateRef = firebase.databaseModule.ref(
+            firebase.database,
+            `${LIVE_ROOT_PATH}/${livePublication.publisherUid}/${livePublication.reportId}/state`
+          );
+          await firebase.databaseModule.set(stateRef, stateEnvelope);
+        }
+        storeLivePublication({
+          ...livePublication,
+          desiredStateRevision: Math.max(Number(livePublication.desiredStateRevision || 0), stateRevision),
+          lastPublishedStateRevision: stateRevision,
+          lastCheckpointRevision: checkpointRevision,
+          pendingCheckpointKind: createsCheckpoint && Number(livePublication.pendingCheckpointRevision || 0) <= stateRevision
+            ? "state"
+            : (livePublication.pendingCheckpointKind || "state"),
+          pendingCheckpointRevision: createsCheckpoint && Number(livePublication.pendingCheckpointRevision || 0) <= stateRevision
+            ? 0
+            : Number(livePublication.pendingCheckpointRevision || 0),
+          lastPublishedAt: Date.now()
+        });
+        setLivePublishState("live");
+      } catch (error) {
+        livePendingPublishKind = mergeLivePublishKind(livePendingPublishKind, publishKind);
+        const offline = !navigator.onLine || /network|offline/i.test(error?.message || "");
+        setLivePublishState(offline ? "offline" : "error", error?.message || "Не удалось обновить live-отчёт.");
+      } finally {
+        livePublishInFlight = false;
+        if (livePublishPending && !liveStopping) {
+          if (livePublishTimer) window.clearTimeout(livePublishTimer);
+          livePublishTimer = window.setTimeout(() => {
+            livePublishTimer = null;
+            void publishLiveUpdate();
+          }, LIVE_PUBLISH_DEBOUNCE_MS);
+        }
+      }
+    }
+
+    async function startLivePublication() {
+      closeModal();
+      if (state.status !== "match") return;
+      if (livePublication && !livePublicationMatchesCurrentMeeting()) {
+        showCopyableLiveError("Live-публикация не запущена", "Сначала удалите прежнюю live-публикацию из меню.");
+        return;
+      }
+      if (!protectedCryptoAvailable()) {
+        showCopyableLiveError("Live-публикация не поддерживается", "Live-отчёт требует HTTPS и поддержки Web Crypto API.");
+        return;
+      }
+      if (!claimLivePublisherLease()) {
+        showCopyableLiveError("Конфликт вкладок", "Эта встреча уже публикуется из другой вкладки.");
+        return;
+      }
+      liveStopping = false;
+      setLivePublishState("starting");
+      try {
+        const firebase = await ensureLiveAuthor({ allowCreate: true });
+        const keyBytes = crypto.getRandomValues(new Uint8Array(PROTECTED_REPORT_KEY_BYTES));
+        const reportId = await deriveProtectedReportId(keyBytes);
+        const publication = {
+          version: 2,
+          matchId: state.matchId,
+          matchDate: state.matchDate,
+          publisherUid: firebase.user.uid,
+          reportId,
+          keyText: encodeBase64Url(keyBytes),
+          expiresAt: Date.now() + LIVE_REPORT_TTL_MS,
+          desiredStateRevision: 0,
+          lastPublishedStateRevision: 0,
+          lastCheckpointRevision: 0,
+          pendingCheckpointKind: "state",
+          pendingCheckpointRevision: 0,
+          lastPublishedAt: null
+        };
+        storeLivePublication(publication);
+        const initialPublishKind = state.pendingGame
+          ? (pendingGameEndsMatch() ? "match" : "game")
+          : (state.games.length ? "game" : "state");
+        await scheduleLivePublish(initialPublishKind, { immediate: true });
+        if (livePublishState === "live") showLiveShareModal();
+      } catch (error) {
+        setLivePublishState("error", error?.message || "Не удалось включить live-публикацию.");
+        showCopyableLiveError("Не удалось включить live-публикацию", livePublishError);
+      }
+    }
+
+    async function stopLivePublication({ silent = false } = {}) {
+      if (!livePublication) return true;
+      if (!silent) closeModal();
+      liveStopping = true;
+      livePublishPending = false;
+      if (livePublishTimer) window.clearTimeout(livePublishTimer);
+      livePublishTimer = null;
+      setLivePublishState("stopping");
+      try {
+        while (livePublishInFlight) {
+          await new Promise(resolve => window.setTimeout(resolve, 50));
+        }
+        const firebase = await ensureLiveAuthor();
+        if (firebase.user.uid !== livePublication.publisherUid) {
+          throw new Error("Удалить публикацию может только исходная анонимная учётная запись автора.");
+        }
+        const reportRef = firebase.databaseModule.ref(
+          firebase.database,
+          `${LIVE_ROOT_PATH}/${livePublication.publisherUid}/${livePublication.reportId}`
+        );
+        await firebase.databaseModule.remove(reportRef);
+        storeLivePublication(null);
+        releaseLivePublisherLease();
+        liveStopping = false;
+        setLivePublishState("off");
+        render();
+        if (!silent) alert("Live-публикация остановлена, данные удалены из Firebase.");
+        return true;
+      } catch (error) {
+        liveStopping = false;
+        setLivePublishState("error", error?.message || "Не удалось остановить live-публикацию.");
+        if (!silent) showCopyableLiveError("Не удалось остановить live-публикацию", livePublishError);
+        return false;
+      }
+    }
+
+    function forgetLivePublicationLocally() {
+      closeModal();
+      queueLiveCleanup(livePublication);
+      storeLivePublication(null);
+      releaseLivePublisherLease();
+      liveStopping = false;
+      setLivePublishState("off");
+      render();
+      alert("Локальная привязка сброшена. Приложение попробует удалить старую запись при восстановлении исходной анонимной сессии.");
+    }
+
+    function showForgetLivePublicationConfirm() {
+      activeModal = "forgetLivePublication";
+      showModal(
+        "Сбросить локальную привязку?",
+        "Это позволит создать новую публикацию, но не удалит прежнюю запись из Firebase. Прежнюю запись нужно удалить вручную в Firebase Console.",
+        [
+          makeButton("Сбросить локально", "danger", forgetLivePublicationLocally),
+          makeButton("Отмена", "secondary", showMenu)
+        ]
+      );
+      activeModal = "forgetLivePublication";
+    }
+
+    function showLiveShareModal() {
+      if (!livePublicationMatchesCurrentMeeting()) return;
+      const url = liveReportUrl();
+      activeModal = "liveShare";
+      showModal(
+        "Live-отчёт включён",
+        `Ссылка работает до 24 часов. Ключ расшифрования находится после # и не отправляется в Firebase.\n\n${url}`,
+        [
+          makeButton("Скопировать ссылку", "primary", async () => {
+            await writeTextToClipboard(url);
+            closeModal();
+          }),
+          makeButton("Закрыть", "secondary", closeModal)
+        ]
+      );
+      activeModal = "liveShare";
+    }
+
+    async function resumeLivePublication() {
+      if (!livePublicationMatchesCurrentMeeting()) return;
+      if (!claimLivePublisherLease()) {
+        setLivePublishState("error", "Live-публикация уже выполняется в другой вкладке.");
+        return;
+      }
+      setLivePublishState("starting", "Восстановление live-публикации…");
+      await scheduleLivePublish("state", { immediate: true });
+    }
+
+    function decodeBase64UrlBytes(value, maximumBytes) {
+      if (typeof value !== "string" || !/^[A-Za-z0-9_-]+$/.test(value)) {
+        throw new Error("Live-отчёт содержит некорректный зашифрованный снимок.");
+      }
+      const estimatedBytes = Math.floor(value.length * 3 / 4);
+      if (estimatedBytes > maximumBytes) throw new Error("Live-отчёт превышает допустимый размер.");
+      const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
+      const binary = atob(padded);
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      if (bytes.length > maximumBytes || encodeBase64Url(bytes) !== value) {
+        throw new Error("Live-отчёт содержит некорректный зашифрованный снимок.");
+      }
+      return bytes;
+    }
+
+    function validateLiveStateEnvelope(value) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Компактное live-состояние отсутствует.");
+      const allowed = ["envelopeVersion", "schemaVersion", "revision", "checkpointRevision", "updatedAt", "expiresAt", "reason", "encryptedPayload"];
+      if (Object.keys(value).some(key => !allowed.includes(key)) || allowed.some(key => !(key in value))) {
+        throw new Error("Конверт компактного live-состояния не соответствует версии PoC.");
+      }
+      if (value.envelopeVersion !== LIVE_ENVELOPE_VERSION || value.schemaVersion !== LIVE_STATE_SCHEMA_VERSION) {
+        throw new Error("Версия компактного live-состояния не поддерживается.");
+      }
+      if (!Number.isInteger(value.revision) || value.revision < 1) throw new Error("Некорректная live-ревизия.");
+      if (!Number.isInteger(value.checkpointRevision) || value.checkpointRevision < 0 || value.checkpointRevision > value.revision) {
+        throw new Error("Некорректная ревизия контрольной точки.");
+      }
+      if (!Number.isFinite(value.updatedAt) || !Number.isFinite(value.expiresAt)) throw new Error("Некорректное время live-состояния.");
+      if (value.expiresAt <= Date.now()) throw new Error("Срок live-ссылки истёк.");
+      if (!/^(state|game|match|rollback)$/.test(value.reason || "")) throw new Error("Некорректная причина live-обновления.");
+      if (typeof value.encryptedPayload !== "string") throw new Error("В live-состоянии нет зашифрованных данных.");
+      return value;
+    }
+
+    function validateLiveCheckpointEnvelope(value, expectedRevision) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Контрольная точка live-отчёта отсутствует.");
+      const allowed = ["envelopeVersion", "schemaVersion", "revision", "sourceStateRevision", "updatedAt", "expiresAt", "reason", "encryptedPayload"];
+      if (Object.keys(value).some(key => !allowed.includes(key)) || allowed.some(key => !(key in value))) {
+        throw new Error("Конверт контрольной точки не соответствует версии PoC.");
+      }
+      if (value.envelopeVersion !== LIVE_ENVELOPE_VERSION || value.schemaVersion !== 1) {
+        throw new Error("Версия контрольной точки не поддерживается.");
+      }
+      if (!Number.isInteger(value.revision) || value.revision !== expectedRevision || value.sourceStateRevision !== value.revision) {
+        throw new Error("Контрольная точка не соответствует live-состоянию.");
+      }
+      if (!Number.isFinite(value.updatedAt) || !Number.isFinite(value.expiresAt) || value.expiresAt <= Date.now()) {
+        throw new Error("Срок контрольной точки истёк.");
+      }
+      if (!/^(game|match|rollback)$/.test(value.reason || "")) throw new Error("Некорректная причина контрольной точки.");
+      if (typeof value.encryptedPayload !== "string") throw new Error("В контрольной точке нет зашифрованного отчёта.");
+      return value;
+    }
+
+    function buildStateFromCompactLiveState(value, checkpointState = null) {
+      const allowed = [
+        "schemaVersion", "matchId", "matchDate", "recordCreatedAt", "recordUpdatedAt", "status", "players", "format",
+        "initialServer", "initialLeftPlayer", "currentFirstServer", "leftPlayer", "handicap", "gameIndex", "score",
+        "games", "pendingGame", "sideChangeAcknowledgedForGame"
+      ];
+      if (!value || typeof value !== "object" || Array.isArray(value)
+          || Object.keys(value).some(key => !allowed.includes(key))
+          || allowed.some(key => !(key in value))
+          || value.schemaVersion !== LIVE_STATE_SCHEMA_VERSION) {
+        throw new Error("Расшифрованное компактное состояние имеет неверную схему.");
+      }
+      const previousRallies = checkpointState?.matchId === value.matchId && Array.isArray(checkpointState.rallies)
+        ? clone(checkpointState.rallies)
+        : [];
+      const candidate = {
+        ...clone(value),
+        rallies: previousRallies,
+        history: [],
+        speechEnabled: false,
+        speechRate: 1.05
+      };
+      delete candidate.schemaVersion;
+      const restored = normalizeRestoredState(candidate);
+      if (!restored) throw new Error("Компактное live-состояние не прошло проверку.");
+      return restored;
+    }
+
+    function setLiveViewerStatus(nextState, text) {
+      if (!els.liveViewerStatus) return;
+      liveViewerError = nextState === "error" || nextState === "offline" ? text : "";
+      els.liveViewerStatus.hidden = !IS_LIVE_REPORT;
+      els.liveViewerStatus.dataset.state = nextState;
+      els.liveViewerStatusText.textContent = text;
+      els.copyLiveViewerErrorButton.hidden = !liveViewerError;
+    }
+
+    async function startLiveReportSubscription() {
+      liveReportLoading = true;
+      importLoadError = "";
+      setLiveViewerStatus("starting", "Подключение к live-отчёту…");
+      render();
+      try {
+        if (!/^[A-Za-z0-9_-]{1,128}$/.test(livePublisherUid)) throw new Error("В ссылке отсутствует корректный идентификатор автора.");
+        const keyBytes = decodeProtectedReportKey(protectedReportKeyText);
+        const reportId = await deriveProtectedReportId(keyBytes);
+        const firebase = await loadLiveFirebase();
+        const stateRef = firebase.databaseModule.ref(firebase.database, `${LIVE_ROOT_PATH}/${livePublisherUid}/${reportId}/state`);
+        const checkpointRef = firebase.databaseModule.ref(firebase.database, `${LIVE_ROOT_PATH}/${livePublisherUid}/${reportId}/checkpoint`);
+        liveViewerUnsubscribe = firebase.databaseModule.onValue(stateRef, async snapshot => {
+          try {
+            const envelope = validateLiveStateEnvelope(snapshot.val());
+            const observedRevision = envelope.revision;
+            if (observedRevision < liveViewerRevision) return;
+            const stateBytes = decodeBase64UrlBytes(
+              envelope.encryptedPayload,
+              LIVE_STATE_MAX_JSON_BYTES + PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES
+            );
+            const compactJson = await decryptProtectedReport(
+              stateBytes,
+              keyBytes,
+              liveEncryptionContext(reportId, "state", observedRevision)
+            );
+            const compactValue = JSON.parse(compactJson);
+            let checkpointWarning = "";
+            if (envelope.checkpointRevision > liveViewerCheckpointRevision) {
+              try {
+                const checkpointSnapshot = await firebase.databaseModule.get(checkpointRef);
+                const checkpoint = validateLiveCheckpointEnvelope(checkpointSnapshot.val(), envelope.checkpointRevision);
+                const checkpointBytes = decodeBase64UrlBytes(
+                  checkpoint.encryptedPayload,
+                  MAX_CANONICAL_JSON_BYTES + PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES
+                );
+                const checkpointJson = await decryptProtectedReport(
+                  checkpointBytes,
+                  keyBytes,
+                  liveEncryptionContext(reportId, "checkpoint", checkpoint.revision)
+                );
+                const { data, analysis } = parseCanonicalJsonText(checkpointJson);
+                liveViewerCheckpointState = buildStateFromCanonicalData(data, analysis);
+                liveViewerCheckpointRevision = checkpoint.revision;
+              } catch (checkpointError) {
+                checkpointWarning = checkpointError?.message || "Контрольная точка временно недоступна.";
+              }
+            }
+            if (observedRevision < liveViewerRevision) return;
+            const previousMatchId = state.matchId;
+            state = buildStateFromCompactLiveState(compactValue, liveViewerCheckpointState);
+            liveViewerRevision = observedRevision;
+            liveReportLoading = false;
+            importLoadError = "";
+            if (previousMatchId !== state.matchId) {
+              statsSelectedGame = state.gameIndex || 0;
+              statsFollowCurrentGame = true;
+              multiChartSelectionMode = "current";
+              multiChartCustomGameIndexes.clear();
+              multiChartMeetingId = state.matchId || null;
+              reportPerspectivePlayer = "A";
+            } else if (statsFollowCurrentGame) {
+              statsSelectedGame = state.gameIndex || 0;
+            }
+            const checkpointText = liveViewerCheckpointRevision
+              ? ` · отчёт ${liveViewerCheckpointRevision}`
+              : " · отчёт после завершения партии";
+            setLiveViewerStatus(
+              checkpointWarning ? "offline" : "live",
+              checkpointWarning
+                ? `Live-счёт ${liveViewerRevision}; ${checkpointWarning}`
+                : `Live · счёт ${liveViewerRevision}${checkpointText}`
+            );
+            render();
+          } catch (error) {
+            liveReportLoading = false;
+            importLoadError = error?.message || "Не удалось обработать live-отчёт.";
+            setLiveViewerStatus("error", importLoadError);
+            if (state.status !== "match") render();
+          }
+        }, error => {
+          liveReportLoading = false;
+          const permissionDenied = /permission[-_]denied/i.test(error?.code || "");
+          importLoadError = permissionDenied
+            ? "Firebase запретил чтение. Возможные причины: записи нет, истёк срок, не опубликованы Rules или App Check отклоняет домен."
+            : `${error?.message || "Соединение с live-отчётом прервано."}${error?.code ? ` (${error.code})` : ""}`;
+          setLiveViewerStatus("offline", importLoadError);
+          render();
+        });
+      } catch (error) {
+        liveReportLoading = false;
+        importLoadError = error?.message || "Не удалось открыть live-отчёт.";
+        setLiveViewerStatus("error", importLoadError);
+        render();
+      }
+    }
 
     function normalizeRestoredState(candidate) {
       if (!candidate || typeof candidate !== "object") return null;
@@ -2131,7 +3032,7 @@
       return copy;
     }
 
-    function saveState() {
+    function saveState(liveReason = "state") {
       try {
         if (state.status !== "match") {
           localStorage.removeItem(STORAGE_KEY);
@@ -2145,6 +3046,7 @@
           state: persistableState()
         }));
         notifyStateChanged();
+        scheduleLivePublish(liveReason);
       } catch (_) {}
     }
 
@@ -2368,14 +3270,14 @@
 
         if (wouldMatchBeOverAfter(completedGame)) {
           state.pendingGame = completedGame;
-          saveState();
+          saveState("match");
           updateHandicapPlayerNames();
           render();
           speak(scorePhrase());
           showMatchOver();
         } else {
           state.pendingGame = completedGame;
-          saveState();
+          saveState("game");
           updateHandicapPlayerNames();
           render();
           speak(scorePhrase());
@@ -2390,14 +3292,21 @@
       speak(scorePhrase());
     }
 
+    function crossedLiveCheckpointBoundary(current, previous) {
+      return Number(current?.gameIndex) !== Number(previous?.gameIndex)
+        || (Array.isArray(current?.games) ? current.games.length : 0) !== (Array.isArray(previous?.games) ? previous.games.length : 0)
+        || !!current?.pendingGame !== !!previous?.pendingGame;
+    }
+
     function undo() {
       const prev = historyStack.pop();
       if (!prev) return;
+      const requiresCheckpoint = crossedLiveCheckpointBoundary(state, prev);
       const currentSpeechEnabled = state.speechEnabled;
       state = prev;
       state.speechEnabled = currentSpeechEnabled;
       touchRecord();
-      saveState();
+      saveState(requiresCheckpoint ? "rollback" : "state");
       closeModal();
       updateHandicapPlayerNames();
     render();
@@ -2414,6 +3323,7 @@
       state.leftPlayer = other(state.leftPlayer);
       state.gameIndex += 1;
       state.sideChangeAcknowledgedForGame = false;
+      touchRecord();
       saveState();
       closeModal();
       updateHandicapPlayerNames();
@@ -2421,7 +3331,14 @@
       speak(scorePhrase());
     }
 
-    function resetToSetup(clearPlayers = false) {
+    async function resetToSetup(clearPlayers = false) {
+      if (livePublicationMatchesCurrentMeeting()) {
+        const stopped = await stopLivePublication({ silent: true });
+        if (!stopped) {
+          showCopyableLiveError("Новая встреча не начата", "Сначала устраните ошибку остановки live-публикации.");
+          return;
+        }
+      }
       historyStack = [];
       const oldPlayers = state.players;
       state = defaultState();
@@ -2608,6 +3525,7 @@
       historyStack = [];
       closeModal();
       render();
+      if (livePublicationMatchesCurrentMeeting()) void resumeLivePublication();
     }
 
     function discardSavedMeeting() {
@@ -2784,11 +3702,26 @@
     }
 
     function showMenu() {
+      const liveActions = livePublicationMatchesCurrentMeeting()
+        ? [
+            makeButton("Скопировать live-ссылку", "primary", showLiveShareModal),
+            makeButton("Остановить live-публикацию", "danger", () => void stopLivePublication()),
+            ...(livePublishState === "error"
+              ? [makeButton("Сбросить локальную привязку", "secondary", showForgetLivePublicationConfirm)]
+              : [])
+          ]
+        : livePublication
+          ? [
+              makeButton("Удалить прежнюю live-публикацию", "danger", () => void stopLivePublication()),
+              makeButton("Сбросить локальную привязку", "secondary", showForgetLivePublicationConfirm)
+            ]
+          : [makeButton("Включить live-отчёт", "primary", () => void startLivePublication())];
       activeModal = "overflowMenu";
       showModal(
         "Дополнительно",
         "",
         [
+          ...liveActions,
           makeButton("Открыть отчёт о встрече", "primary", openStatistics),
           makeButton("Новая встреча", "secondary", showNewMatchConfirm),
           makeButton("Закрыть", "secondary", closeModal)
@@ -3530,7 +4463,7 @@
         },
         createdBy: {
           application: "ttScore",
-          version: "0.2.36"
+          version: "live-report-poc-0.2"
         },
         match: {
           date: state.matchDate,
@@ -3844,8 +4777,12 @@
     }
 
     function encodeBase64Url(bytes) {
-      let binary = "";
-      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      const chunks = [];
+      const chunkSize = 0x8000;
+      for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        chunks.push(String.fromCharCode(...bytes.subarray(offset, offset + chunkSize)));
+      }
+      const binary = chunks.join("");
       return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
     }
 
@@ -3875,7 +4812,12 @@
       return encodeBase64Url(new Uint8Array(digest).subarray(0, PROTECTED_REPORT_ID_BYTES));
     }
 
-    async function encryptProtectedReport(json, keyBytes, iv) {
+    function protectedAdditionalData(header, context = "") {
+      if (!context) return header;
+      return joinBytes([header, new TextEncoder().encode(context)]);
+    }
+
+    async function encryptProtectedReport(json, keyBytes, iv, context = "") {
       const plaintext = new TextEncoder().encode(json);
       if (plaintext.length > MAX_CANONICAL_JSON_BYTES) {
         throw new Error("JSON встречи превышает допустимый размер 1 МиБ.");
@@ -3887,14 +4829,14 @@
       header.set(iv, 6);
       const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
       const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv, additionalData: header, tagLength: 128 },
+        { name: "AES-GCM", iv, additionalData: protectedAdditionalData(header, context), tagLength: 128 },
         key,
         plaintext
       );
       return joinBytes([header, new Uint8Array(ciphertext)]);
     }
 
-    async function decryptProtectedReport(bytes, keyBytes) {
+    async function decryptProtectedReport(bytes, keyBytes, context = "") {
       if (bytes.length < PROTECTED_REPORT_HEADER_BYTES + PROTECTED_REPORT_TAG_BYTES) {
         throw new Error("Файл защищённого отчёта имеет некорректный формат.");
       }
@@ -3917,7 +4859,7 @@
       let plaintext;
       try {
         plaintext = await crypto.subtle.decrypt(
-          { name: "AES-GCM", iv, additionalData: header, tagLength: 128 },
+          { name: "AES-GCM", iv, additionalData: protectedAdditionalData(header, context), tagLength: 128 },
           key,
           ciphertext
         );
@@ -4216,7 +5158,7 @@
       appLinkLine.append(appLink);
       const version = document.createElement("p");
       version.className = "app-version";
-      version.textContent = "Версия 0.2.36";
+      version.textContent = "PoC Live Report 0.2 · configured build 2026-08-16 · compact-live 1 · база ttScore 0.2.36";
       footer.append(dataEnteredLine, appLinkLine, version);
       screen.append(footer);
       root.append(screen);
@@ -4407,7 +5349,7 @@ ${buildStandaloneReportRoot().outerHTML}
 
     function sharingTransportAvailable() {
       if (typeof TextEncoder !== "function" || !downloadTransportAvailable()) return false;
-      if (IS_PROTECTED_REPORT) return false;
+      if (IS_REMOTE_REPORT) return false;
       return protectedCryptoAvailable();
     }
 
@@ -4864,9 +5806,12 @@ ${buildStandaloneReportRoot().outerHTML}
       const showHandicap = hasMeeting && state.handicap?.enabled && Number(state.handicap?.points) > 0;
       els.statHeaderHandicap.hidden = !showHandicap;
       els.statHeaderHandicap.textContent = showHandicap ? reportHandicapText() : "";
-      renderInteractiveReportFooter(IS_PROTECTED_REPORT && hasMeeting);
-      if (IS_PROTECTED_REPORT && !hasMeeting) {
-        const title = protectedReportLoading ? "Загрузка защищённого отчёта" : "Защищённый отчёт";
+      renderInteractiveReportFooter(IS_REMOTE_REPORT && hasMeeting);
+      if (IS_REMOTE_REPORT && !hasMeeting) {
+        const loading = IS_LIVE_REPORT ? liveReportLoading : protectedReportLoading;
+        const title = IS_LIVE_REPORT
+          ? (loading ? "Подключение к live-отчёту" : "Live-отчёт")
+          : (loading ? "Загрузка защищённого отчёта" : "Защищённый отчёт");
         document.title = `${title} — ttScore`;
         els.statTitle.textContent = title;
         els.statReportControls.hidden = true;
@@ -4874,9 +5819,9 @@ ${buildStandaloneReportRoot().outerHTML}
         els.statContent.hidden = true;
         els.statScoreTableWrap.hidden = true;
         els.statEmpty.hidden = false;
-        els.statEmptyText.textContent = protectedReportLoading
-          ? "Загрузка и расшифрование отчёта…"
-          : (importLoadError || "Не удалось открыть защищённый отчёт.");
+        els.statEmptyText.textContent = loading
+          ? (IS_LIVE_REPORT ? "Ожидание первого зашифрованного снимка…" : "Загрузка и расшифрование отчёта…")
+          : (importLoadError || (IS_LIVE_REPORT ? "Не удалось открыть live-отчёт." : "Не удалось открыть защищённый отчёт."));
         els.selectSavedReportButton.hidden = true;
         els.selectAnotherReportButton.hidden = true;
         els.exportReportButton.hidden = true;
@@ -4890,7 +5835,7 @@ ${buildStandaloneReportRoot().outerHTML}
       els.statStatusCard.hidden = false;
       els.selectSavedReportButton.hidden = true;
       els.selectAnotherReportButton.hidden = !IS_IMPORTED_REPORT;
-      els.exportReportButton.hidden = IS_PROTECTED_REPORT;
+      els.exportReportButton.hidden = IS_REMOTE_REPORT;
       els.statEmpty.hidden = hasMeeting;
       els.statEmptyText.textContent = importLoadError
         || "Начните встречу в основной вкладке ttScore. Статистика появится после первого сохранения состояния.";
@@ -4952,7 +5897,7 @@ ${buildStandaloneReportRoot().outerHTML}
     }
 
     function refreshStatsFromStorage() {
-      if (!IS_REPORT_PAGE || IS_IMPORTED_REPORT || IS_IMPORT_PICKER || IS_PROTECTED_REPORT) return;
+      if (!IS_REPORT_PAGE || IS_IMPORTED_REPORT || IS_IMPORT_PICKER || IS_REMOTE_REPORT) return;
       const freshMeeting = loadStoredMeeting();
       state = freshMeeting?.state || defaultState();
       statsSelectedGame = statsFollowCurrentGame
@@ -4962,6 +5907,7 @@ ${buildStandaloneReportRoot().outerHTML}
     }
 
     function renderMatch() {
+      renderLivePublishStatus(livePublishError);
       els.formatPill.textContent = `Из ${state.format} партий`;
       els.subtitle.textContent = `${state.players.A} ${gamesWon("A")} — ${gamesWon("B")} ${state.players.B}`;
       els.gameLabel.textContent = `Партия ${state.gameIndex + 1} · ${state.score.A}:${state.score.B}`;
@@ -5115,6 +6061,12 @@ ${buildStandaloneReportRoot().outerHTML}
     els.speechButton.addEventListener("click", toggleSpeech);
     els.speechRepeatButton.addEventListener("click", repeatSpeech);
     els.menuButton.addEventListener("click", showMenu);
+    els.copyLivePublishErrorButton.addEventListener("click", event => {
+      void copyLiveDiagnostic("автор", livePublishError || els.livePublishStatusText.textContent, event.currentTarget);
+    });
+    els.copyLiveViewerErrorButton.addEventListener("click", event => {
+      void copyLiveDiagnostic("зритель", liveViewerError || els.liveViewerStatusText.textContent, event.currentTarget);
+    });
     els.ackSideNotice.addEventListener("click", acknowledgeSideNotice);
     els.nextGameButton.addEventListener("click", startNextGame);
     els.copyProtocolButton.addEventListener("click", copyResult);
@@ -5132,10 +6084,24 @@ ${buildStandaloneReportRoot().outerHTML}
 
     window.addEventListener("pagehide", () => {
       if (!IS_REPORT_PAGE && state.status === "match") saveState();
+      releaseLivePublisherLease();
     });
 
     window.addEventListener("beforeunload", () => {
       if (!IS_REPORT_PAGE && state.status === "match") saveState();
+    });
+
+    window.addEventListener("online", () => {
+      if (livePublicationMatchesCurrentMeeting()) {
+        setLivePublishState("starting", "Связь восстановлена; отправка актуального снимка…");
+        scheduleLivePublish();
+      }
+    });
+
+    window.addEventListener("offline", () => {
+      if (livePublicationMatchesCurrentMeeting()) {
+        setLivePublishState("offline", "Нет связи с Firebase; локальный счёт продолжает работать");
+      }
     });
 
     document.addEventListener("visibilitychange", () => {
@@ -5158,7 +6124,10 @@ ${buildStandaloneReportRoot().outerHTML}
 
     updateHandicapPlayerNames();
     render();
-    if (IS_PROTECTED_REPORT) loadProtectedReport();
+    if (!IS_REPORT_PAGE) void cleanupQueuedLivePublications();
+    if (IS_LIVE_REPORT) startLiveReportSubscription();
+    else if (IS_PROTECTED_REPORT) loadProtectedReport();
+    if (!IS_REPORT_PAGE && !pendingRestoreState && livePublicationMatchesCurrentMeeting()) void resumeLivePublication();
     if (!IS_REPORT_PAGE && pendingRestoreState) showRestoreChoice();
   </script>
 </body>
