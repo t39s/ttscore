@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <title>Командная встреча · ttScore Team</title>
-  <link rel="stylesheet" href="./assets/0.3.1/styles.css">
+  <link rel="stylesheet" href="./assets/0.4.0/styles.css">
 </head>
 <body>
   <main class="page">
     <header>
-      <p class="eyebrow">ttScore Team · v0.3.1</p>
+      <p class="eyebrow">ttScore Team · v0.4.0</p>
       <h1 id="team-match-title">Командная встреча</h1>
       <p id="team-match-meta" class="meta"></p>
     </header>
@@ -67,7 +67,7 @@
         <label>Live-ссылка первой встречи (необязательно)
           <input id="creator-first-live-url" type="text" autocomplete="off">
         </label>
-        <button id="creator-prepare" class="button button--prepare" type="submit">Создать JSON</button>
+        <button id="creator-prepare" class="button button--prepare" type="submit">Создать расписание</button>
       </form>
 
       <p id="creator-error" class="editor__error" role="alert" hidden></p>
@@ -75,6 +75,15 @@
       <section id="creator-preview" class="preview" aria-labelledby="creator-preview-heading" hidden>
         <h3 id="creator-preview-heading">Предварительная проверка</h3>
         <p id="creator-preview-summary"></p>
+        <section class="creator-schedule" aria-labelledby="creator-schedule-heading">
+          <h4 id="creator-schedule-heading">Порядок личных встреч</h4>
+          <p class="muted">Используйте кнопки ↑ и ↓. Первая пара начнёт встречу и получит введённую live-ссылку.</p>
+          <ol id="creator-schedule-list" class="creator-schedule__list"></ol>
+        </section>
+        <dl class="creator-output">
+          <div><dt>Путь JSON в репозитории</dt><dd><code id="creator-json-path"></code></dd></div>
+          <div><dt>Адрес после публикации</dt><dd><a id="creator-public-url" target="_blank" rel="noopener noreferrer"></a></dd></div>
+        </dl>
         <details><summary>Показать JSON</summary><pre id="creator-preview-json"></pre></details>
         <button id="creator-download" class="button button--download" type="button">Сохранить JSON</button>
         <p class="muted">Загрузите файл в <code>team/team-matches/</code>. Имя файла должно остаться точно равным <code>&lt;id&gt;.json</code>.</p>
@@ -153,6 +162,6 @@
     </div>
   </main>
 
-  <script type="module" src="./assets/0.3.1/app.mjs"></script>
+  <script type="module" src="./assets/0.4.0/app.mjs"></script>
 </body>
 </html>
