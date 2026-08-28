@@ -4,7 +4,7 @@
   "title": "Кошки — Птицы",
   "date": "2026-08-28",
   "venue": null,
-  "updatedAt": "2026-08-28T04:08:55.408Z",
+  "updatedAt": "2026-08-28T04:19:55.870Z",
   "individualMatchBestOf": 5,
   "winsToFinish": 5,
   "teams": {
@@ -38,7 +38,7 @@
         },
         {
           "id": "b3",
-          "name": "Воробей Быстрый"
+          "name": "Воробей"
         }
       ]
     }
@@ -62,6 +62,19 @@
       "order": 2,
       "playerAId": "a2",
       "playerBId": "b2",
+      "status": "finished",
+      "result": {
+        "gamesA": 3,
+        "gamesB": 0
+      },
+      "liveUrl": null,
+      "reportUrl": "no"
+    },
+    {
+      "id": "m04",
+      "order": 3,
+      "playerAId": "a1",
+      "playerBId": "b2",
       "status": "current",
       "result": null,
       "liveUrl": null,
@@ -69,19 +82,9 @@
     },
     {
       "id": "m03",
-      "order": 3,
+      "order": 4,
       "playerAId": "a3",
       "playerBId": "b3",
-      "status": "planned",
-      "result": null,
-      "liveUrl": null,
-      "reportUrl": null
-    },
-    {
-      "id": "m04",
-      "order": 4,
-      "playerAId": "a1",
-      "playerBId": "b2",
       "status": "planned",
       "result": null,
       "liveUrl": null,
