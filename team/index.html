@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <title>Командная встреча · ttScore Team</title>
-  <link rel="stylesheet" href="./assets/0.4.1/styles.css">
+  <link rel="stylesheet" href="./assets/0.5.0/styles.css">
 </head>
 <body>
   <main class="page">
     <header>
-      <p class="eyebrow">ttScore Team · v0.4.1</p>
+      <p class="eyebrow">ttScore Team · v0.5.0</p>
       <h1 id="team-match-title">Командная встреча</h1>
       <p id="team-match-meta" class="meta"></p>
     </header>
@@ -27,6 +27,15 @@
     <section id="creator" class="creator" aria-labelledby="creator-heading" hidden>
       <h2 id="creator-heading">Новая командная встреча</h2>
       <p class="creator__note">Заполните составы. Страница создаст все личные встречи и сохранит готовый JSON для ручной загрузки в GitHub.</p>
+      <section class="creator-import" aria-labelledby="creator-import-heading">
+        <div>
+          <h3 id="creator-import-heading">Продолжить подготовку</h3>
+          <p>Загрузите ранее сохранённый JSON <code>schemaVersion: 4</code>. Файл читается только локально и не отправляется в сеть.</p>
+        </div>
+        <button id="creator-import" class="button button--secondary" type="button">Загрузить JSON</button>
+        <input id="creator-import-file" type="file" accept=".json,application/json" hidden>
+      </section>
+      <p id="creator-import-status" class="creator__warning creator__warning--available" role="status" hidden></p>
       <form id="creator-form" class="creator__form">
         <div class="creator__base-fields">
           <label>Идентификатор
@@ -167,6 +176,6 @@
     </div>
   </main>
 
-  <script type="module" src="./assets/0.4.1/app.mjs"></script>
+  <script type="module" src="./assets/0.5.0/app.mjs"></script>
 </body>
 </html>
