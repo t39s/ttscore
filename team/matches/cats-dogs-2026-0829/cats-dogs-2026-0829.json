@@ -4,7 +4,7 @@
   "title": "Кошки — Собаки",
   "date": "2026-08-29",
   "venue": null,
-  "updatedAt": "2026-08-29T09:33:57.507Z",
+  "updatedAt": "2026-08-29T09:46:50.445Z",
   "individualMatchBestOf": 3,
   "winsToFinish": 3,
   "teams": {
@@ -73,7 +73,7 @@
         "gamesB": 0
       },
       "liveUrl": "https://t39s.github.io/ttscore/?page=report&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#rvZSi2rZcA5vu2NPVrqBtA",
-      "reportUrl": null
+      "reportUrl": "./report03.html"
     },
     {
       "id": "m04",
@@ -82,7 +82,7 @@
       "playerBId": "b1",
       "status": "current",
       "result": null,
-      "liveUrl": null,
+      "liveUrl": "https://t39s.github.io/ttscore/?page=report&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#s13VgHJido6iOVB8yxkLVg",
       "reportUrl": null
     }
   ]
