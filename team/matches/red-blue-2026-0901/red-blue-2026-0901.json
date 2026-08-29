@@ -1,1 +1,138 @@
-new
+{
+  "schemaVersion": 4,
+  "id": "red-blue-2026-0901",
+  "title": "Red team — Blue dreams",
+  "date": "2026-08-29",
+  "venue": null,
+  "updatedAt": "2026-08-29T11:40:19.579Z",
+  "individualMatchBestOf": 5,
+  "winsToFinish": 5,
+  "teams": {
+    "A": {
+      "name": "Red team",
+      "players": [
+        {
+          "id": "a1",
+          "name": "Красная шапочка"
+        },
+        {
+          "id": "a2",
+          "name": "Красный директор"
+        },
+        {
+          "id": "a3",
+          "name": "Красна девица"
+        }
+      ]
+    },
+    "B": {
+      "name": "Blue dreams",
+      "players": [
+        {
+          "id": "b1",
+          "name": "Синий кит"
+        },
+        {
+          "id": "b2",
+          "name": "Голубой берет"
+        },
+        {
+          "id": "b3",
+          "name": "Бирюзовый бухгалтер"
+        }
+      ]
+    }
+  },
+  "individualMatches": [
+    {
+      "id": "m01",
+      "order": 1,
+      "playerAId": "a1",
+      "playerBId": "b1",
+      "status": "current",
+      "result": null,
+      "liveUrl": "https://t39s.github.io/ttscore/?page=report&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#-YalDtnma4BWRVT6MjKi4w",
+      "reportUrl": null
+    },
+    {
+      "id": "m02",
+      "order": 2,
+      "playerAId": "a2",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m03",
+      "order": 3,
+      "playerAId": "a3",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m04",
+      "order": 4,
+      "playerAId": "a1",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m05",
+      "order": 5,
+      "playerAId": "a2",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m06",
+      "order": 6,
+      "playerAId": "a3",
+      "playerBId": "b1",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m07",
+      "order": 7,
+      "playerAId": "a1",
+      "playerBId": "b3",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m08",
+      "order": 8,
+      "playerAId": "a2",
+      "playerBId": "b1",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    },
+    {
+      "id": "m09",
+      "order": 9,
+      "playerAId": "a3",
+      "playerBId": "b2",
+      "status": "planned",
+      "result": null,
+      "liveUrl": null,
+      "reportUrl": null
+    }
+  ]
+}
