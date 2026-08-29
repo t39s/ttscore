@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
   <title>Командная встреча · ttScore Team</title>
-  <link rel="stylesheet" href="./assets/0.8.5/styles.css">
+  <link rel="stylesheet" href="./assets/0.8.6/styles.css">
 </head>
 <body>
   <main class="page">
     <header>
-      <p class="eyebrow">ttScore Team · v0.8.5</p>
+      <p class="eyebrow">ttScore Team · v0.8.6</p>
       <h1 id="team-match-title">Командная встреча</h1>
       <p id="team-match-meta" class="meta"></p>
     </header>
@@ -142,7 +142,7 @@
           <summary><span id="ttscore-integration-heading">Данные из ttScore</span><span class="editor-subsection__hint">Локальная интеграция</span></summary>
           <div class="editor-panel__body">
             <div class="ttscore-integration__heading">
-              <p class="muted">Текущая локальная встреча ttScore 0.3.5.</p>
+              <p class="muted">Текущая локальная встреча ttScore 0.3.5. Если live-публикация доступна, Live-отчёт и Live-табло автоматически попадут в следующий подготовленный JSON.</p>
               <button id="ttscore-refresh" class="button button--secondary" type="button">Перечитать ttScore</button>
             </div>
             <p id="ttscore-integration-status" class="ttscore-integration__status muted" role="status"></p>
@@ -253,11 +253,11 @@
         <p id="updated" class="updated"></p>
       </section>
 
-      <p class="public-note">Составы, результаты и ссылки на постоянные отчёты опубликованы открыто. Live-доступ текущей встречи вычисляется локально из ttScore и в JSON не сохраняется.</p>
+      <p class="public-note">Составы, результаты и ссылки на постоянные отчёты опубликованы открыто. Для текущей личной встречи Live-отчёт и Live-табло также доступны публично, если их ссылки сохранены в JSON командной встречи.</p>
 
     </div>
   </main>
 
-  <script type="module" src="./assets/0.8.5/app.mjs"></script>
+  <script type="module" src="./assets/0.8.6/app.mjs"></script>
 </body>
 </html>
