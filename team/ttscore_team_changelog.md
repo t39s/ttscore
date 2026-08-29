@@ -2,6 +2,16 @@
 
 Документ содержит историю реализованных версий `ttscore_team`, начиная с `v0.1`.
 
+## v0.8.10 — 2026-08-30
+
+- Исправлен ложный конфликт Firebase editor, из-за которого корректная публикация могла завершаться сообщением «Данные в Firebase изменились после загрузки».
+- Корневая причина: `runTransaction()` в Realtime Database может вызвать update callback с `null` при отсутствии локального cache даже при существующем удалённом узле.
+- Editor publication упрощена до `get()` → проверка ревизии → `set()` → readback.
+- Create-mode сохраняет transaction, чтобы не перезаписывать уже существующий ID.
+- Сохранены RTDB-null normalization, UID allowlist Rules, `schemaVersion: 4`, `pendingFinishedMatch`, Undo, пакетный переход и Live.
+- Версия поднята до `0.8.10`, чтобы исключить использование браузером закэшированных assets `0.8.9`.
+- Добавлен `ttscore_team_review_v0.8.10.md`.
+
 ## v0.8.9 — 2026-08-30
 
 Статус: **IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED**

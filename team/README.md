@@ -1,19 +1,19 @@
-# ttScore Team v0.8.9
+# ttScore Team v0.8.10
 
 ## Статус
 
-- Версия: `v0.8.9`.
+- Версия: `v0.8.10`.
 - Статус: `IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED`.
 - Основа: принятая `v0.8.7`.
 - `ttScore 0.3.5` не изменяется.
 - `schemaVersion: 4` не изменяется.
 
-Главное изменение `v0.8.9`: рабочий JSON командной встречи больше не публикуется через GitHub Pages. Источник истины — Firebase Realtime Database проекта `ttscore-list`.
+Главное изменение `v0.8.10`: рабочий JSON командной встречи больше не публикуется через GitHub Pages. Источник истины — Firebase Realtime Database проекта `ttscore-list`.
 
 ```text
 mode=create / mode=edit
         │
-        │ Email/Password + transaction
+        │ Email/Password + get/set
         ▼
 Firebase Realtime Database
 /teamMatches/<teamMatchId>
@@ -39,14 +39,14 @@ GitHub Pages остаётся статическим хостингом HTML/JS/
 Публичное чтение разрешено только внутри `/teamMatches/<id>`. Запись разрешена только аутентифицированным UID, включённым в закрытый allowlist `/editors/<uid> = true`. Учётная запись редактора создаётся вручную в Firebase Console → Authentication → Users, затем её UID добавляется в Realtime Database → Data → `/editors`.
 Для работы Web Auth с production-страницей в Authentication → Settings → Authorized domains должен присутствовать `t39s.github.io`.
 
-Подробная настройка: `ttscore_team_firebase_setup_v0.8.9.md`.
+Подробная настройка: `ttscore_team_firebase_setup_v0.8.10.md`.
 
 ## Структура пакета
 
 ```text
 team/
-  ttscore_team_0.8.9.html
-  assets/0.8.9/
+  ttscore_team_0.8.10.html
+  assets/0.8.10/
     app.mjs
     creator.mjs
     editor.mjs
@@ -68,9 +68,9 @@ tests/
   static-structure.test.mjs
   ttscore-integration.test.mjs
   ui-state.test.mjs
-ttscore_team_firebase_setup_v0.8.9.md
-ttscore_team_review_v0.8.9.md
-ttscore_team_referee_checklists_v0.8.9.md
+ttscore_team_firebase_setup_v0.8.10.md
+ttscore_team_review_v0.8.10.md
+ttscore_team_referee_checklists_v0.8.10.md
 ...
 ```
 
@@ -84,14 +84,14 @@ ttscore_team_referee_checklists_v0.8.9.md
 /teamMatches/<teamMatchId>
 ```
 
-Логическое содержимое объекта — тот же командный JSON `schemaVersion: 4`, который использовался в `v0.8.7`. Realtime Database физически не хранит свойства со значением `null`; Firebase-adapter `v0.8.9` восстанавливает отсутствующие nullable-поля (`venue`, верхнеуровневые Live-поля, `result`, `reportUrl`) перед строгой валидацией и вычислением ревизии. Поэтому спортивная модель и локальный JSON остаются каноническими.
+Логическое содержимое объекта — тот же командный JSON `schemaVersion: 4`, который использовался в `v0.8.7`. Realtime Database физически не хранит свойства со значением `null`; Firebase-adapter `v0.8.10` восстанавливает отсутствующие nullable-поля (`venue`, верхнеуровневые Live-поля, `result`, `reportUrl`) перед строгой валидацией и вычислением ревизии. Поэтому спортивная модель и локальный JSON остаются каноническими.
 
 Поля `liveReportUrl` и `liveScoreboardUrl` по-прежнему относятся только к текущей (`current`) личной встрече. `reportUrl` завершённой личной встречи остаётся необязательным.
 
 ## Публичный режим
 
 ```text
-ttscore_team_0.8.9.html?match=<id>
+ttscore_team_0.8.10.html?match=<id>
 ```
 
 Публичная страница подписывается через Firebase `onValue()` непосредственно на `/teamMatches/<id>`. Listener получает первоначальное состояние и каждое последующее изменение. Периодический polling удалён.
@@ -101,7 +101,7 @@ ttscore_team_0.8.9.html?match=<id>
 ## Редактор Firebase
 
 ```text
-ttscore_team_0.8.9.html?match=<id>&mode=edit
+ttscore_team_0.8.10.html?match=<id>&mode=edit
 ```
 
 Редактор:
@@ -110,8 +110,8 @@ ttscore_team_0.8.9.html?match=<id>&mode=edit
 2. Позволяет локально подготовить preview точно так же, как `v0.8.7`.
 3. Перед preview повторно читает Firebase и проверяет ревизию источника.
 4. Для публикации требует вход Email/Password.
-5. Публикует подготовленный JSON через `runTransaction()`.
-6. В transaction ещё раз проверяет, что текущая Firebase-ревизия совпадает с загруженной.
+5. Непосредственно перед публикацией выполняет свежий `get()` из Firebase.
+6. Сравнивает серверную ревизию с загруженной и при совпадении записывает подготовленный JSON через `set()`.
 7. После успешной публикации сразу синхронизирует editor с опубликованным состоянием.
 
 Таким образом, прежняя ручная цепочка `Сохранить JSON → GitHub commit → дождаться Pages → Перезагрузить источник` больше не является рабочим циклом.
@@ -121,20 +121,20 @@ ttscore_team_0.8.9.html?match=<id>&mode=edit
 ## Создание новой встречи
 
 ```text
-ttscore_team_0.8.9.html?mode=create
+ttscore_team_0.8.10.html?mode=create
 ```
 
 Creator формирует тот же JSON `schemaVersion: 4`. После preview:
 
 - `Опубликовать в Firebase` создаёт `/teamMatches/<id>`;
-- создание выполняется transaction и не перезаписывает уже существующий ID;
+- создание по-прежнему выполняется transaction и не перезаписывает уже существующий ID;
 - если ID занят, для дальнейших изменений используется `?match=<id>&mode=edit`;
 - `Сохранить JSON` остаётся резервным экспортом.
 
 ## Локальный editor
 
 ```text
-ttscore_team_0.8.9.html?mode=edit
+ttscore_team_0.8.10.html?mode=edit
 ```
 
 Локальный режим сохранён как fallback для чтения и редактирования файла `schemaVersion: 4`. Он не обращается к Firebase и не публикует данные. Это сознательное разделение: Firebase-editor работает только при наличии `match=<id>`.
@@ -177,7 +177,7 @@ team/matches/<id>/
 
 ## Безопасность и простота
 
-`v0.8.9` сознательно использует минимальную модель доступа:
+`v0.8.10` сознательно использует минимальную модель доступа:
 
 - public read `/teamMatches/<id>`;
 - write `/teamMatches/<id>` только для UID из `/editors`;
@@ -193,8 +193,8 @@ Firebase Web config является клиентской конфигураци
 
 ## Проверки
 
-- автоматические тесты: **172/172**;
-- Firebase: config/path/auth/realtime/transaction, RTDB-null normalization и editor allowlist проверены статическими и модульными тестами;
+- автоматические тесты: **173/173**;
+- Firebase: config/path/auth/realtime, create-transaction, editor get+revision+set, RTDB-null normalization и editor allowlist проверены статическими и модульными тестами;
 - JavaScript syntax: проверяется `node --check`;
 - спортивная модель `schemaVersion: 4` и workflow `v0.8.7` сохранены.
 
