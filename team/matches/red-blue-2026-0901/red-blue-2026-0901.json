@@ -4,7 +4,7 @@
   "title": "Red team — Blue dreams",
   "date": "2026-08-29",
   "venue": null,
-  "updatedAt": "2026-08-29T12:41:49.239Z",
+  "updatedAt": "2026-08-29T16:03:16.536Z",
   "individualMatchBestOf": 5,
   "winsToFinish": 5,
   "teams": {
@@ -54,7 +54,6 @@
         "gamesA": 3,
         "gamesB": 0
       },
-      "liveUrl": "https://t39s.github.io/ttscore/?page=report&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#-YalDtnma4BWRVT6MjKi4w",
       "reportUrl": null
     },
     {
@@ -62,9 +61,11 @@
       "order": 2,
       "playerAId": "a2",
       "playerBId": "b2",
-      "status": "current",
-      "result": null,
-      "liveUrl": null,
+      "status": "finished",
+      "result": {
+        "gamesA": 3,
+        "gamesB": 0
+      },
       "reportUrl": null
     },
     {
@@ -72,9 +73,8 @@
       "order": 3,
       "playerAId": "a3",
       "playerBId": "b3",
-      "status": "planned",
+      "status": "current",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -84,7 +84,6 @@
       "playerBId": "b2",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -94,7 +93,6 @@
       "playerBId": "b3",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -104,7 +102,6 @@
       "playerBId": "b1",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -114,7 +111,6 @@
       "playerBId": "b3",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -124,7 +120,6 @@
       "playerBId": "b1",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     },
     {
@@ -134,8 +129,9 @@
       "playerBId": "b2",
       "status": "planned",
       "result": null,
-      "liveUrl": null,
       "reportUrl": null
     }
-  ]
+  ],
+  "liveReportUrl": null,
+  "liveScoreboardUrl": null
 }
