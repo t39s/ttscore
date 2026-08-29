@@ -2,7 +2,7 @@
 
 Документ содержит историю реализованных версий `ttscore_team`, начиная с `v0.1`.
 
-## v0.8.8 — 2026-08-30
+## v0.8.9 — 2026-08-30
 
 Статус: **IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED**
 
@@ -19,9 +19,12 @@
 - После успешной публикации editor сразу синхронизируется с опубликованным Firebase-состоянием; отдельное постпубликационное `Перезагрузить источник` больше не требуется.
 - Creator создаёт `/teamMatches/<id>` напрямую в Firebase и не перезаписывает уже существующий ID.
 - Добавлен `firebase-source.mjs` с клиентской конфигурацией проекта, realtime read/subscription, Authentication и транзакционными write-операциями.
-- Добавлен `firebase-database-rules.json`: публичное чтение `/teamMatches/<id>`, запись только при `auth != null`, минимальная серверная валидация `schemaVersion: 4` и совпадения `id` с ключом.
+- Добавлен `firebase-database-rules.json`: публичное чтение `/teamMatches/<id>`, запись только для аутентифицированных UID из закрытого `/editors`, минимальная серверная валидация `schemaVersion: 4` и совпадения `id` с ключом.
+- По результатам ревью добавлен Firebase transport-normalizer: Realtime Database удаляет свойства со значением `null`, поэтому adapter восстанавливает `venue`, `liveReportUrl`, `liveScoreboardUrl`, `result` и `reportUrl` перед строгой валидацией и вычислением ревизии. Это исправляет ошибку `mode=edit` вида `individualMatches[0]: отсутствуют поля: result, reportUrl`.
+- Firebase transaction теперь вычисляет ревизию текущего server snapshot после той же нормализации, поэтому физическое отсутствие `null`-ключей не создаёт ложный конфликт.
+- По результатам security-review правило `auth != null` заменено allowlist-проверкой `/editors/<uid> = true`; Email/Password-аутентификация сама по себе больше не даёт права записи.
 - Относительные `reportUrl` продолжают разрешаться от статического GitHub Pages-каталога `team/matches/<id>/`; переносится только рабочий командный JSON.
-- Добавлены `ttscore_team_firebase_setup_v0.8.8.md` и актуальные судейские чеклисты `v0.8.8`.
+- Добавлены `ttscore_team_firebase_setup_v0.8.9.md` и актуальные судейские чеклисты `v0.8.9`.
 
 ### Не изменено
 
@@ -34,8 +37,8 @@
 
 ### Проверено
 
-- Автоматические тесты: **169 из 169 пройдены**.
-- Добавлены тесты Firebase config/path, `onValue`, Email/Password, transaction, запрета create-overwrite, atomic revision guard и Rules.
+- Автоматические тесты: **172 из 172 пройдены**.
+- Добавлены тесты Firebase config/path, `onValue`, Email/Password, transaction, запрета create-overwrite, atomic revision guard, RTDB-null normalization и editor allowlist Rules.
 - Спортивная матрица 2×2/3×3/4×4 × best-of 3/5/7 остаётся совместимой с принятой моделью `v0.8.7`.
 - JavaScript-модули проверяются `node --check`.
 - Реальный end-to-end write не автоматизирован: для него требуются установленный Rules-файл и действующая учётная запись редактора Firebase.

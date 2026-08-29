@@ -1,14 +1,14 @@
-# ttScore Team v0.8.8
+# ttScore Team v0.8.9
 
 ## Статус
 
-- Версия: `v0.8.8`.
+- Версия: `v0.8.9`.
 - Статус: `IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED`.
 - Основа: принятая `v0.8.7`.
 - `ttScore 0.3.5` не изменяется.
 - `schemaVersion: 4` не изменяется.
 
-Главное изменение `v0.8.8`: рабочий JSON командной встречи больше не публикуется через GitHub Pages. Источник истины — Firebase Realtime Database проекта `ttscore-list`.
+Главное изменение `v0.8.9`: рабочий JSON командной встречи больше не публикуется через GitHub Pages. Источник истины — Firebase Realtime Database проекта `ttscore-list`.
 
 ```text
 mode=create / mode=edit
@@ -36,17 +36,17 @@ GitHub Pages остаётся статическим хостингом HTML/JS/
 
 Готовые правила находятся в `firebase-database-rules.json`. Перед рабочей публикацией их нужно установить в Firebase Console → Realtime Database → Rules.
 
-Публичное чтение разрешено только внутри `/teamMatches/<id>`. Запись разрешена только аутентифицированным пользователям. Приложение не содержит регистрации пользователя: учётная запись редактора создаётся вручную в Firebase Console → Authentication → Users.
+Публичное чтение разрешено только внутри `/teamMatches/<id>`. Запись разрешена только аутентифицированным UID, включённым в закрытый allowlist `/editors/<uid> = true`. Учётная запись редактора создаётся вручную в Firebase Console → Authentication → Users, затем её UID добавляется в Realtime Database → Data → `/editors`.
 Для работы Web Auth с production-страницей в Authentication → Settings → Authorized domains должен присутствовать `t39s.github.io`.
 
-Подробная настройка: `ttscore_team_firebase_setup_v0.8.8.md`.
+Подробная настройка: `ttscore_team_firebase_setup_v0.8.9.md`.
 
 ## Структура пакета
 
 ```text
 team/
-  ttscore_team_0.8.8.html
-  assets/0.8.8/
+  ttscore_team_0.8.9.html
+  assets/0.8.9/
     app.mjs
     creator.mjs
     editor.mjs
@@ -68,8 +68,9 @@ tests/
   static-structure.test.mjs
   ttscore-integration.test.mjs
   ui-state.test.mjs
-ttscore_team_firebase_setup_v0.8.8.md
-ttscore_team_referee_checklists_v0.8.8.md
+ttscore_team_firebase_setup_v0.8.9.md
+ttscore_team_review_v0.8.9.md
+ttscore_team_referee_checklists_v0.8.9.md
 ...
 ```
 
@@ -83,14 +84,14 @@ ttscore_team_referee_checklists_v0.8.8.md
 /teamMatches/<teamMatchId>
 ```
 
-Содержимое объекта — тот же командный JSON `schemaVersion: 4`, который использовался в `v0.8.7`. Firebase не добавляет служебные поля в спортивную модель.
+Логическое содержимое объекта — тот же командный JSON `schemaVersion: 4`, который использовался в `v0.8.7`. Realtime Database физически не хранит свойства со значением `null`; Firebase-adapter `v0.8.9` восстанавливает отсутствующие nullable-поля (`venue`, верхнеуровневые Live-поля, `result`, `reportUrl`) перед строгой валидацией и вычислением ревизии. Поэтому спортивная модель и локальный JSON остаются каноническими.
 
 Поля `liveReportUrl` и `liveScoreboardUrl` по-прежнему относятся только к текущей (`current`) личной встрече. `reportUrl` завершённой личной встречи остаётся необязательным.
 
 ## Публичный режим
 
 ```text
-ttscore_team_0.8.8.html?match=<id>
+ttscore_team_0.8.9.html?match=<id>
 ```
 
 Публичная страница подписывается через Firebase `onValue()` непосредственно на `/teamMatches/<id>`. Listener получает первоначальное состояние и каждое последующее изменение. Периодический polling удалён.
@@ -100,7 +101,7 @@ ttscore_team_0.8.8.html?match=<id>
 ## Редактор Firebase
 
 ```text
-ttscore_team_0.8.8.html?match=<id>&mode=edit
+ttscore_team_0.8.9.html?match=<id>&mode=edit
 ```
 
 Редактор:
@@ -120,7 +121,7 @@ ttscore_team_0.8.8.html?match=<id>&mode=edit
 ## Создание новой встречи
 
 ```text
-ttscore_team_0.8.8.html?mode=create
+ttscore_team_0.8.9.html?mode=create
 ```
 
 Creator формирует тот же JSON `schemaVersion: 4`. После preview:
@@ -133,7 +134,7 @@ Creator формирует тот же JSON `schemaVersion: 4`. После previ
 ## Локальный editor
 
 ```text
-ttscore_team_0.8.8.html?mode=edit
+ttscore_team_0.8.9.html?mode=edit
 ```
 
 Локальный режим сохранён как fallback для чтения и редактирования файла `schemaVersion: 4`. Он не обращается к Firebase и не публикует данные. Это сознательное разделение: Firebase-editor работает только при наличии `match=<id>`.
@@ -176,10 +177,11 @@ team/matches/<id>/
 
 ## Безопасность и простота
 
-`v0.8.8` сознательно использует минимальную модель доступа:
+`v0.8.9` сознательно использует минимальную модель доступа:
 
 - public read `/teamMatches/<id>`;
-- authenticated write `/teamMatches/<id>`;
+- write `/teamMatches/<id>` только для UID из `/editors`;
+- `/editors` закрыт для клиентского чтения и записи;
 - нет регистрации пользователя в приложении;
 - нет пользовательских ролей, custom claims или Cloud Functions;
 - нет собственного сервера;
@@ -187,12 +189,12 @@ team/matches/<id>/
 
 Firebase Web config является клиентской конфигурацией. Право записи защищается Authentication и Realtime Database Rules, а не сокрытием `apiKey`.
 
-При необходимости следующая версия может ограничить запись конкретными UID, не меняя структуру данных.
+Все разрешённые UID сейчас имеют одинаковые права на все командные встречи. Более детальное разграничение при необходимости можно добавить позже без изменения структуры спортивного JSON.
 
 ## Проверки
 
-- автоматические тесты: **169/169**;
-- Firebase: config/path/auth/realtime/transaction проверены статическими и модульными тестами;
+- автоматические тесты: **172/172**;
+- Firebase: config/path/auth/realtime/transaction, RTDB-null normalization и editor allowlist проверены статическими и модульными тестами;
 - JavaScript syntax: проверяется `node --check`;
 - спортивная модель `schemaVersion: 4` и workflow `v0.8.7` сохранены.
 
