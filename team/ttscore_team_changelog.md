@@ -2,9 +2,47 @@
 
 Документ содержит историю реализованных версий `ttscore_team`, начиная с `v0.1`.
 
-## v0.8.7 — 2026-08-29
+## v0.8.8 — 2026-08-30
 
 Статус: **IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED**
+
+Версия построена на принятой `v0.8.7`. Спортивная модель `schemaVersion: 4`, локальная интеграция с `ttScore 0.3.5`, `pendingFinishedMatch`, Undo и пакетный переход сохранены. Основное изменение — перенос рабочего командного JSON с ручной публикации GitHub Pages в Firebase Realtime Database проекта `ttscore-list`.
+
+### Изменено
+
+- Рабочий опубликованный источник командной встречи теперь `/teamMatches/<id>` в Firebase Realtime Database.
+- Публичный режим использует `onValue()` и получает первоначальный JSON и последующие обновления в реальном времени; 30-секундный polling удалён.
+- `mode=edit` читает текущий JSON из Firebase вместо `team/matches/<id>/<id>.json`.
+- Добавлена Email/Password-аутентификация редактора через Firebase Authentication. Публичное чтение не требует входа.
+- После preview основное действие — `Опубликовать в Firebase`; `Сохранить JSON` сохранён как резервный локальный экспорт.
+- Публикация editor выполняется через `runTransaction()` с атомарной проверкой ревизии загруженного источника. Более новое состояние Firebase не перезаписывается старым preview.
+- После успешной публикации editor сразу синхронизируется с опубликованным Firebase-состоянием; отдельное постпубликационное `Перезагрузить источник` больше не требуется.
+- Creator создаёт `/teamMatches/<id>` напрямую в Firebase и не перезаписывает уже существующий ID.
+- Добавлен `firebase-source.mjs` с клиентской конфигурацией проекта, realtime read/subscription, Authentication и транзакционными write-операциями.
+- Добавлен `firebase-database-rules.json`: публичное чтение `/teamMatches/<id>`, запись только при `auth != null`, минимальная серверная валидация `schemaVersion: 4` и совпадения `id` с ключом.
+- Относительные `reportUrl` продолжают разрешаться от статического GitHub Pages-каталога `team/matches/<id>/`; переносится только рабочий командный JSON.
+- Добавлены `ttscore_team_firebase_setup_v0.8.8.md` и актуальные судейские чеклисты `v0.8.8`.
+
+### Не изменено
+
+- `schemaVersion: 4` и структура командного JSON.
+- `ttScore 0.3.5`.
+- Логика `pendingFinishedMatch`, автоматический Undo до нового `matchId`, проверка следующей пары, пакетный переход с Live/без Live и reconciliation.
+- Необязательность `reportUrl`.
+- Статический хостинг HTML/JS/CSS на GitHub Pages.
+- Собственный backend, Cloud Functions, service account и GitHub API не добавлены.
+
+### Проверено
+
+- Автоматические тесты: **169 из 169 пройдены**.
+- Добавлены тесты Firebase config/path, `onValue`, Email/Password, transaction, запрета create-overwrite, atomic revision guard и Rules.
+- Спортивная матрица 2×2/3×3/4×4 × best-of 3/5/7 остаётся совместимой с принятой моделью `v0.8.7`.
+- JavaScript-модули проверяются `node --check`.
+- Реальный end-to-end write не автоматизирован: для него требуются установленный Rules-файл и действующая учётная запись редактора Firebase.
+
+## v0.8.7 — 2026-08-29
+
+Статус: **ACCEPTED**
 
 Версия построена на `v0.8.6`. `schemaVersion: 4` и структура публикации сохранены. Основное изменение — пакетный рабочий цикл между соседними личными встречами без изменений `ttScore 0.3.5`.
 
