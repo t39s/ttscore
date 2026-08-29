@@ -4,7 +4,7 @@
   "title": "Red team — Blue dreams",
   "date": "2026-08-29",
   "venue": null,
-  "updatedAt": "2026-08-29T16:31:05.062Z",
+  "updatedAt": "2026-08-29T16:45:09.532Z",
   "individualMatchBestOf": 5,
   "winsToFinish": 5,
   "teams": {
@@ -97,8 +97,11 @@
       "order": 5,
       "playerAId": "a2",
       "playerBId": "b3",
-      "status": "current",
-      "result": null,
+      "status": "finished",
+      "result": {
+        "gamesA": 0,
+        "gamesB": 3
+      },
       "reportUrl": null
     },
     {
@@ -106,7 +109,7 @@
       "order": 6,
       "playerAId": "a3",
       "playerBId": "b1",
-      "status": "planned",
+      "status": "current",
       "result": null,
       "reportUrl": null
     },
@@ -138,6 +141,6 @@
       "reportUrl": null
     }
   ],
-  "liveReportUrl": null,
-  "liveScoreboardUrl": null
+  "liveReportUrl": "https://t39s.github.io/ttscore/?page=report&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#gqcZWSZQuUk9OBsjV02goQ",
+  "liveScoreboardUrl": "https://t39s.github.io/ttscore/?page=scoreboard&source=live&publisher=qT8s7fBD3nfMtWWCBtzBeWpfgJG2#gqcZWSZQuUk9OBsjV02goQ"
 }
