@@ -2,9 +2,27 @@
 
 Документ содержит историю реализованных версий `ttscore_team`, начиная с `v0.1`.
 
+## v0.8.12 — 2026-08-31
+
+Статус: **IMPLEMENTED LOCALLY, REVIEWED, NOT PUBLISHED, NOT YET ACCEPTED**  
+Decision: **ESCALATE** — для полного достижения продуктовой цели требуется прямое разрешение на минимальное изменение `ttScore`.
+
+- Baseline — принятая `v0.8.11`; finished GitHub fallback сохранён.
+- Финальный результат `ttScore` автоматически сохраняется как pending и больше не требует штатного ручного переноса в Team.
+- Automatic current → finished выполняется только после проверяемой границы Undo: выхода из final state либо появления нового `matchId` с точным совпадением следующей `planned`-пары.
+- Storage `oldValue/newValue` используется для восстановления безопасного перехода `final → setup` и прямого `final → exact next`.
+- Wrong next pair блокирует автоматический переход.
+- Operational `liveReportUrl/liveScoreboardUrl` совпавшей current ttScore-встречи синхронизируются в Firebase автоматически отдельным artifact без изменения sports revision.
+- Непубликованные ручные правки editor/result/preview приостанавливают automation вместо скрытого merge/overwrite.
+- Добавлены retry после Firebase login, восстановления сети и освобождения busy editor.
+- Ручные transition controls сохранены и обозначены как fallback/correction path.
+- `ttScore 0.3.5`, его storage protocol, `schemaVersion: 4`, Firebase Rules и спортивная модель не изменены.
+- Добавлены end-to-end pure workflow tests; полный suite: **188/188 PASS**.
+- Остаточный gap: Team знает следующую пару/date/bestOf, но `ttScore 0.3.5` не имеет поддерживаемого setup-prefill интерфейса. Рекомендуемый следующий шаг после разрешения владельца — URL-prefill setup без автоматического старта встречи.
+
 ## v0.8.11 — 2026-08-31
 
-Статус: **IMPLEMENTED LOCALLY, REVIEWED, NOT PUBLISHED, NOT YET ACCEPTED**
+Статус: **ACCEPTED**
 
 - Добавлен статический read-only fallback финального JSON завершённой командной встречи: `team/matches/<id>/<id>.json`.
 - Firebase остаётся единственным оперативным источником `planned/current/live` и основным источником `finished`.
