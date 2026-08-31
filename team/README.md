@@ -1,53 +1,55 @@
-# ttScore Team v0.8.10
+# ttScore Team v0.8.11
 
 ## Статус
 
-- Версия: `v0.8.10`.
-- Статус: `IMPLEMENTED LOCALLY, NOT PUBLISHED, NOT YET ACCEPTED`.
-- Основа: принятая `v0.8.7`.
+- Версия: `v0.8.11`.
+- Статус: `IMPLEMENTED LOCALLY, REVIEWED, NOT PUBLISHED, NOT YET ACCEPTED`.
+- Baseline: `v0.8.10`.
 - `ttScore 0.3.5` не изменяется.
 - `schemaVersion: 4` не изменяется.
 
-Главное изменение `v0.8.10`: рабочий JSON командной встречи больше не публикуется через GitHub Pages. Источник истины — Firebase Realtime Database проекта `ttscore-list`.
+Главное изменение `v0.8.11`: для завершённых командных встреч добавлен статический read-only fallback финального JSON на GitHub Pages. Firebase остаётся единственным оперативным источником для `planned/current/live` и основным источником для `finished`.
 
 ```text
-mode=create / mode=edit
-        │
-        │ Email/Password + get/set
-        ▼
-Firebase Realtime Database
-/teamMatches/<teamMatchId>
-        │
-        │ onValue()
-        ▼
-public view на всех устройствах
+public view
+   ↓
+Firebase /teamMatches/<id>
+   ├─ success → обычный realtime view
+   └─ error / no match
+          ↓
+     проверить GitHub archive
+     team/matches/<id>/<id>.json
+          ↓
+     только если schemaVersion: 4 + completed
+          ↓
+     предложить [Открыть архивную копию]
+          ↓
+     read-only view + «Архивная копия»
 ```
 
-GitHub Pages остаётся статическим хостингом HTML/JS/CSS `ttscore_team`. Собственный backend, Cloud Functions, GitHub API и service account не добавляются.
+Архив не используется в `mode=edit`, не участвует в Live, не записывается обратно в Firebase и не сравнивается с Firebase по принципу «какая версия новее».
 
 ## Firebase
 
-Проект:
+Проект и правила не изменены относительно `v0.8.10`:
 
-- `projectId`: `ttscore-list`
-- `databaseURL`: `https://ttscore-list-default-rtdb.europe-west1.firebasedatabase.app/`
-- Authentication: Email/Password
-- рабочий путь: `/teamMatches/<id>`
+- `projectId`: `ttscore-list`;
+- `databaseURL`: `https://ttscore-list-default-rtdb.europe-west1.firebasedatabase.app/`;
+- Authentication: Email/Password;
+- рабочий путь: `/teamMatches/<id>`;
+- публичное чтение `/teamMatches/<id>`;
+- запись только для UID из закрытого `/editors/<uid> = true`.
 
-Готовые правила находятся в `firebase-database-rules.json`. Перед рабочей публикацией их нужно установить в Firebase Console → Realtime Database → Rules.
-
-Публичное чтение разрешено только внутри `/teamMatches/<id>`. Запись разрешена только аутентифицированным UID, включённым в закрытый allowlist `/editors/<uid> = true`. Учётная запись редактора создаётся вручную в Firebase Console → Authentication → Users, затем её UID добавляется в Realtime Database → Data → `/editors`.
-Для работы Web Auth с production-страницей в Authentication → Settings → Authorized domains должен присутствовать `t39s.github.io`.
-
-Подробная настройка: `ttscore_team_firebase_setup_v0.8.10.md`.
+Настройка: `ttscore_team_firebase_setup_v0.8.10.md`. Rules: `firebase-database-rules.json`.
 
 ## Структура пакета
 
 ```text
 team/
-  ttscore_team_0.8.10.html
-  assets/0.8.10/
+  ttscore_team_0.8.11.html
+  assets/0.8.11/
     app.mjs
+    archive-source.mjs
     creator.mjs
     editor.mjs
     file-save.mjs
@@ -57,145 +59,96 @@ team/
     styles.css
     ttscore-integration.mjs
     ui-state.mjs
-firebase-database-rules.json
 tests/
-  creator.test.mjs
-  editor.test.mjs
-  file-save.test.mjs
-  firebase-source.test.mjs
-  matches-source.test.mjs
-  model.test.mjs
-  static-structure.test.mjs
-  ttscore-integration.test.mjs
-  ui-state.test.mjs
-ttscore_team_firebase_setup_v0.8.10.md
-ttscore_team_review_v0.8.10.md
-ttscore_team_referee_checklists_v0.8.10.md
-...
+  archive-source.test.mjs
+  ...
+firebase-database-rules.json
+RESEARCH_v0.8.11.md
+PLAN_v0.8.11.md
+GENERAL_REVIEW_v0.8.11.md
+NEXT_CYCLE_BRIEF_v0.8.11.md
+ttscore_team_referee_checklists_v0.8.11.md
 ```
 
-Исторические документы предыдущих версий сохранены без изменения.
-
-## Модель данных
-
-Одна командная встреча хранится одним JSON-объектом:
-
-```text
-/teamMatches/<teamMatchId>
-```
-
-Логическое содержимое объекта — тот же командный JSON `schemaVersion: 4`, который использовался в `v0.8.7`. Realtime Database физически не хранит свойства со значением `null`; Firebase-adapter `v0.8.10` восстанавливает отсутствующие nullable-поля (`venue`, верхнеуровневые Live-поля, `result`, `reportUrl`) перед строгой валидацией и вычислением ревизии. Поэтому спортивная модель и локальный JSON остаются каноническими.
-
-Поля `liveReportUrl` и `liveScoreboardUrl` по-прежнему относятся только к текущей (`current`) личной встрече. `reportUrl` завершённой личной встречи остаётся необязательным.
+Исторические документы предыдущих версий сохранены без переписывания.
 
 ## Публичный режим
 
 ```text
-ttscore_team_0.8.10.html?match=<id>
+ttscore_team_0.8.11.html?match=<id>
 ```
 
-Публичная страница подписывается через Firebase `onValue()` непосредственно на `/teamMatches/<id>`. Listener получает первоначальное состояние и каждое последующее изменение. Периодический polling удалён.
+Нормальный путь — Firebase `onValue()`. Если Firebase успешно отдаёт матч, GitHub archive не используется.
 
-Публичному режиму Firebase Authentication не требуется.
-
-## Редактор Firebase
+Если первоначальное получение Firebase завершается ошибкой или матч отсутствует, приложение проверяет:
 
 ```text
-ttscore_team_0.8.10.html?match=<id>&mode=edit
+team/matches/<id>/<id>.json
 ```
 
-Редактор:
+Архив предлагается пользователю только если:
 
-1. Загружает `/teamMatches/<id>` из Firebase.
-2. Позволяет локально подготовить preview точно так же, как `v0.8.7`.
-3. Перед preview повторно читает Firebase и проверяет ревизию источника.
-4. Для публикации требует вход Email/Password.
-5. Непосредственно перед публикацией выполняет свежий `get()` из Firebase.
-6. Сравнивает серверную ревизию с загруженной и при совпадении записывает подготовленный JSON через `set()`.
-7. После успешной публикации сразу синхронизирует editor с опубликованным состоянием.
+1. JSON проходит обычную строгую модель `schemaVersion: 4`;
+2. `id` совпадает с параметром `match`;
+3. командная встреча действительно завершена (`completed`).
 
-Таким образом, прежняя ручная цепочка `Сохранить JSON → GitHub commit → дождаться Pages → Перезагрузить источник` больше не является рабочим циклом.
+Переход на архив выполняется только после нажатия `Открыть архивную копию`. В интерфейсе постоянно показывается `Архивная копия · read-only`.
 
-Основное действие после preview — `Опубликовать в Firebase`. `Сохранить JSON` остаётся резервным локальным экспортом.
+Запрос архива использует `cache: no-store`, чтобы снизить риск показа старой копии после обновления постоянных `reportUrl`.
 
-## Создание новой встречи
+## Редактор и creator
+
+Firebase-editor и creator сохраняют контракт `v0.8.10`:
+
+- `?match=<id>&mode=edit` — только Firebase;
+- `?mode=create` — создание в Firebase;
+- `?mode=edit` без `match` — локальный JSON editor;
+- `Сохранить JSON` — резервный локальный экспорт.
+
+Архивный fallback не подключён к editor. Это жёсткая граница против появления второго оперативного source of truth.
+
+Editor publication остаётся `get()` → проверка ревизии → `set()` → readback. Это не атомарный CAS; модель рассчитана на одного операционного редактора. Create-mode по-прежнему использует transaction для защиты от overwrite существующего ID.
+
+## Архивирование finished
+
+После финальной публикации Firebase и проверки public view сохранить канонический JSON и разместить:
 
 ```text
-ttscore_team_0.8.10.html?mode=create
+team/matches/<id>/<id>.json
 ```
 
-Creator формирует тот же JSON `schemaVersion: 4`. После preview:
-
-- `Опубликовать в Firebase` создаёт `/teamMatches/<id>`;
-- создание по-прежнему выполняется transaction и не перезаписывает уже существующий ID;
-- если ID занят, для дальнейших изменений используется `?match=<id>&mode=edit`;
-- `Сохранить JSON` остаётся резервным экспортом.
-
-## Локальный editor
+Рекомендуемый порядок:
 
 ```text
-ttscore_team_0.8.10.html?mode=edit
+finished в Firebase
+→ проверить public view
+→ Сохранить JSON
+→ commit <id>.json вместе с постоянными отчётами
 ```
 
-Локальный режим сохранён как fallback для чтения и редактирования файла `schemaVersion: 4`. Он не обращается к Firebase и не публикует данные. Это сознательное разделение: Firebase-editor работает только при наличии `match=<id>`.
+Если позднее добавляется `reportUrl`, рекомендуется обновить и Firebase final JSON, и GitHub archive JSON. GitHub archive при этом остаётся только read-only fallback.
 
 ## Относительные reportUrl
 
-Перенос рабочего JSON в Firebase не меняет семантику файлов постоянных отчётов.
-
-Относительный `reportUrl`, например:
-
-```text
-./individual-01.html
-```
-
-по-прежнему разрешается от GitHub Pages-каталога:
+Семантика не изменилась. `./individual-01.html` разрешается от:
 
 ```text
 team/matches/<id>/
 ```
 
-То есть в Firebase хранится командный JSON, а автономные HTML/JSON-файлы отчётов при необходимости могут оставаться статическими файлами GitHub Pages.
+Поэтому архивный `<id>.json` и постоянные отчёты естественно живут в одном каталоге.
 
 ## Интеграция ttScore 0.3.5
 
-Вся логика `v0.8.7` сохранена:
-
-- чтение `ttScore:0.3.5:currentMeeting`;
-- чтение `ttScore:0.3.5:livePublication`;
-- `BroadcastChannel("ttScore:0.3.5:meeting")` и `storage` events;
-- локальный `pendingFinishedMatch`;
-- автоматический Undo, пока остаётся тот же `matchId`;
-- удержание завершённого результата после запуска следующей встречи;
-- проверка следующей пары;
-- пакетный переход `finished предыдущей + current следующей + Live следующей`;
-- ручная корректировка сохранённого результата после нового `matchId`;
-- публикация перехода без Live;
-- reconciliation pending с опубликованным состоянием.
-
-Разница только в последнем шаге: подготовленный JSON публикуется напрямую в Firebase.
-
-## Безопасность и простота
-
-`v0.8.10` сознательно использует минимальную модель доступа:
-
-- public read `/teamMatches/<id>`;
-- write `/teamMatches/<id>` только для UID из `/editors`;
-- `/editors` закрыт для клиентского чтения и записи;
-- нет регистрации пользователя в приложении;
-- нет пользовательских ролей, custom claims или Cloud Functions;
-- нет собственного сервера;
-- нет секретов service account в клиенте.
-
-Firebase Web config является клиентской конфигурацией. Право записи защищается Authentication и Realtime Database Rules, а не сокрытием `apiKey`.
-
-Все разрешённые UID сейчас имеют одинаковые права на все командные встречи. Более детальное разграничение при необходимости можно добавить позже без изменения структуры спортивного JSON.
+Сохранена без изменений: `currentMeeting`, `livePublication`, BroadcastChannel/storage events, `pendingFinishedMatch`, Undo до нового `matchId`, пакетный переход, проверка следующей пары, Live и reconciliation.
 
 ## Проверки
 
-- автоматические тесты: **173/173**;
-- Firebase: config/path/auth/realtime, create-transaction, editor get+revision+set, RTDB-null normalization и editor allowlist проверены статическими и модульными тестами;
-- JavaScript syntax: проверяется `node --check`;
-- спортивная модель `schemaVersion: 4` и workflow `v0.8.7` сохранены.
+- автоматические тесты: **177/177**;
+- добавлены unit/regression tests архивного URL, HTTP 404/503, `cache: no-store`, совпадения `id` и запрета fallback для незавершённой встречи;
+- статически проверена граница `public view only` и отсутствие archive-write path;
+- JavaScript syntax: `node --check` для всех runtime/test `.mjs`;
+- Firebase Rules и `schemaVersion: 4` не изменены;
+- `ttScore 0.3.5` не изменён.
 
-Сетевой end-to-end write в реальный Firebase не включён в автоматические тесты пакета, потому что для него требуется действующая учётная запись редактора и установленные Rules.
+Не выполнен реальный production smoke с искусственным отключением Firebase на GitHub Pages: среда не управляет production Firebase/Pages. Этот сценарий покрыт модульными и структурными проверками; перед публикацией остаётся короткий ручной smoke по чеклисту.
