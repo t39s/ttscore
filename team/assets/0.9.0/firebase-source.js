@@ -24,6 +24,7 @@ export function normalizeFirebaseTeamMatchData(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
 
   const normalized = cloneJson(value);
+  delete normalized._writeRevision;
   if (!Object.prototype.hasOwnProperty.call(normalized, "venue")) normalized.venue = null;
   if (normalized.schemaVersion === 4) {
     if (!Object.prototype.hasOwnProperty.call(normalized, "liveReportUrl")) normalized.liveReportUrl = null;
@@ -134,7 +135,7 @@ export async function createFirebaseTeamMatch(id, data) {
   try {
     transaction = await databaseModule.runTransaction(reference, current => {
       if (current !== null) return;
-      return data;
+      return withFirebaseTeamMatchWriteRevision(data, 1);
     }, { applyLocally: false });
   } catch (error) {
     rethrowFirebaseWriteError(error);
@@ -159,53 +160,71 @@ export function assertFirebaseSourceRevision(current, expectedRevision, revision
   return currentRevision;
 }
 
-export function createFirebaseTeamMatchTransactionUpdater(id, transform, state = {}) {
-  if (typeof transform !== "function") throw new Error("Для transaction требуется функция преобразования Team state.");
-  return current => {
-    // Firebase RTDB may invoke a transaction updater with null before the
-    // existing remote value is present in the local cache. Returning undefined
-    // here would abort a valid transaction. Returning null lets Firebase send
-    // the local candidate; if the server contains the match, the transaction is
-    // rejected as stale and retried with the actual server value.
-    if (current === null) {
-      state.sawNull = true;
-      state.transformError = null;
-      return null;
-    }
-    try {
-      const normalized = normalizeFirebaseTeamMatchData(current);
-      const next = transform(normalized);
-      if (!next || typeof next !== "object" || next.id !== id) throw new Error("Team transaction вернул некорректный JSON.");
-      state.transformError = null;
-      return next;
-    } catch (error) {
-      state.transformError = error instanceof Error ? error : new Error(String(error));
-      return;
-    }
+const WRITE_REVISION_FIELD = "_writeRevision";
+
+export function firebaseTeamMatchWriteRevision(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  if (!Object.prototype.hasOwnProperty.call(value, WRITE_REVISION_FIELD)) return 0;
+  const revision = value[WRITE_REVISION_FIELD];
+  if (!Number.isSafeInteger(revision) || revision < 1) throw new Error("Firebase Team write revision повреждена.");
+  return revision;
+}
+
+export function withFirebaseTeamMatchWriteRevision(value, revision) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Team write: ожидается JSON-объект.");
+  if (!Number.isSafeInteger(revision) || revision < 1) throw new Error("Team write revision должна быть положительным целым числом.");
+  return { ...cloneJson(value), [WRITE_REVISION_FIELD]: revision };
+}
+
+export function prepareFirebaseTeamMatchGuardedWrite(rawCurrent, id, transform) {
+  if (rawCurrent === null) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
+  if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
+  const expectedWriteRevision = firebaseTeamMatchWriteRevision(rawCurrent);
+  const current = normalizeFirebaseTeamMatchData(rawCurrent);
+  const next = transform(current);
+  if (!next || typeof next !== "object" || next.id !== id) throw new Error("Team conditional write вернул некорректный JSON.");
+  return {
+    expectedWriteRevision,
+    nextWriteRevision: expectedWriteRevision + 1,
+    data: normalizeFirebaseTeamMatchData(next),
+    candidate: withFirebaseTeamMatchWriteRevision(next, expectedWriteRevision + 1)
   };
 }
 
+async function classifyRevisionGuardFailure(reference, expectedRevision, databaseModule, originalError) {
+  try {
+    const latestSnapshot = await databaseModule.get(reference);
+    if (!latestSnapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
+    const latestRevision = firebaseTeamMatchWriteRevision(latestSnapshot.val());
+    if (latestRevision !== expectedRevision) {
+      throw new Error("Данные в Firebase изменились во время публикации. Team state не перезаписан; перезагрузите источник и повторите операцию.");
+    }
+  } catch (classificationError) {
+    if (classificationError instanceof Error && (
+      /больше не существует/.test(classificationError.message)
+      || /изменились во время публикации/.test(classificationError.message)
+      || /write revision повреждена/.test(classificationError.message)
+    )) throw classificationError;
+  }
+  rethrowFirebaseWriteError(originalError);
+}
+
 export async function transactFirebaseTeamMatch(id, transform) {
-  if (typeof transform !== "function") throw new Error("Для transaction требуется функция преобразования Team state.");
+  if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
   const { auth, database, databaseModule } = await loadFirebaseServices();
   if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
   const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
-  const state = { transformError: null, sawNull: false };
+  const snapshot = await databaseModule.get(reference);
+  if (!snapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
 
-  let transaction;
+  const guarded = prepareFirebaseTeamMatchGuardedWrite(snapshot.val(), id, transform);
+
   try {
-    transaction = await databaseModule.runTransaction(
-      reference,
-      createFirebaseTeamMatchTransactionUpdater(id, transform, state),
-      { applyLocally: false }
-    );
+    await databaseModule.set(reference, guarded.candidate);
   } catch (error) {
-    rethrowFirebaseWriteError(error);
+    await classifyRevisionGuardFailure(reference, guarded.expectedWriteRevision, databaseModule, error);
   }
-  if (!transaction.committed) throw state.transformError ?? new Error("Firebase transaction не был применён.");
-  const value = normalizeFirebaseTeamMatchData(transaction.snapshot.val());
-  if (value === null) throw new Error("Командная встреча больше не существует в Firebase.");
-  return value;
+  return guarded.data;
 }
 
 export async function publishFirebaseTeamMatch(id, data, expectedRevision, revisionOf) {
