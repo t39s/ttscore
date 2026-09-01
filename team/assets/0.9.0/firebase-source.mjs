@@ -176,6 +176,22 @@ export function withFirebaseTeamMatchWriteRevision(value, revision) {
   return { ...cloneJson(value), [WRITE_REVISION_FIELD]: revision };
 }
 
+const teamMatchWriteTails = new Map();
+
+export async function serializeFirebaseTeamMatchWrite(id, operation) {
+  assertTeamMatchId(id);
+  if (typeof operation !== "function") throw new Error("Для сериализации Team write требуется операция.");
+  const previous = teamMatchWriteTails.get(id) ?? Promise.resolve();
+  const run = previous.catch(() => undefined).then(operation);
+  const tail = run.then(() => undefined, () => undefined);
+  teamMatchWriteTails.set(id, tail);
+  try {
+    return await run;
+  } finally {
+    if (teamMatchWriteTails.get(id) === tail) teamMatchWriteTails.delete(id);
+  }
+}
+
 export function prepareFirebaseTeamMatchGuardedWrite(rawCurrent, id, transform) {
   if (rawCurrent === null) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
   if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
@@ -211,20 +227,22 @@ async function classifyRevisionGuardFailure(reference, expectedRevision, databas
 
 export async function transactFirebaseTeamMatch(id, transform) {
   if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
-  const { auth, database, databaseModule } = await loadFirebaseServices();
-  if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
-  const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
-  const snapshot = await databaseModule.get(reference);
-  if (!snapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
+  return serializeFirebaseTeamMatchWrite(id, async () => {
+    const { auth, database, databaseModule } = await loadFirebaseServices();
+    if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
+    const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
+    const snapshot = await databaseModule.get(reference);
+    if (!snapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
 
-  const guarded = prepareFirebaseTeamMatchGuardedWrite(snapshot.val(), id, transform);
+    const guarded = prepareFirebaseTeamMatchGuardedWrite(snapshot.val(), id, transform);
 
-  try {
-    await databaseModule.set(reference, guarded.candidate);
-  } catch (error) {
-    await classifyRevisionGuardFailure(reference, guarded.expectedWriteRevision, databaseModule, error);
-  }
-  return guarded.data;
+    try {
+      await databaseModule.set(reference, guarded.candidate);
+    } catch (error) {
+      await classifyRevisionGuardFailure(reference, guarded.expectedWriteRevision, databaseModule, error);
+    }
+    return guarded.data;
+  });
 }
 
 export async function publishFirebaseTeamMatch(id, data, expectedRevision, revisionOf) {
