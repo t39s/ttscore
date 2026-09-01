@@ -159,40 +159,71 @@ export function assertFirebaseSourceRevision(current, expectedRevision, revision
   return currentRevision;
 }
 
+export function createFirebaseTeamMatchTransactionUpdater(id, transform, state = {}) {
+  if (typeof transform !== "function") throw new Error("Для transaction требуется функция преобразования Team state.");
+  return current => {
+    // Firebase RTDB may invoke a transaction updater with null before an
+    // existing remote value is available locally. Never return null here:
+    // in Realtime Database null is a delete candidate. Abort this attempt and
+    // let transactFirebaseTeamMatch re-read the node and retry instead.
+    if (current === null) {
+      state.sawNull = true;
+      state.transformError = null;
+      return;
+    }
+    try {
+      const normalized = normalizeFirebaseTeamMatchData(current);
+      const next = transform(normalized);
+      if (!next || typeof next !== "object" || next.id !== id) throw new Error("Team transaction вернул некорректный JSON.");
+      state.transformError = null;
+      return next;
+    } catch (error) {
+      state.transformError = error instanceof Error ? error : new Error(String(error));
+      return;
+    }
+  };
+}
+
+export async function runExistingFirebaseTeamMatchTransaction(databaseModule, reference, id, transform, maxAttempts = 3) {
+  if (!databaseModule || typeof databaseModule.get !== "function" || typeof databaseModule.runTransaction !== "function") {
+    throw new Error("Firebase transaction adapter недоступен.");
+  }
+  if (typeof transform !== "function") throw new Error("Для transaction требуется функция преобразования Team state.");
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const preflight = await databaseModule.get(reference);
+    if (!preflight.exists()) throw new Error("Командная встреча больше не существует в Firebase.");
+
+    const state = { transformError: null, sawNull: false };
+    const transaction = await databaseModule.runTransaction(
+      reference,
+      createFirebaseTeamMatchTransactionUpdater(id, transform, state),
+      { applyLocally: false }
+    );
+
+    if (transaction.committed) {
+      const value = normalizeFirebaseTeamMatchData(transaction.snapshot.val());
+      if (value === null) throw new Error("Командная встреча больше не существует в Firebase.");
+      return value;
+    }
+    if (state.transformError) throw state.transformError;
+    if (!state.sawNull) throw new Error("Firebase transaction не был применён.");
+  }
+
+  throw new Error("Firebase не предоставил актуальное состояние командной встречи для transaction. Повторите публикацию.");
+}
+
 export async function transactFirebaseTeamMatch(id, transform) {
   if (typeof transform !== "function") throw new Error("Для transaction требуется функция преобразования Team state.");
   const { auth, database, databaseModule } = await loadFirebaseServices();
   if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
   const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
 
-  // Warm the RTDB cache first: runTransaction() may initially call the updater
-  // with null when this path has not yet been read by this client.
-  try { await databaseModule.get(reference); } catch (error) { rethrowFirebaseWriteError(error); }
-
-  let transformError = null;
-  let transaction;
   try {
-    transaction = await databaseModule.runTransaction(reference, current => {
-      if (current === null) {
-        transformError = new Error("Командная встреча больше не существует в Firebase.");
-        return;
-      }
-      try {
-        const normalized = normalizeFirebaseTeamMatchData(current);
-        const next = transform(normalized);
-        if (!next || typeof next !== "object" || next.id !== id) throw new Error("Team transaction вернул некорректный JSON.");
-        transformError = null;
-        return next;
-      } catch (error) {
-        transformError = error instanceof Error ? error : new Error(String(error));
-        return;
-      }
-    }, { applyLocally: false });
+    return await runExistingFirebaseTeamMatchTransaction(databaseModule, reference, id, transform);
   } catch (error) {
     rethrowFirebaseWriteError(error);
   }
-  if (!transaction.committed) throw transformError ?? new Error("Firebase transaction не был применён.");
-  return normalizeFirebaseTeamMatchData(transaction.snapshot.val());
 }
 
 export async function publishFirebaseTeamMatch(id, data, expectedRevision, revisionOf) {
