@@ -101,7 +101,7 @@ export function teamAssignment(raw) {
   };
 }
 
-export function assignmentMatchesBinding(assignment, binding) {
+export function assignmentMatchesBindingIdentity(assignment, binding) {
   return !!assignment && assignment.status === 'current' && !!binding
     && binding.version === TEAM_INTEGRATION_CONTRACT_VERSION
     && assignment.teamMatchId === binding.teamMatchId
@@ -111,7 +111,11 @@ export function assignmentMatchesBinding(assignment, binding) {
     && assignment.playerA.id === binding.playerA?.id
     && assignment.playerB.id === binding.playerB?.id
     && assignment.playerA.name === binding.playerA?.name
-    && assignment.playerB.name === binding.playerB?.name
+    && assignment.playerB.name === binding.playerB?.name;
+}
+
+export function assignmentMatchesBinding(assignment, binding) {
+  return assignmentMatchesBindingIdentity(assignment, binding)
     && assignment.revision === binding.revision;
 }
 
@@ -144,6 +148,15 @@ export function bindAssignment(assignment, state) {
   };
   validateBoundState(binding, state);
   return binding;
+}
+
+export function rebaseBinding(assignment, binding, state) {
+  if (!assignmentMatchesBindingIdentity(assignment, binding)) return null;
+  validateBoundState(binding, state);
+  if (state.matchId !== binding.ttScoreMatchId) throw new Error('ttScore matchId не совпадает с сохранённым Team binding.');
+  const rebased = bindAssignment(assignment, state);
+  if (rebased.ttScoreMatchId !== binding.ttScoreMatchId) throw new Error('Team binding нельзя перепривязать к другой ttScore-встрече.');
+  return rebased;
 }
 
 function assertCurrentBinding(raw, binding, state) {

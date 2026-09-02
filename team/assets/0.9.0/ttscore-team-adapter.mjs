@@ -6,7 +6,7 @@ import {
   transactFirebaseTeamMatch
 } from './firebase-source.mjs';
 import {
-  assignmentMatchesBinding, bindAssignment, finishedBindingApplied,
+  assignmentMatchesBinding, bindAssignment, finishedBindingApplied, rebaseBinding,
   prepareOperationalLiveUpdate,
   prepareTransition,
   teamAssignment,
@@ -44,6 +44,10 @@ export function assignmentMatchesTeamBinding(assignment, binding) {
 
 export function bindTeamAssignment(assignment, ttScoreState) {
   return bindAssignment(assignment, ttScoreState);
+}
+
+export function rebaseTeamBinding(assignment, binding, ttScoreState) {
+  return rebaseBinding(assignment, binding, ttScoreState);
 }
 
 export function validateTeamBoundState(binding, ttScoreState) {
