@@ -2715,14 +2715,31 @@
       render();
     }
 
-    async function reloadTeamContext() {
+    function rebasePendingTeamRelease(assignment) {
+      const pending = teamSession?.pendingRelease;
+      if (!pending || !teamAdapter || assignment?.status !== "current") return false;
+      const rebasedBinding = teamAdapter.rebaseTeamBinding(assignment, pending.binding, pending.ttScoreState);
+      if (!rebasedBinding || rebasedBinding.revision === pending.binding.revision) return false;
+      const nextPending = { ...pending, binding: clone(rebasedBinding) };
+      const stored = storeTeamSession({
+        ...teamSession,
+        binding: clone(rebasedBinding),
+        pendingRelease: nextPending
+      });
+      if (!stored) throw new Error(teamContextError || "Не удалось сохранить обновлённый Team binding перед повторной публикацией.");
+      return true;
+    }
+
+    async function reloadTeamContext({ allowPendingRebase = false } = {}) {
       if (!IS_TEAM_MODE || !TEAM_MATCH_ID) return;
       teamContextState = "loading";
       teamContextError = "";
       render();
       try {
         const adapter = await loadTeamAdapter();
-        handleTeamAssignment(await adapter.readTeamContext(TEAM_MATCH_ID));
+        const assignment = await adapter.readTeamContext(TEAM_MATCH_ID);
+        if (allowPendingRebase && teamSession?.pendingRelease) rebasePendingTeamRelease(assignment);
+        handleTeamAssignment(assignment);
       } catch (error) {
         teamContextState = "error";
         teamContextError = error instanceof Error ? error.message : String(error);
@@ -7186,7 +7203,7 @@ ${buildStandaloneReportRoot().outerHTML}
     });
     els.startButton.addEventListener("click", startMatch);
     els.teamAuthForm.addEventListener("submit", handleTeamSignIn);
-    els.teamReloadButton.addEventListener("click", () => { void reloadTeamContext(); });
+    els.teamReloadButton.addEventListener("click", () => { void reloadTeamContext({ allowPendingRebase: true }); });
     els.teamExitButton.addEventListener("click", exitTeamMode);
     els.zoneA.addEventListener("click", () => addPoint("A"));
     els.zoneB.addEventListener("click", () => addPoint("B"));
