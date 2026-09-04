@@ -177,18 +177,42 @@ function applyLiveLinks(value, links) {
 }
 
 
-export function finishedBindingApplied(raw, binding, result, reportUrl = undefined) {
-  if (!binding || binding.version !== TEAM_INTEGRATION_CONTRACT_VERSION) return false;
+function finishedBindingMatch(raw, binding, result) {
+  if (!binding || binding.version !== TEAM_INTEGRATION_CONTRACT_VERSION) return null;
   const team = prepareTeamMatch(raw);
-  if (team.id !== binding.teamMatchId || team.date !== binding.matchDate || team.individualMatchBestOf !== binding.bestOf) return false;
+  if (team.id !== binding.teamMatchId || team.date !== binding.matchDate || team.individualMatchBestOf !== binding.bestOf) return null;
   const match = team.individualMatches.find(item => item.id === binding.individualMatchId);
-  if (!match || match.status !== 'finished' || !match.result) return false;
+  if (!match || match.status !== 'finished' || !match.result) return null;
   if (match.playerA.id !== binding.playerA?.id || match.playerB.id !== binding.playerB?.id
-      || match.playerA.name !== binding.playerA?.name || match.playerB.name !== binding.playerB?.name) return false;
+      || match.playerA.name !== binding.playerA?.name || match.playerB.name !== binding.playerB?.name) return null;
   const gamesA = Number(result?.gamesA), gamesB = Number(result?.gamesB);
-  if (match.result.gamesA !== gamesA || match.result.gamesB !== gamesB) return false;
-  if (reportUrl !== undefined && match.reportUrl !== reportUrl) return false;
+  if (match.result.gamesA !== gamesA || match.result.gamesB !== gamesB) return null;
+  return { team, match };
+}
+
+export function finishedBindingApplied(raw, binding, result, reportUrl = undefined) {
+  const matched = finishedBindingMatch(raw, binding, result);
+  if (!matched) return false;
+  if (reportUrl !== undefined && matched.match.reportUrl !== reportUrl) return false;
   return true;
+}
+
+export function prepareFinishedReportUpdate(raw, binding, result, reportUrl, updatedAt) {
+  const matched = finishedBindingMatch(raw, binding, result);
+  if (!matched) throw new Error('Завершённая Team-встреча не совпадает с сохранённым binding/result.');
+  const normalizedReportUrl = optionalText(reportUrl, 'reportUrl');
+  if (!normalizedReportUrl) throw new Error('reportUrl обязателен для восстановления завершённой Team-встречи.');
+  const normalizedUpdatedAt = requiredText(updatedAt, 'updatedAt');
+  if (!Number.isFinite(Date.parse(normalizedUpdatedAt))) throw new Error('updatedAt должен быть корректной датой ISO 8601.');
+
+  const beforeRevision = operationalRevision(raw);
+  const updated = normalizedRaw(raw, matched.team);
+  const target = updated.individualMatches.find(item => item.id === binding.individualMatchId);
+  target.reportUrl = normalizedReportUrl;
+  updated.updatedAt = normalizedUpdatedAt;
+  const prepared = prepareTeamMatch(updated);
+  if (operationalRevision(updated) !== beforeRevision) throw new Error('Восстановление reportUrl попыталось изменить спортивные данные.');
+  return { data: updated, prepared, assignment: teamAssignment(updated) };
 }
 
 export function prepareOperationalLiveUpdate(raw, liveLinks, updatedAt, binding = null, state = null) {
