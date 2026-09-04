@@ -202,6 +202,10 @@ export function prepareFinishedReportUpdate(raw, binding, result, reportUrl, upd
   if (!matched) throw new Error('Завершённая Team-встреча не совпадает с сохранённым binding/result.');
   const normalizedReportUrl = optionalText(reportUrl, 'reportUrl');
   if (!normalizedReportUrl) throw new Error('reportUrl обязателен для восстановления завершённой Team-встречи.');
+  const existingReportUrl = optionalText(matched.match.reportUrl, 'reportUrl');
+  if (existingReportUrl && existingReportUrl !== normalizedReportUrl) {
+    throw new Error('Завершённая Team-встреча уже содержит другой reportUrl; перезапись заблокирована.');
+  }
   const normalizedUpdatedAt = requiredText(updatedAt, 'updatedAt');
   if (!Number.isFinite(Date.parse(normalizedUpdatedAt))) throw new Error('updatedAt должен быть корректной датой ISO 8601.');
 
