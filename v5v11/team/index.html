@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Командная встреча · ttScore Team</title>
+  <link rel="stylesheet" href="./assets/0.11.0/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">ttScore Team · v0.11.0</p>
+      <h1 id="team-match-title">Командная встреча</h1>
+      <p id="team-match-meta" class="meta"></p>
+    </header>
+
+    <div id="loading" class="notice" role="status">
+      <strong>Загрузка командной встречи…</strong>
+    </div>
+
+    <div id="error" class="notice notice--error" role="alert" hidden>
+      <strong></strong>
+      <span></span>
+    </div>
+
+    <section id="archive-fallback" class="notice archive-fallback" aria-labelledby="archive-fallback-heading" hidden>
+      <strong id="archive-fallback-heading">Доступна архивная копия завершённой встречи.</strong>
+      <span>Firebase остаётся основным источником. Архив на GitHub Pages открывается только по вашему действию и только для завершённой встречи.</span>
+      <button id="archive-open" class="button button--secondary" type="button">Открыть архивную копию</button>
+    </section>
+
+    <section id="firebase-auth-panel" class="firebase-auth" aria-labelledby="firebase-auth-heading" hidden>
+      <div>
+        <p class="eyebrow">Firebase · ttscore-list</p>
+        <h2 id="firebase-auth-heading">Публикация</h2>
+        <p id="firebase-auth-status" class="muted" role="status">Проверка авторизации…</p>
+      </div>
+      <form id="firebase-auth-form" class="firebase-auth__form">
+        <label>Email
+          <input id="firebase-auth-email" type="email" autocomplete="username" required>
+        </label>
+        <label>Пароль
+          <input id="firebase-auth-password" type="password" autocomplete="current-password" required>
+        </label>
+        <button id="firebase-sign-in" class="button button--prepare" type="submit">Войти</button>
+      </form>
+      <button id="firebase-sign-out" class="button button--secondary" type="button" hidden>Выйти</button>
+      <p id="firebase-auth-error" class="editor__error" role="alert" hidden></p>
+    </section>
+
+    <section id="creator" class="creator" aria-labelledby="creator-heading" hidden>
+      <h2 id="creator-heading">Новая командная встреча</h2>
+      <p class="creator__note">Заполните составы. Страница создаст все личные встречи. Основная публикация выполняется напрямую в Firebase; сохранение JSON остаётся резервным экспортом.</p>
+      <section class="creator-import" aria-labelledby="creator-import-heading">
+        <div>
+          <h3 id="creator-import-heading">Продолжить подготовку</h3>
+          <p>Загрузите ранее сохранённый JSON <code>schemaVersion: 4</code>. Файл читается только локально и не отправляется в сеть.</p>
+        </div>
+        <button id="creator-import" class="button button--secondary" type="button">Загрузить JSON</button>
+        <input id="creator-import-file" type="file" accept=".json,application/json" hidden>
+      </section>
+      <p id="creator-import-status" class="creator__warning creator__warning--available" role="status" hidden></p>
+      <form id="creator-form" class="creator__form">
+        <div class="creator__base-fields">
+          <label>Идентификатор
+            <input id="creator-id" type="text" required maxlength="80" pattern="[a-z0-9][a-z0-9-]*" placeholder="team-match-2026-09-05" autocomplete="off">
+          </label>
+          <label>Дата
+            <input id="creator-date" type="date" required>
+          </label>
+          <label>Место (необязательно)
+            <input id="creator-venue" type="text" maxlength="160" autocomplete="off">
+          </label>
+          <label>Формат
+            <select id="creator-team-size">
+              <option value="2">2 × 2</option>
+              <option value="3" selected>3 × 3</option>
+              <option value="4">4 × 4</option>
+            </select>
+          </label>
+          <label>Личные встречи
+            <select id="creator-individual-match-best-of">
+              <option value="3">Из 3 партий</option>
+              <option value="5" selected>Из 5 партий</option>
+              <option value="7">Из 7 партий</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="creator__teams">
+          <fieldset>
+            <legend>Команда A</legend>
+            <label>Название
+              <input id="creator-team-a-name" type="text" required maxlength="100" autocomplete="off">
+            </label>
+            <div id="creator-players-a" class="creator__players"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Команда B</legend>
+            <label>Название
+              <input id="creator-team-b-name" type="text" required maxlength="100" autocomplete="off">
+            </label>
+            <div id="creator-players-b" class="creator__players"></div>
+          </fieldset>
+        </div>
+        <button id="creator-prepare" class="button button--prepare" type="submit">Создать расписание</button>
+      </form>
+
+      <p id="creator-error" class="editor__error" role="alert" hidden></p>
+      <p id="creator-id-warning" class="creator__warning" role="status" hidden></p>
+      <section id="creator-preview" class="preview" aria-labelledby="creator-preview-heading" hidden>
+        <h3 id="creator-preview-heading">Предварительная проверка</h3>
+        <p id="creator-preview-summary"></p>
+        <section class="creator-schedule" aria-labelledby="creator-schedule-heading">
+          <h4 id="creator-schedule-heading">Порядок личных встреч</h4>
+          <p class="muted">Используйте кнопки ↑ и ↓. Первая пара начнёт командную встречу.</p>
+          <ol id="creator-schedule-list" class="creator-schedule__list"></ol>
+        </section>
+        <dl class="creator-output">
+          <div><dt>Путь в Firebase</dt><dd><code id="creator-json-path"></code></dd></div>
+          <div><dt>Адрес после публикации</dt><dd><a id="creator-public-url" target="_blank" rel="noopener noreferrer"></a></dd></div>
+        </dl>
+        <details><summary>Показать JSON</summary><pre id="creator-preview-json"></pre></details>
+        <div class="preview__actions">
+          <button id="creator-firebase-publish" class="button button--publish" type="button" disabled>Опубликовать в Firebase</button>
+          <button id="creator-download" class="button button--download" type="button">Сохранить JSON</button>
+        </div>
+        <p id="creator-publish-status" class="save-status" role="status" hidden></p>
+        <p id="creator-save-status" class="save-status" role="status" hidden></p>
+        <p class="muted">JSON публикуется в Firebase Realtime Database. Резервный файл можно сохранить локально. Постоянные отчёты по-прежнему могут размещаться в <code>team/matches/&lt;id&gt;/</code> и ссылаться относительным <code>reportUrl</code>.</p>
+      </section>
+    </section>
+
+    <section id="local-editor-loader" class="creator editor-loader" aria-labelledby="local-editor-loader-heading" hidden>
+      <h2 id="local-editor-loader-heading">Редактирование локального JSON</h2>
+      <p class="creator__note">Выберите JSON <code>schemaVersion: 4</code> идущей или завершённой командной встречи. Этот режим не обращается к опубликованному источнику.</p>
+      <button id="local-editor-import" class="button button--secondary" type="button">Загрузить JSON</button>
+      <input id="local-editor-file" type="file" accept=".json,application/json" hidden>
+      <p id="local-editor-error" class="editor__error" role="alert" hidden></p>
+    </section>
+
+    <div id="content" hidden>
+      <section class="scoreboard" aria-label="Командный счёт">
+        <article class="team">
+          <h2 id="team-a-name" class="team__name"></h2>
+          <ul id="team-a-players" class="team__players"></ul>
+        </article>
+        <div class="score" aria-label="Счёт">
+          <span><span id="team-a-score">0</span><span class="score__separator">:</span><span id="team-b-score">0</span></span>
+        </div>
+        <article class="team team--b">
+          <h2 id="team-b-name" class="team__name"></h2>
+          <ul id="team-b-players" class="team__players"></ul>
+        </article>
+      </section>
+
+      <p id="archive-mode" class="archive-mode" role="status" hidden>Архивная копия · read-only</p>
+      <p id="team-match-status" class="team-match-status" role="status"></p>
+
+      <section id="editor" class="editor" aria-labelledby="editor-heading" hidden>
+        <p class="eyebrow">Firebase Realtime Database</p>
+        <h2 id="editor-heading">Редактор командной встречи</h2>
+        <p class="editor__note">Изменения остаются локальными до публикации. Основной источник — Firebase; сохранение JSON доступно как резервный экспорт. Размер команд, формат личных встреч, ID спортсменов и состав пар не изменяются.</p>
+        <div class="editor__source-row">
+          <p id="editor-source-status" class="editor__source" role="status"></p>
+          <button id="editor-refresh-source" class="button button--secondary" type="button">Перезагрузить источник</button>
+        </div>
+        <p id="editor-status" class="editor__status" role="status" hidden></p>
+
+        <details id="ttscore-integration" class="ttscore-integration editor-panel editor-panel--details" hidden>
+          <summary><span id="ttscore-integration-heading">Данные из ttScore</span><span class="editor-subsection__hint">Локальная интеграция</span></summary>
+          <div class="editor-panel__body">
+            <div class="ttscore-integration__heading">
+              <p class="muted">ttScore отслеживается автоматически. После безопасного подтверждения завершения результат публикуется в Firebase без ручного переноса; Live-отчёт и Live-табло совпавшей текущей встречи синхронизируются автоматически. Ручные элементы ниже остаются резервным способом коррекции.</p>
+              <button id="ttscore-refresh" class="button button--secondary" type="button">Перечитать ttScore</button>
+            </div>
+            <p id="ttscore-integration-status" class="ttscore-integration__status muted" role="status"></p>
+            <div class="ttscore-integration__actions">
+              <button id="ttscore-use-result" class="button button--prepare" type="button" hidden>Подставить результат вручную</button>
+              <button id="ttscore-cancel-pending" class="button button--secondary" type="button" hidden>Отменить сохранённый результат</button>
+            </div>
+            <p id="ttscore-action-status" class="editor__status" role="status" hidden></p>
+          </div>
+        </details>
+
+        <details id="editor-changes-section" class="editor-panel editor-panel--details">
+          <summary><span id="editor-changes-heading">Изменения командной встречи</span><span class="editor-subsection__hint">Отчёты, сведения и расписание</span></summary>
+          <div class="editor-panel__body">
+            <p class="muted">Подготовленный preview включает все текущие правки в этом разделе: отчёты, сведения и порядок запланированных встреч.</p>
+
+            <details id="editor-links-panel" class="editor-subsection editor-subsection--details">
+              <summary><span>Отчёты личных встреч</span><span class="editor-subsection__hint">Постоянные ссылки</span></summary>
+              <form id="editor-links-form" class="editor-links">
+                <p class="muted">Постоянный отчёт необязателен. Можно использовать абсолютную HTTP(S)-ссылку или допустимый относительный путь к файлу в каталоге встречи.</p>
+                <div id="editor-links-list" class="editor-links__list"></div>
+              </form>
+            </details>
+
+            <details id="editor-details-panel" class="editor-subsection editor-subsection--details">
+              <summary><span>Дата, место и составы</span><span class="editor-subsection__hint">Сведения о командной встрече</span></summary>
+              <form id="editor-details-form" class="editor__details-form">
+                <div class="editor__base-fields">
+                  <label>Дата
+                    <input id="editor-date" type="date" required>
+                  </label>
+                  <label>Место (необязательно)
+                    <input id="editor-venue" type="text" maxlength="160" autocomplete="off">
+                  </label>
+                </div>
+                <div class="editor__teams">
+                  <fieldset>
+                    <legend>Команда A</legend>
+                    <label>Название
+                      <input id="editor-team-a-name" type="text" required maxlength="100" autocomplete="off">
+                    </label>
+                    <div id="editor-players-a" class="creator__players"></div>
+                  </fieldset>
+                  <fieldset>
+                    <legend>Команда B</legend>
+                    <label>Название
+                      <input id="editor-team-b-name" type="text" required maxlength="100" autocomplete="off">
+                    </label>
+                    <div id="editor-players-b" class="creator__players"></div>
+                  </fieldset>
+                </div>
+                <p class="creator__warning creator__warning--unknown">Исправление имени спортсмена изменит его отображение и в уже завершённых личных встречах; постоянный ID при этом сохранится.</p>
+              </form>
+            </details>
+
+            <details id="editor-planned-section" class="creator-schedule editor-subsection editor-subsection--details">
+              <summary><span id="editor-planned-heading">Запланированные личные встречи</span><span class="editor-subsection__hint">Порядок planned-встреч</span></summary>
+              <div class="editor-subsection__body">
+                <p class="muted">Нажмите встречу, чтобы выделить её. Перемещаются только <code>planned</code>-встречи. Их ID и пары сохраняются; изменяется только порядок.</p>
+                <ol id="editor-planned-list" class="creator-schedule__list"></ol>
+              </div>
+            </details>
+
+            <button id="prepare-changes" class="button button--prepare" type="button">Подготовить JSON с изменениями</button>
+          </div>
+        </details>
+
+        <section id="editor-undo-section" class="editor-panel editor-panel--transition" aria-labelledby="editor-undo-heading" hidden>
+          <h3 id="editor-undo-heading">Отмена последней завершённой личной встречи</h3>
+          <p class="muted">Административный force-majeure путь. Отменяется только последняя завершённая личная встреча: её результат и ссылка на отчёт снимаются из активного Team-state, а сохранённый backup отчёта не удаляется.</p>
+          <dl class="editor__matches">
+            <div><dt>Будет отменена</dt><dd id="editor-undo-match"></dd></div>
+          </dl>
+          <button id="prepare-undo" class="button button--prepare" type="button">Подготовить Team-level Undo</button>
+        </section>
+
+        <section id="editor-transition-section" class="editor-panel editor-panel--transition" aria-labelledby="editor-transition-heading">
+          <h3 id="editor-transition-heading">Завершение текущей личной встречи</h3>
+          <p class="muted">Штатный результат из ttScore публикуется автоматически после подтверждённого выхода из завершённой встречи или запуска точно совпавшей следующей пары. Эта форма предназначена для ручной коррекции или резервного перехода; при её использовании также сохраняются текущие изменения из раздела выше.</p>
+          <dl class="editor__matches">
+            <div><dt>Завершается</dt><dd class="editor__current-match"><span id="editor-current"></span><a id="editor-open-ttscore" class="button button--primary editor__live-scoreboard" target="_blank" rel="noopener noreferrer">Открыть в ttScore</a><a id="editor-current-live-scoreboard" class="button button--secondary editor__live-scoreboard" target="_blank" rel="noopener noreferrer" hidden>Live-табло</a><a id="editor-current-live-report" class="button button--secondary editor__live-scoreboard" target="_blank" rel="noopener noreferrer" hidden>Live-отчёт</a></dd></div>
+            <div><dt>Следующая</dt><dd id="editor-next"></dd></div>
+          </dl>
+          <form id="transition-form" class="editor__form">
+            <fieldset>
+              <legend>Итог по партиям</legend>
+              <label><span id="games-a-team-name">Команда A</span>
+                <select id="games-a" required></select>
+              </label>
+              <span class="editor__score-separator">:</span>
+              <label><span id="games-b-team-name">Команда B</span>
+                <select id="games-b" required></select>
+              </label>
+            </fieldset>
+            <button id="prepare-update" class="button button--prepare" type="submit">Подготовить переход вручную</button>
+          </form>
+        </section>
+
+        <p id="editor-error" class="editor__error" role="alert" hidden></p>
+        <details id="preview" class="preview editor-panel editor-panel--preview editor-panel--details" hidden>
+          <summary><span id="preview-heading">Предварительная проверка</span><span class="editor-subsection__hint">Подготовленный JSON</span></summary>
+          <div class="editor-panel__body">
+            <p id="preview-summary"></p>
+            <details><summary>Показать JSON</summary><pre id="preview-json"></pre></details>
+            <div class="preview__actions">
+              <button id="firebase-publish" class="button button--publish" type="button" disabled>Опубликовать в Firebase</button>
+              <button id="download-json" class="button button--download" type="button">Сохранить JSON</button>
+            </div>
+            <p id="firebase-publish-status" class="save-status" role="status" hidden></p>
+            <p id="editor-save-status" class="save-status" role="status" hidden></p>
+            <p class="muted">Публикация в Firebase обновляет публичные страницы в реальном времени. «Сохранить JSON» — резервный локальный экспорт.</p>
+          </div>
+        </details>
+      </section>
+
+      <section aria-labelledby="schedule-heading">
+        <div class="section-heading">
+          <h2 id="schedule-heading">Личные встречи</h2>
+          <button id="refresh" class="refresh" type="button">Обновить</button>
+        </div>
+        <div id="individual-matches" class="individual-matches"></div>
+        <p id="updated" class="updated"></p>
+      </section>
+
+      <p class="public-note">Firebase Realtime Database остаётся основным источником. Открытая страница обновляется автоматически при публикации нового состояния. Live-отчёт и Live-табло текущей встречи доступны публично, если их ссылки сохранены в JSON командной встречи. Если Firebase недоступен, для завершённой встречи может быть предложена статическая read-only копия <code>team/matches/&lt;id&gt;/&lt;id&gt;.json</code> на GitHub Pages. Архив не используется для редактирования, Live или оперативного состояния.</p>
+
+    </div>
+  </main>
+
+  <script type="module" src="./assets/0.11.0/app.mjs"></script>
+</body>
+</html>

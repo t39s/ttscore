@@ -1,0 +1,59 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "editors": {
+      ".read": false,
+      ".write": false
+    },
+    "teamMatches": {
+      "$matchId": {
+        ".read": true,
+        ".write": "auth != null && root.child('editors').child(auth.uid).val() === true && newData.exists()",
+        ".validate": "newData.hasChildren(['schemaVersion', 'id', '_writeRevision']) && newData.child('schemaVersion').val() === 4 && newData.child('id').val() === $matchId",
+        "_writeRevision": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() % 1 === 0 && ((!data.exists() && newData.val() === 1) || (data.isNumber() && newData.val() === data.val() + 1))"
+        }
+      }
+    },
+    "individualMatchReportsV1": {
+      ".read": false,
+      ".write": false,
+      "$teamMatchId": {
+        ".read": false,
+        "$recordId": {
+          ".read": true,
+          ".write": "auth != null && root.child('editors').child(auth.uid).val() === true && root.child('teamMatches').child($teamMatchId).exists() && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['schemaVersion', 'teamMatchId', 'individualMatchId', 'recordId', 'savedAt', 'byteLength', 'sha256', 'json']) && newData.child('schemaVersion').val() === 1 && newData.child('teamMatchId').val() === $teamMatchId && newData.child('recordId').val() === $recordId",
+          "schemaVersion": {
+            ".validate": "newData.isNumber() && newData.val() === 1"
+          },
+          "teamMatchId": {
+            ".validate": "newData.isString() && newData.val() === $teamMatchId && newData.val().length >= 1 && newData.val().length <= 80"
+          },
+          "individualMatchId": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40 && newData.val().matches(/^[A-Za-z0-9][A-Za-z0-9_-]*$/)"
+          },
+          "recordId": {
+            ".validate": "newData.isString() && newData.val() === $recordId && newData.val().matches(/^[0-9]{4}-[0-9]{4}-[0-9a-f]{4}$/)"
+          },
+          "savedAt": {
+            ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() % 1 === 0"
+          },
+          "byteLength": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1048576 && newData.val() % 1 === 0"
+          },
+          "sha256": {
+            ".validate": "newData.isString() && newData.val().matches(/^[0-9a-f]{64}$/)"
+          },
+          "json": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 1048576"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}
