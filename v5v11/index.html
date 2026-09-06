@@ -1681,6 +1681,46 @@
       height: 100%;
       overflow: hidden;
     }
+    #liveScoreboardScreen.is-rotated-180 {
+      transform: rotate(180deg);
+      transform-origin: 50% 50%;
+    }
+    .live-scoreboard-orientation-toggle {
+      position: absolute;
+      z-index: 5;
+      top: max(10px, env(safe-area-inset-top));
+      right: max(10px, env(safe-area-inset-right));
+      min-width: 72px;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid rgba(0,0,0,.22);
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      color: #222;
+      box-shadow: 0 3px 14px rgba(0,0,0,.12);
+      font: 700 14px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      white-space: nowrap;
+      touch-action: manipulation;
+    }
+    .live-scoreboard-orientation-toggle:focus-visible {
+      outline: 3px solid rgba(17,17,17,.32);
+      outline-offset: 2px;
+    }
+    #liveScoreboardScreen.is-rotated-180 .live-scoreboard-status {
+      top: max(10px, env(safe-area-inset-bottom));
+      left: max(10px, env(safe-area-inset-right));
+    }
+    #liveScoreboardScreen.is-rotated-180 .live-scoreboard-footer {
+      top: max(62px, calc(env(safe-area-inset-bottom) + 52px));
+      right: max(12px, env(safe-area-inset-left));
+    }
+    #liveScoreboardScreen.is-rotated-180 .live-scoreboard-orientation-toggle {
+      top: max(10px, env(safe-area-inset-bottom));
+      right: max(10px, env(safe-area-inset-left));
+    }
+    #liveScoreboardScreen.is-rotated-180 .live-scoreboard-rotate {
+      top: max(10px, env(safe-area-inset-bottom));
+    }
     .live-scoreboard-status {
       position: absolute;
       z-index: 4;
@@ -1812,7 +1852,7 @@
     .live-scoreboard-footer {
       position: absolute;
       z-index: 2;
-      top: max(8px, env(safe-area-inset-top));
+      top: max(62px, calc(env(safe-area-inset-top) + 52px));
       right: max(12px, env(safe-area-inset-right));
       margin: 0;
       color: #888;
@@ -1821,6 +1861,7 @@
     }
     @media (orientation: portrait) {
       .live-scoreboard-rotate { display: block; }
+      .live-scoreboard-status:not([hidden]) ~ .live-scoreboard-rotate { display: none; }
       .live-scoreboard-layout {
         grid-template-columns: 12fr 38fr 7px 38fr 12fr;
         grid-template-rows: minmax(0, 1fr) clamp(92px, 12vh, 132px);
@@ -1828,6 +1869,43 @@
       .live-scoreboard-name { font-size: clamp(20px, 4.6vw, 40px); }
       .live-scoreboard-game-score { font-size: min(58vh, 50vw); }
       .live-scoreboard-match-score { font-size: min(28vh, 20vw); }
+    }
+    @media (orientation: portrait) and (max-width: 560px) {
+      .live-scoreboard-rotate {
+        top: max(88px, calc(env(safe-area-inset-top) + 78px));
+      }
+      #liveScoreboardScreen.is-rotated-180 .live-scoreboard-rotate {
+        top: max(88px, calc(env(safe-area-inset-bottom) + 78px));
+      }
+    }
+    @media (orientation: portrait) and (max-width: 440px) {
+      .live-scoreboard-rotate {
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
+        line-height: 1.25;
+        white-space: normal;
+      }
+      .live-scoreboard-status {
+        top: max(64px, calc(env(safe-area-inset-top) + 54px));
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
+        max-width: none;
+      }
+      #liveScoreboardScreen.is-rotated-180 .live-scoreboard-status {
+        top: max(64px, calc(env(safe-area-inset-bottom) + 54px));
+        right: max(10px, env(safe-area-inset-left));
+        left: max(10px, env(safe-area-inset-right));
+      }
+      .live-scoreboard-footer {
+        top: auto;
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(10px, env(safe-area-inset-bottom));
+      }
+      #liveScoreboardScreen.is-rotated-180 .live-scoreboard-footer {
+        top: auto;
+        right: max(12px, env(safe-area-inset-left));
+        bottom: max(10px, env(safe-area-inset-top));
+      }
     }
 
     .team-context-panel { gap: 12px; }
@@ -2136,6 +2214,7 @@
         <button class="live-status-copy" id="copyLiveScoreboardErrorButton" type="button" hidden>Скопировать ошибку</button>
       </div>
       <p class="live-scoreboard-rotate">Для крупного табло поверните планшет горизонтально</p>
+      <button class="live-scoreboard-orientation-toggle" id="liveScoreboardOrientationToggle" type="button" aria-pressed="false" aria-label="Повернуть табло на 180 градусов">↻ 180°</button>
       <div class="live-scoreboard-layout" aria-label="Онлайн-табло встречи">
         <div class="live-scoreboard-match-cell live-scoreboard-match-left">
           <span class="live-scoreboard-digit live-scoreboard-match-score" id="liveScoreboardLeftGames" aria-label="Счёт встречи: 0">0</span>
@@ -2150,10 +2229,10 @@
         <div class="live-scoreboard-match-cell live-scoreboard-match-right">
           <span class="live-scoreboard-digit live-scoreboard-match-score" id="liveScoreboardRightGames" aria-label="Счёт встречи: 0">0</span>
         </div>
-        <div class="live-scoreboard-server-indicator live-scoreboard-server-left" id="liveScoreboardLeftPlayer" aria-label="Подающий слева"></div>
+        <div class="live-scoreboard-server-indicator live-scoreboard-server-left" id="liveScoreboardLeftPlayer" aria-label="Подающий"></div>
         <div class="live-scoreboard-name-cell live-scoreboard-name-left"><span class="live-scoreboard-name" id="liveScoreboardLeftName">Спортсмен A</span></div>
         <div class="live-scoreboard-name-cell live-scoreboard-name-right"><span class="live-scoreboard-name" id="liveScoreboardRightName">Спортсмен B</span></div>
-        <div class="live-scoreboard-server-indicator live-scoreboard-server-right" id="liveScoreboardRightPlayer" aria-label="Подающий справа"></div>
+        <div class="live-scoreboard-server-indicator live-scoreboard-server-right" id="liveScoreboardRightPlayer" aria-label="Подающий"></div>
       </div>
       <p class="visually-hidden" id="liveScoreboardServer" hidden></p>
       <p class="live-scoreboard-footer">Версия 0.5.0</p>
@@ -2176,6 +2255,7 @@
     const LIVE_PUBLICATION_KEY = "ttScore:0.3.5:livePublication";
     const LIVE_PUBLISHER_LEASE_KEY = "ttScore:0.3.5:publisherLease";
     const LIVE_CLEANUP_QUEUE_KEY = "ttScore:0.3.5:cleanupQueue";
+    const LIVE_SCOREBOARD_ORIENTATION_KEY = "ttScore:liveScoreboardOrientation:v1";
     const LIVE_REPORT_TTL_MS = 23 * 60 * 60 * 1000;
     const LIVE_PUBLISH_DEBOUNCE_MS = 160;
     const LIVE_PUBLISHER_LEASE_MS = 15_000;
@@ -2247,6 +2327,22 @@
     const TEAM_MODE_REQUESTED = PAGE_MODE === "score" && requestedTeamMatchId !== null;
     const TEAM_MATCH_ID = TEAM_MODE_REQUESTED && TEAM_MATCH_ID_PATTERN.test(requestedTeamMatchId || "") ? requestedTeamMatchId : "";
     const IS_TEAM_MODE = TEAM_MODE_REQUESTED;
+
+    function loadLiveScoreboardOrientation() {
+      if (!IS_SCOREBOARD_PAGE) return 0;
+      try {
+        return localStorage.getItem(LIVE_SCOREBOARD_ORIENTATION_KEY) === "180" ? 180 : 0;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    function storeLiveScoreboardOrientation(value) {
+      if (!IS_SCOREBOARD_PAGE) return;
+      try {
+        localStorage.setItem(LIVE_SCOREBOARD_ORIENTATION_KEY, value === 180 ? "180" : "0");
+      } catch (_) {}
+    }
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -2360,6 +2456,7 @@
     let liveReportLoading = IS_LIVE_REPORT;
     let teamReportLoading = IS_TEAM_REPORT;
     let liveScoreboardLoading = IS_LIVE_SCOREBOARD;
+    let liveScoreboardOrientation = loadLiveScoreboardOrientation();
     let liveViewerRevision = 0;
     let liveViewerCheckpointRevision = 0;
     let liveViewerCheckpointState = null;
@@ -2421,6 +2518,7 @@
       liveScoreboardStatus: $("liveScoreboardStatus"),
       liveScoreboardStatusText: $("liveScoreboardStatusText"),
       copyLiveScoreboardErrorButton: $("copyLiveScoreboardErrorButton"),
+      liveScoreboardOrientationToggle: $("liveScoreboardOrientationToggle"),
       liveScoreboardLeftPlayer: $("liveScoreboardLeftPlayer"),
       liveScoreboardRightPlayer: $("liveScoreboardRightPlayer"),
       liveScoreboardLeftName: $("liveScoreboardLeftName"),
@@ -7180,7 +7278,25 @@ ${buildStandaloneReportRoot().outerHTML}
       }
     }
 
+    function applyLiveScoreboardOrientation() {
+      const rotated = liveScoreboardOrientation === 180;
+      els.liveScoreboardScreen.classList.toggle("is-rotated-180", rotated);
+      els.liveScoreboardOrientationToggle.setAttribute("aria-pressed", String(rotated));
+      els.liveScoreboardOrientationToggle.setAttribute(
+        "aria-label",
+        rotated ? "Вернуть обычную ориентацию табло" : "Повернуть табло на 180 градусов"
+      );
+      els.liveScoreboardOrientationToggle.textContent = rotated ? "↻ 0°" : "↻ 180°";
+    }
+
+    function toggleLiveScoreboardOrientation() {
+      liveScoreboardOrientation = liveScoreboardOrientation === 180 ? 0 : 180;
+      storeLiveScoreboardOrientation(liveScoreboardOrientation);
+      applyLiveScoreboardOrientation();
+    }
+
     function renderLiveScoreboard() {
+      applyLiveScoreboardOrientation();
       const view = buildLiveScoreboardViewModel(state);
       document.title = "Онлайн-табло — ttScore";
       if (!view) {
@@ -7212,6 +7328,8 @@ ${buildStandaloneReportRoot().outerHTML}
       els.liveScoreboardServer.textContent = view.server ? `Подающий: ${serverName}` : "";
       els.liveScoreboardLeftPlayer.classList.toggle("is-server", view.server === view.left.player);
       els.liveScoreboardRightPlayer.classList.toggle("is-server", view.server === view.right.player);
+      els.liveScoreboardLeftPlayer.setAttribute("aria-label", `Подающий: ${view.left.name}`);
+      els.liveScoreboardRightPlayer.setAttribute("aria-label", `Подающий: ${view.right.name}`);
       els.liveScoreboardLeftPlayer.setAttribute("aria-hidden", String(view.server !== view.left.player));
       els.liveScoreboardRightPlayer.setAttribute("aria-hidden", String(view.server !== view.right.player));
     }
@@ -7350,6 +7468,7 @@ ${buildStandaloneReportRoot().outerHTML}
     els.copyLiveScoreboardErrorButton.addEventListener("click", event => {
       void copyLiveDiagnostic("онлайн-табло", liveViewerError || els.liveScoreboardStatusText.textContent, event.currentTarget);
     });
+    els.liveScoreboardOrientationToggle.addEventListener("click", toggleLiveScoreboardOrientation);
     els.selectSavedReportButton.addEventListener("click", openImportJsonPicker);
     els.selectAnotherReportButton.addEventListener("click", openImportJsonPicker);
     els.importJsonInput.addEventListener("change", handleImportJsonSelection);
