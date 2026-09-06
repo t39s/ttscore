@@ -1737,8 +1737,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     .live-scoreboard-perspective-toggle[aria-pressed="true"] {
-      background: #222;
-      color: #fff;
+      font-weight: 900;
+      -webkit-text-stroke: .45px currentColor;
     }
     .live-scoreboard-perspective-toggle:focus-visible {
       outline: 3px solid #1f6feb;
@@ -7283,8 +7283,8 @@ ${buildStandaloneReportRoot().outerHTML}
     }
 
     function renderLiveScoreboard() {
-      const courtView = buildLiveScoreboardViewModel(state);
-      const view = orientLiveScoreboardViewModel(courtView);
+      const tableView = buildLiveScoreboardViewModel(state);
+      const view = orientLiveScoreboardViewModel(tableView);
       document.title = "Онлайн-табло — ttScore";
       renderLiveScoreboardPerspectiveControl();
       if (!view) {
