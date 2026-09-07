@@ -1,0 +1,13 @@
+--- RC13/ttScore_0.5.0.html
++++ RC14/ttScore_0.5.0.html
+@@ -7283,8 +7283,8 @@
+     }
+ 
+     function renderLiveScoreboard() {
+-      const courtView = buildLiveScoreboardViewModel(state);
+-      const view = orientLiveScoreboardViewModel(courtView);
++      const tableView = buildLiveScoreboardViewModel(state);
++      const view = orientLiveScoreboardViewModel(tableView);
+       document.title = "Онлайн-табло — ttScore";
+       renderLiveScoreboardPerspectiveControl();
+       if (!view) {

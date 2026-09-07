@@ -1,0 +1,12 @@
+RC14 runtime scope verification
+RC10 → RC14 production runtime:
+ttScore_0.5.0.html: DIFF
+firebase-database-rules.json: IDENTICAL
+team/ttscore_team_0.11.0.html: IDENTICAL
+team/: IDENTICAL
+firebase-database-rules.json: IDENTICAL
+
+RC13 → RC14 terminology-only runtime check:
+normalized courtView→tableView equivalence: PASS
+RC13 ttScore SHA-256: a514f5c05ab17d932e9033f1fbc60ae85f870d4db60e527a76e9241cc8f84eaa
+RC14 ttScore SHA-256: 85ff140f9918f8c0b2aad19dfe6a571f992a132f6489826e7288ea64e30d2423

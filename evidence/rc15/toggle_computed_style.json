@@ -1,0 +1,18 @@
+{
+  "normal": {
+    "background": "rgba(255, 255, 255, 0.94)",
+    "color": "rgb(34, 34, 34)",
+    "fontWeight": "700",
+    "webkitTextStroke": "0px rgb(34, 34, 34)",
+    "width": "48px",
+    "height": "48px"
+  },
+  "active": {
+    "background": "rgba(255, 255, 255, 0.94)",
+    "color": "rgb(34, 34, 34)",
+    "fontWeight": "900",
+    "webkitTextStroke": "0.45px rgb(34, 34, 34)",
+    "width": "48px",
+    "height": "48px"
+  }
+}

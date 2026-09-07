@@ -1,0 +1,352 @@
+{
+  "passed": 5,
+  "failed": 0,
+  "cases": [
+    {
+      "viewport": "1280x800",
+      "status": "PASS",
+      "metrics": {
+        "screen": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 800,
+          "width": 1280,
+          "height": 800
+        },
+        "layout": {
+          "left": 0,
+          "top": 0,
+          "right": 1280,
+          "bottom": 800,
+          "width": 1280,
+          "height": 800
+        },
+        "toggle": {
+          "left": 616,
+          "top": 720,
+          "right": 664,
+          "bottom": 768,
+          "width": 48,
+          "height": 48
+        },
+        "hint": null,
+        "leftNameCell": {
+          "left": 177.796875,
+          "top": 688,
+          "right": 635,
+          "bottom": 800,
+          "width": 457.203125,
+          "height": 112
+        },
+        "rightNameCell": {
+          "left": 645,
+          "top": 688,
+          "right": 1102.1875,
+          "bottom": 800,
+          "width": 457.1875,
+          "height": 112
+        },
+        "leftName": {
+          "left": 206.5,
+          "top": 720.171875,
+          "right": 582.28125,
+          "bottom": 768.8125,
+          "width": 375.78125,
+          "height": 48.640625
+        },
+        "rightName": {
+          "left": 684,
+          "top": 720.171875,
+          "right": 1087.1875,
+          "bottom": 768.8125,
+          "width": 403.1875,
+          "height": 48.640625
+        },
+        "sw": 1280,
+        "sh": 800
+      }
+    },
+    {
+      "viewport": "1024x768",
+      "status": "PASS",
+      "metrics": {
+        "screen": {
+          "left": 0,
+          "top": 0,
+          "right": 1024,
+          "bottom": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "layout": {
+          "left": 0,
+          "top": 0,
+          "right": 1024,
+          "bottom": 768,
+          "width": 1024,
+          "height": 768
+        },
+        "toggle": {
+          "left": 488,
+          "top": 690.25,
+          "right": 536,
+          "bottom": 738.25,
+          "width": 48,
+          "height": 48
+        },
+        "hint": null,
+        "leftNameCell": {
+          "left": 141.953125,
+          "top": 660.484375,
+          "right": 507,
+          "bottom": 768,
+          "width": 365.046875,
+          "height": 107.515625
+        },
+        "rightNameCell": {
+          "left": 517,
+          "top": 660.484375,
+          "right": 882.03125,
+          "bottom": 768,
+          "width": 365.03125,
+          "height": 107.515625
+        },
+        "leftName": {
+          "left": 162.125,
+          "top": 695.28125,
+          "right": 462.8125,
+          "bottom": 734.1875,
+          "width": 300.6875,
+          "height": 38.90625
+        },
+        "rightName": {
+          "left": 556,
+          "top": 695.28125,
+          "right": 867.03125,
+          "bottom": 734.1875,
+          "width": 311.03125,
+          "height": 38.90625
+        },
+        "sw": 1024,
+        "sh": 768
+      }
+    },
+    {
+      "viewport": "768x1024",
+      "status": "PASS",
+      "metrics": {
+        "screen": {
+          "left": 0,
+          "top": 0,
+          "right": 768,
+          "bottom": 1024,
+          "width": 768,
+          "height": 1024
+        },
+        "layout": {
+          "left": 0,
+          "top": 0,
+          "right": 768,
+          "bottom": 1024,
+          "width": 768,
+          "height": 1024
+        },
+        "toggle": {
+          "left": 360,
+          "top": 938.5625,
+          "right": 408,
+          "bottom": 986.5625,
+          "width": 48,
+          "height": 48
+        },
+        "hint": {
+          "left": 201.125,
+          "top": 10,
+          "right": 566.875,
+          "bottom": 39,
+          "width": 365.75,
+          "height": 29
+        },
+        "leftNameCell": {
+          "left": 91.3125,
+          "top": 901.125,
+          "right": 380.5,
+          "bottom": 1024,
+          "width": 289.1875,
+          "height": 122.875
+        },
+        "rightNameCell": {
+          "left": 387.5,
+          "top": 901.125,
+          "right": 676.671875,
+          "bottom": 1024,
+          "width": 289.171875,
+          "height": 122.875
+        },
+        "leftName": {
+          "left": 106.3125,
+          "top": 945.390625,
+          "right": 341.5,
+          "bottom": 980.71875,
+          "width": 235.1875,
+          "height": 35.328125
+        },
+        "rightName": {
+          "left": 426.5,
+          "top": 945.390625,
+          "right": 661.671875,
+          "bottom": 980.71875,
+          "width": 235.171875,
+          "height": 35.328125
+        },
+        "sw": 768,
+        "sh": 1024
+      }
+    },
+    {
+      "viewport": "390x844",
+      "status": "PASS",
+      "metrics": {
+        "screen": {
+          "left": 0,
+          "top": 0,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 844
+        },
+        "layout": {
+          "left": 0,
+          "top": 0,
+          "right": 390,
+          "bottom": 844,
+          "width": 390,
+          "height": 844
+        },
+        "toggle": {
+          "left": 171,
+          "top": 769.375,
+          "right": 219,
+          "bottom": 817.375,
+          "width": 48,
+          "height": 48
+        },
+        "hint": {
+          "left": 10,
+          "top": 88,
+          "right": 380,
+          "bottom": 117,
+          "width": 370,
+          "height": 29
+        },
+        "leftNameCell": {
+          "left": 45.953125,
+          "top": 742.734375,
+          "right": 191.5,
+          "bottom": 844,
+          "width": 145.546875,
+          "height": 101.265625
+        },
+        "rightNameCell": {
+          "left": 198.5,
+          "top": 742.734375,
+          "right": 344.03125,
+          "bottom": 844,
+          "width": 145.53125,
+          "height": 101.265625
+        },
+        "leftName": {
+          "left": 60.953125,
+          "top": 783.859375,
+          "right": 152.5,
+          "bottom": 803.859375,
+          "width": 91.546875,
+          "height": 20
+        },
+        "rightName": {
+          "left": 237.5,
+          "top": 783.859375,
+          "right": 329.03125,
+          "bottom": 803.859375,
+          "width": 91.53125,
+          "height": 20
+        },
+        "sw": 390,
+        "sh": 844
+      }
+    },
+    {
+      "viewport": "320x568",
+      "status": "PASS",
+      "metrics": {
+        "screen": {
+          "left": 0,
+          "top": 0,
+          "right": 320,
+          "bottom": 568,
+          "width": 320,
+          "height": 568
+        },
+        "layout": {
+          "left": 0,
+          "top": 0,
+          "right": 320,
+          "bottom": 568,
+          "width": 320,
+          "height": 568
+        },
+        "toggle": {
+          "left": 136,
+          "top": 498,
+          "right": 184,
+          "bottom": 546,
+          "width": 48,
+          "height": 48
+        },
+        "hint": {
+          "left": 10,
+          "top": 88,
+          "right": 310,
+          "bottom": 132,
+          "width": 300,
+          "height": 44
+        },
+        "leftNameCell": {
+          "left": 37.546875,
+          "top": 476,
+          "right": 156.5,
+          "bottom": 568,
+          "width": 118.953125,
+          "height": 92
+        },
+        "rightNameCell": {
+          "left": 163.5,
+          "top": 476,
+          "right": 282.4375,
+          "bottom": 568,
+          "width": 118.9375,
+          "height": 92
+        },
+        "leftName": {
+          "left": 52.546875,
+          "top": 512.5,
+          "right": 117.5,
+          "bottom": 532.5,
+          "width": 64.953125,
+          "height": 20
+        },
+        "rightName": {
+          "left": 202.5,
+          "top": 512.5,
+          "right": 267.4375,
+          "bottom": 532.5,
+          "width": 64.9375,
+          "height": 20
+        },
+        "sw": 320,
+        "sh": 568
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+RC10 -> RC13 runtime diff
+
+Only in /mnt/data/side_perspective_cycle/rc13/ttscore_integration_v0.5.0_v0.11.0_RC13/evidence: rc13_runtime_diff.txt
+Only in /mnt/data/side_perspective_cycle/rc13/ttscore_integration_v0.5.0_v0.11.0_RC13/evidence: side-perspective-browser
+Files /mnt/data/side_perspective_cycle/rc10/ttscore_integration_v0.5.0_v0.11.0_RC10/ttScore_0.5.0.html and /mnt/data/side_perspective_cycle/rc13/ttscore_integration_v0.5.0_v0.11.0_RC13/ttScore_0.5.0.html differ
+
+team directory diff:
+
+firebase rules:
+6f256cd0fcd1f33d30f4d7f5c263b32a48b6635e0a77937ad6edbc36430ada4e  /mnt/data/side_perspective_cycle/rc10/ttscore_integration_v0.5.0_v0.11.0_RC10/firebase-database-rules.json
+6f256cd0fcd1f33d30f4d7f5c263b32a48b6635e0a77937ad6edbc36430ada4e  /mnt/data/side_perspective_cycle/rc13/ttscore_integration_v0.5.0_v0.11.0_RC13/firebase-database-rules.json

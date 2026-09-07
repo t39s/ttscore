@@ -1,0 +1,60 @@
+--- /tmp/rc15.html	2026-09-06 14:52:46.245494953 +0000
++++ ttScore_0.5.0.html	2026-09-06 14:50:29.320785730 +0000
+@@ -1714,8 +1714,10 @@
+     .live-scoreboard-perspective-toggle {
+       position: absolute;
+       z-index: 5;
+-      top: max(30px, calc(env(safe-area-inset-top) + 22px));
+-      right: max(10px, env(safe-area-inset-right));
++      top: auto;
++      right: auto;
++      bottom: clamp(24px, calc(7vh - 24px), 53px);
++      left: 50%;
+       display: inline-flex;
+       align-items: center;
+       justify-content: center;
+@@ -1734,6 +1736,7 @@
+       font-weight: 700;
+       line-height: 1;
+       cursor: pointer;
++      transform: translateX(-50%);
+       -webkit-tap-highlight-color: transparent;
+     }
+     .live-scoreboard-perspective-toggle[aria-pressed="true"] {
+@@ -1840,8 +1843,14 @@
+     .live-scoreboard-game-right { grid-area: 1 / 4; }
+     .live-scoreboard-match-right { grid-area: 1 / 5; }
+     .live-scoreboard-server-left { grid-area: 2 / 1; }
+-    .live-scoreboard-name-left { grid-area: 2 / 2; }
+-    .live-scoreboard-name-right { grid-area: 2 / 4; }
++    .live-scoreboard-name-left {
++      grid-area: 2 / 2;
++      padding-right: 38px;
++    }
++    .live-scoreboard-name-right {
++      grid-area: 2 / 4;
++      padding-left: 38px;
++    }
+     .live-scoreboard-server-right { grid-area: 2 / 5; }
+     .live-scoreboard-footer {
+       position: absolute;
+@@ -1855,6 +1864,9 @@
+     }
+     @media (orientation: portrait) {
+       .live-scoreboard-rotate { display: block; }
++      .live-scoreboard-perspective-toggle {
++        bottom: clamp(22px, calc(6vh - 24px), 42px);
++      }
+       .live-scoreboard-layout {
+         grid-template-columns: 12fr 38fr 7px 38fr 12fr;
+         grid-template-rows: minmax(0, 1fr) clamp(92px, 12vh, 132px);
+@@ -1864,9 +1876,6 @@
+       .live-scoreboard-match-score { font-size: min(28vh, 20vw); }
+     }
+     @media (orientation: portrait) and (max-width: 440px) {
+-      .live-scoreboard-perspective-toggle {
+-        top: max(30px, calc(env(safe-area-inset-top) + 22px));
+-      }
+       .live-scoreboard-status {
+         top: max(88px, calc(env(safe-area-inset-top) + 80px));
+         right: max(10px, env(safe-area-inset-right));
