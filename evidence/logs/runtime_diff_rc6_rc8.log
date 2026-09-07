@@ -1,0 +1,65 @@
+RC6 -> RC8 production runtime diff
+Changed: team/assets/0.9.0/firebase-source.mjs only
+
+--- /mnt/data/_rc6_inspect/ttscore_integration_v0.4.0_v0.9.0_rc6/team/assets/0.9.0/firebase-source.mjs	2026-09-01 14:11:24.000000000 +0000
++++ /mnt/data/ttscore_integration_v0.4.0_v0.9.0_rc8/team/assets/0.9.0/firebase-source.mjs	2026-09-01 19:13:33.103033802 +0000
+@@ -176,6 +176,22 @@
+   return { ...cloneJson(value), [WRITE_REVISION_FIELD]: revision };
+ }
+ 
++const teamMatchWriteTails = new Map();
++
++export async function serializeFirebaseTeamMatchWrite(id, operation) {
++  assertTeamMatchId(id);
++  if (typeof operation !== "function") throw new Error("Для сериализации Team write требуется операция.");
++  const previous = teamMatchWriteTails.get(id) ?? Promise.resolve();
++  const run = previous.catch(() => undefined).then(operation);
++  const tail = run.then(() => undefined, () => undefined);
++  teamMatchWriteTails.set(id, tail);
++  try {
++    return await run;
++  } finally {
++    if (teamMatchWriteTails.get(id) === tail) teamMatchWriteTails.delete(id);
++  }
++}
++
+ export function prepareFirebaseTeamMatchGuardedWrite(rawCurrent, id, transform) {
+   if (rawCurrent === null) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
+   if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
+@@ -211,20 +227,22 @@
+ 
+ export async function transactFirebaseTeamMatch(id, transform) {
+   if (typeof transform !== "function") throw new Error("Для conditional write требуется функция преобразования Team state.");
+-  const { auth, database, databaseModule } = await loadFirebaseServices();
+-  if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
+-  const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
+-  const snapshot = await databaseModule.get(reference);
+-  if (!snapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
+-
+-  const guarded = prepareFirebaseTeamMatchGuardedWrite(snapshot.val(), id, transform);
+-
+-  try {
+-    await databaseModule.set(reference, guarded.candidate);
+-  } catch (error) {
+-    await classifyRevisionGuardFailure(reference, guarded.expectedWriteRevision, databaseModule, error);
+-  }
+-  return guarded.data;
++  return serializeFirebaseTeamMatchWrite(id, async () => {
++    const { auth, database, databaseModule } = await loadFirebaseServices();
++    if (!auth.currentUser) throw new Error("Для публикации войдите в Firebase.");
++    const reference = databaseModule.ref(database, firebaseTeamMatchPath(id));
++    const snapshot = await databaseModule.get(reference);
++    if (!snapshot.exists()) throw new Error("Командная встреча больше не существует в Firebase. Перезагрузите источник.");
++
++    const guarded = prepareFirebaseTeamMatchGuardedWrite(snapshot.val(), id, transform);
++
++    try {
++      await databaseModule.set(reference, guarded.candidate);
++    } catch (error) {
++      await classifyRevisionGuardFailure(reference, guarded.expectedWriteRevision, databaseModule, error);
++    }
++    return guarded.data;
++  });
+ }
+ 
+ export async function publishFirebaseTeamMatch(id, data, expectedRevision, revisionOf) {

@@ -1,0 +1,245 @@
+{
+  "initial": {
+    "schemaVersion": 4,
+    "id": "realtime-editor-test",
+    "title": "Команда A — Команда B",
+    "date": "2026-09-01",
+    "venue": null,
+    "updatedAt": "2026-09-01T08:00:00Z",
+    "liveReportUrl": null,
+    "liveScoreboardUrl": null,
+    "individualMatchBestOf": 5,
+    "winsToFinish": 3,
+    "teams": {
+      "A": {
+        "name": "Команда A",
+        "players": [
+          {
+            "id": "a1",
+            "name": "A1"
+          },
+          {
+            "id": "a2",
+            "name": "A2"
+          }
+        ]
+      },
+      "B": {
+        "name": "Команда B",
+        "players": [
+          {
+            "id": "b1",
+            "name": "B1"
+          },
+          {
+            "id": "b2",
+            "name": "B2"
+          }
+        ]
+      }
+    },
+    "individualMatches": [
+      {
+        "id": "m01",
+        "order": 1,
+        "playerAId": "a1",
+        "playerBId": "b1",
+        "status": "current",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m02",
+        "order": 2,
+        "playerAId": "a2",
+        "playerBId": "b2",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m03",
+        "order": 3,
+        "playerAId": "a1",
+        "playerBId": "b2",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m04",
+        "order": 4,
+        "playerAId": "a2",
+        "playerBId": "b1",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      }
+    ]
+  },
+  "updated": {
+    "schemaVersion": 4,
+    "id": "realtime-editor-test",
+    "title": "Команда A — Команда B",
+    "date": "2026-09-01",
+    "venue": null,
+    "updatedAt": "2026-09-01T08:10:00Z",
+    "liveReportUrl": null,
+    "liveScoreboardUrl": null,
+    "individualMatchBestOf": 5,
+    "winsToFinish": 3,
+    "teams": {
+      "A": {
+        "name": "Команда A",
+        "players": [
+          {
+            "id": "a1",
+            "name": "A1"
+          },
+          {
+            "id": "a2",
+            "name": "A2"
+          }
+        ]
+      },
+      "B": {
+        "name": "Команда B",
+        "players": [
+          {
+            "id": "b1",
+            "name": "B1"
+          },
+          {
+            "id": "b2",
+            "name": "B2"
+          }
+        ]
+      }
+    },
+    "individualMatches": [
+      {
+        "id": "m01",
+        "order": 1,
+        "playerAId": "a1",
+        "playerBId": "b1",
+        "status": "finished",
+        "result": {
+          "gamesA": 3,
+          "gamesB": 1
+        },
+        "reportUrl": null
+      },
+      {
+        "id": "m02",
+        "order": 2,
+        "playerAId": "a2",
+        "playerBId": "b2",
+        "status": "current",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m03",
+        "order": 3,
+        "playerAId": "a1",
+        "playerBId": "b2",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m04",
+        "order": 4,
+        "playerAId": "a2",
+        "playerBId": "b1",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      }
+    ]
+  },
+  "updated2": {
+    "schemaVersion": 4,
+    "id": "realtime-editor-test",
+    "title": "Команда A — Команда B",
+    "date": "2026-09-01",
+    "venue": null,
+    "updatedAt": "2026-09-01T08:20:00Z",
+    "liveReportUrl": null,
+    "liveScoreboardUrl": null,
+    "individualMatchBestOf": 5,
+    "winsToFinish": 3,
+    "teams": {
+      "A": {
+        "name": "Команда A",
+        "players": [
+          {
+            "id": "a1",
+            "name": "A1"
+          },
+          {
+            "id": "a2",
+            "name": "A2"
+          }
+        ]
+      },
+      "B": {
+        "name": "Команда B",
+        "players": [
+          {
+            "id": "b1",
+            "name": "B1"
+          },
+          {
+            "id": "b2",
+            "name": "B2"
+          }
+        ]
+      }
+    },
+    "individualMatches": [
+      {
+        "id": "m01",
+        "order": 1,
+        "playerAId": "a1",
+        "playerBId": "b1",
+        "status": "finished",
+        "result": {
+          "gamesA": 3,
+          "gamesB": 1
+        },
+        "reportUrl": null
+      },
+      {
+        "id": "m02",
+        "order": 2,
+        "playerAId": "a2",
+        "playerBId": "b2",
+        "status": "finished",
+        "result": {
+          "gamesA": 0,
+          "gamesB": 3
+        },
+        "reportUrl": null
+      },
+      {
+        "id": "m03",
+        "order": 3,
+        "playerAId": "a1",
+        "playerBId": "b2",
+        "status": "current",
+        "result": null,
+        "reportUrl": null
+      },
+      {
+        "id": "m04",
+        "order": 4,
+        "playerAId": "a2",
+        "playerBId": "b1",
+        "status": "planned",
+        "result": null,
+        "reportUrl": null
+      }
+    ]
+  }
+}

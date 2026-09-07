@@ -1,0 +1,8 @@
+RC8 -> RC9 runtime changed files:
+- ttScore_0.4.0.html
+- team/assets/0.9.0/team-integration-contract.mjs
+- team/assets/0.9.0/ttscore-team-adapter.mjs
+
+Byte-identical RC8:
+- team/assets/0.9.0/firebase-source.mjs
+- firebase-database-rules.json

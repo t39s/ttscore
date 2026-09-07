@@ -1,0 +1,3 @@
+Production runtime diff RC5 -> RC6:
+ttScore_0.4.0.html: byte-identical
+firebase-database-rules.json: CHANGED

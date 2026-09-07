@@ -1,0 +1,45 @@
+--- /mnt/data/rc8_extract/ttscore_integration_v0.4.0_v0.9.0_rc8/ttScore_0.4.0.html	2026-09-01 12:12:47.000000000 +0000
++++ /mnt/data/ttscore_integration_v0.4.0_v0.9.0_rc9/ttScore_0.4.0.html	2026-09-02 04:53:38.258283533 +0000
+@@ -2715,14 +2715,31 @@
+       render();
+     }
+ 
+-    async function reloadTeamContext() {
++    function rebasePendingTeamRelease(assignment) {
++      const pending = teamSession?.pendingRelease;
++      if (!pending || !teamAdapter || assignment?.status !== "current") return false;
++      const rebasedBinding = teamAdapter.rebaseTeamBinding(assignment, pending.binding, pending.ttScoreState);
++      if (!rebasedBinding || rebasedBinding.revision === pending.binding.revision) return false;
++      const nextPending = { ...pending, binding: clone(rebasedBinding) };
++      const stored = storeTeamSession({
++        ...teamSession,
++        binding: clone(rebasedBinding),
++        pendingRelease: nextPending
++      });
++      if (!stored) throw new Error(teamContextError || "Не удалось сохранить обновлённый Team binding перед повторной публикацией.");
++      return true;
++    }
++
++    async function reloadTeamContext({ allowPendingRebase = false } = {}) {
+       if (!IS_TEAM_MODE || !TEAM_MATCH_ID) return;
+       teamContextState = "loading";
+       teamContextError = "";
+       render();
+       try {
+         const adapter = await loadTeamAdapter();
+-        handleTeamAssignment(await adapter.readTeamContext(TEAM_MATCH_ID));
++        const assignment = await adapter.readTeamContext(TEAM_MATCH_ID);
++        if (allowPendingRebase && teamSession?.pendingRelease) rebasePendingTeamRelease(assignment);
++        handleTeamAssignment(assignment);
+       } catch (error) {
+         teamContextState = "error";
+         teamContextError = error instanceof Error ? error.message : String(error);
+@@ -7186,7 +7203,7 @@
+     });
+     els.startButton.addEventListener("click", startMatch);
+     els.teamAuthForm.addEventListener("submit", handleTeamSignIn);
+-    els.teamReloadButton.addEventListener("click", () => { void reloadTeamContext(); });
++    els.teamReloadButton.addEventListener("click", () => { void reloadTeamContext({ allowPendingRebase: true }); });
+     els.teamExitButton.addEventListener("click", exitTeamMode);
+     els.zoneA.addEventListener("click", () => addPoint("A"));
+     els.zoneB.addEventListener("click", () => addPoint("B"));

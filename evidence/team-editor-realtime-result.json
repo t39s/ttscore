@@ -1,0 +1,13 @@
+{
+  "pass": true,
+  "beforeScore": "0:0",
+  "afterScore": "1:0",
+  "beforeCurrent": "№ 1: A1 — B1",
+  "afterCurrent": "№ 2: A2 — B2",
+  "dirtyDraftBlockedExternalScore": "1:0",
+  "dirtyDraftWarning": "Firebase обновился извне. Непубликованные изменения редактора сохранены локально; перезагрузите источник, когда будете готовы принять новое состояние.",
+  "afterExplicitRefreshScore": "1:1",
+  "afterExplicitRefreshCurrent": "№ 3: A1 — B2",
+  "dirtyDraftGuardPass": true,
+  "pageErrors": []
+}

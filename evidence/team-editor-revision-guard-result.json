@@ -1,0 +1,21 @@
+{
+  "pass": true,
+  "legacyMigrationWriteRevision": 1,
+  "plannedOrderAfterPublish": [
+    [
+      "m03",
+      2
+    ],
+    [
+      "m02",
+      3
+    ],
+    [
+      "m04",
+      4
+    ]
+  ],
+  "conflictError": "Данные в Firebase изменились во время публикации. Team state не перезаписан; перезагрузите источник и повторите операцию.",
+  "editorStillOpenWithoutReload": true,
+  "pageErrors": []
+}

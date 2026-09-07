@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "results": [
+    {
+      "schemaVersion": 4,
+      "id": "same-client-race",
+      "individualMatches": [],
+      "venue": null,
+      "liveReportUrl": "https://live.invalid/r",
+      "liveScoreboardUrl": "https://live.invalid/s"
+    },
+    {
+      "schemaVersion": 4,
+      "id": "same-client-race",
+      "individualMatches": [],
+      "venue": null,
+      "liveReportUrl": null,
+      "liveScoreboardUrl": null,
+      "updatedAt": "2026-09-01T19:00:00Z"
+    }
+  ],
+  "reads": [
+    7,
+    8
+  ],
+  "writes": [
+    8,
+    9
+  ],
+  "state": {
+    "schemaVersion": 4,
+    "id": "same-client-race",
+    "individualMatches": [],
+    "venue": null,
+    "liveReportUrl": null,
+    "liveScoreboardUrl": null,
+    "updatedAt": "2026-09-01T19:00:00Z",
+    "_writeRevision": 9
+  },
+  "pageErrors": [],
+  "pass": true
+}

@@ -1,0 +1,22 @@
+--- /mnt/data/rc8_extract/ttscore_integration_v0.4.0_v0.9.0_rc8/team/assets/0.9.0/ttscore-team-adapter.mjs	2026-08-31 19:31:26.000000000 +0000
++++ /mnt/data/ttscore_integration_v0.4.0_v0.9.0_rc9/team/assets/0.9.0/ttscore-team-adapter.mjs	2026-09-02 04:49:48.224406970 +0000
+@@ -6,7 +6,7 @@
+   transactFirebaseTeamMatch
+ } from './firebase-source.mjs';
+ import {
+-  assignmentMatchesBinding, bindAssignment, finishedBindingApplied,
++  assignmentMatchesBinding, bindAssignment, finishedBindingApplied, rebaseBinding,
+   prepareOperationalLiveUpdate,
+   prepareTransition,
+   teamAssignment,
+@@ -46,6 +46,10 @@
+   return bindAssignment(assignment, ttScoreState);
+ }
+ 
++export function rebaseTeamBinding(assignment, binding, ttScoreState) {
++  return rebaseBinding(assignment, binding, ttScoreState);
++}
++
+ export function validateTeamBoundState(binding, ttScoreState) {
+   return validateBoundState(binding, ttScoreState);
+ }

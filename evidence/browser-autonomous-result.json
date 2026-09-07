@@ -1,0 +1,36 @@
+{
+  "pass": 6,
+  "total": 6,
+  "results": [
+    {
+      "name": "team panel hidden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "normal start enabled",
+      "ok": true,
+      "detail": "Начать встречу из 5 партий"
+    },
+    {
+      "name": "manual player A used",
+      "ok": true,
+      "detail": "A"
+    },
+    {
+      "name": "manual player B used",
+      "ok": true,
+      "detail": "B"
+    },
+    {
+      "name": "scoring works",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

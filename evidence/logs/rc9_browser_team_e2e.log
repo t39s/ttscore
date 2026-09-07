@@ -1,0 +1,101 @@
+{
+  "pass": 19,
+  "total": 19,
+  "results": [
+    {
+      "name": "prefill player A",
+      "ok": true,
+      "detail": "Иванов"
+    },
+    {
+      "name": "prefill player B",
+      "ok": true,
+      "detail": "Петров"
+    },
+    {
+      "name": "prefill date",
+      "ok": true,
+      "detail": "2026-09-05"
+    },
+    {
+      "name": "prefill bestOf",
+      "ok": true,
+      "detail": "Начать встречу из 3 партий"
+    },
+    {
+      "name": "assignment fields locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "referee choices remain enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "binding created",
+      "ok": true,
+      "detail": "{\"version\": 1, \"teamMatchId\": \"team-e2e\", \"binding\": {\"version\": 1, \"teamMatchId\": \"team-e2e\", \"individualMatchId\": \"m01\", \"matchDate\": \"2026-09-05\", \"bestOf\": 3, \"playerA\": {\"id\": \"a1\", \"name\": \"Иванов\"}, \"playerB\": {\"id\": \"b1\", \"name\": \"Петров\"}, \"revision\": \"rev-m01\", \"ttScoreMatchId\": \"2026-0905-407c\"}, \"pendingRelease\": null}"
+    },
+    {
+      "name": "no team finish after game 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no team finish at match-winning point",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "undo returns score to 10",
+      "ok": true,
+      "detail": "10"
+    },
+    {
+      "name": "undo still no team finish",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "refinished still unreleased",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "single finish publication",
+      "ok": true,
+      "detail": "[{\"type\": \"finished\", \"individualMatchId\": \"m01\", \"result\": {\"gamesA\": 2, \"gamesB\": 0}}]"
+    },
+    {
+      "name": "correct released result",
+      "ok": true,
+      "detail": "{\"type\": \"finished\", \"individualMatchId\": \"m01\", \"result\": {\"gamesA\": 2, \"gamesB\": 0}}"
+    },
+    {
+      "name": "next assignment player A",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "next assignment player B",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "next assignment start enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pending release reconciled",
+      "ok": true,
+      "detail": "{\"version\": 1, \"teamMatchId\": \"team-e2e\", \"binding\": null, \"pendingRelease\": null}"
+    },
+    {
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "pass": 10,
+  "total": 10,
+  "results": [
+    {
+      "name": "initial binding revision",
+      "ok": true,
+      "detail": "{\"version\": 1, \"teamMatchId\": \"team-rebase\", \"binding\": {\"version\": 1, \"teamMatchId\": \"team-rebase\", \"individualMatchId\": \"m01\", \"matchDate\": \"2026-09-05\", \"bestOf\": 3, \"playerA\": {\"id\": \"a1\", \"name\": \"Иванов\"}, \"playerB\": {\"id\": \"b1\", \"name\": \"Петров\"}, \"revision\": \"rev-m01\", \"ttScoreMatchId\": \"2026-0905-a1a9\"}, \"pendingRelease\": null}"
+    },
+    {
+      "name": "external reorder creates runtime conflict",
+      "ok": true,
+      "detail": "Team · m01: Team assignment или его операционная ревизия изменились после запуска ttScore-встречи."
+    },
+    {
+      "name": "first stale write blocked",
+      "ok": true,
+      "detail": "Результат сохранён локально, Team не изменён: Team assignment изменился; запись заблокирована."
+    },
+    {
+      "name": "pending remains with stale revision",
+      "ok": true,
+      "detail": "{\"version\": 1, \"teamMatchId\": \"team-rebase\", \"binding\": {\"version\": 1, \"teamMatchId\": \"team-rebase\", \"individualMatchId\": \"m01\", \"matchDate\": \"2026-09-05\", \"bestOf\": 3, \"playerA\": {\"id\": \"a1\", \"name\": \"Иванов\"}, \"playerB\": {\"id\": \"b1\", \"name\": \"Петров\"}, \"revision\": \"rev-m01\", \"ttScoreMatchId\": \"2026-0905-a1a9\"}, \"pendingRelease\": {\"version\": 1, \"binding\": {\"version\": 1, \"teamMatchId\": \"team-rebase\", \"individualMatchId\": \"m01\", \"matchDate\": \"2026-09-05\", \"bestOf\": 3, \"playerA\": {\"id\": \"a1\", \"name\": \"Иванов\"}, \"playerB\": {\"id\": \"b1\", \"name\": \"Петров\"}, \"revision\": \"rev-m01\", \"ttScoreMatchId\": \"2026-0905-a1a9\"}, \"ttScoreState\": {\"matchId\": \"2026-0905-a1a9\", \"matchDate\": \"2026-09-05\", \"format\": 3, \"players\": {\"A\": \"Иванов\", \"B\": \"Петров\"}}, \"result\": {\"gamesA\": 2, \"gamesB\": 0}, \"capturedAt\": \"2026-09-02T04:55:09.713Z\"}}"
+    },
+    {
+      "name": "one failed attempt before explicit reload",
+      "ok": true,
+      "detail": "[{\"type\": \"finish-attempt\", \"revision\": \"rev-m01\", \"currentRevision\": \"rev-reordered\", \"individualMatchId\": \"m01\"}]"
+    },
+    {
+      "name": "explicit reload rebases stale binding",
+      "ok": true,
+      "detail": "[{\"type\": \"rebase\", \"from\": \"rev-m01\", \"to\": \"rev-reordered\", \"individualMatchId\": \"m01\"}]"
+    },
+    {
+      "name": "second finish uses refreshed revision",
+      "ok": true,
+      "detail": "[{\"type\": \"finish-attempt\", \"revision\": \"rev-m01\", \"currentRevision\": \"rev-reordered\", \"individualMatchId\": \"m01\"}, {\"type\": \"finish-attempt\", \"revision\": \"rev-reordered\", \"currentRevision\": \"rev-reordered\", \"individualMatchId\": \"m01\"}]"
+    },
+    {
+      "name": "result published exactly once",
+      "ok": true,
+      "detail": "[{\"type\": \"finished\", \"individualMatchId\": \"m01\", \"result\": {\"gamesA\": 2, \"gamesB\": 0}, \"revision\": \"rev-reordered\"}]"
+    },
+    {
+      "name": "reordered next match becomes current",
+      "ok": true,
+      "detail": "Иванов — Орлов"
+    },
+    {
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

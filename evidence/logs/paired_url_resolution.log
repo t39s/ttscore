@@ -1,0 +1,4 @@
+TEAM_LAUNCH https://example.invalid/ttscore/ttScore_0.4.0.html?teamMatch=demo
+TTSCORE_ADAPTER https://example.invalid/ttscore/team/assets/0.9.0/ttscore-team-adapter.mjs
+LOCAL_TARGETS_EXIST PASS
+PAIRED URL RESOLUTION PASS
