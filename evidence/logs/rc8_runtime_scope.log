@@ -1,0 +1,7 @@
+RC7 -> RC8 runtime diff summary
+Files /mnt/data/rc7_original/ttscore_integration_v0.5.0_v0.11.0_RC7/team/ttscore_team_0.11.0.html and team/ttscore_team_0.11.0.html differ
+Files /mnt/data/rc7_original/ttscore_integration_v0.5.0_v0.11.0_RC7/team/assets/0.11.0/app.mjs and team/assets/0.11.0/app.mjs differ
+Files /mnt/data/rc7_original/ttscore_integration_v0.5.0_v0.11.0_RC7/team/assets/0.11.0/styles.css and team/assets/0.11.0/styles.css differ
+
+Unexpected diffs in all other runtime files:
+unexpected_runtime_diff=0

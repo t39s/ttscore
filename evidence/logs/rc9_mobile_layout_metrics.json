@@ -1,0 +1,19 @@
+{
+  "engine": "Chromium 144.0.7559.96",
+  "fixture": "evidence/fixtures/rc9_3x3_fullnames.html",
+  "note": "Representative static 3x3 fixture using the exact RC9 Team CSS/DOM classes; not a live Firebase capture.",
+  "viewports": {
+    "393": {
+      "resultWidth": 279,
+      "statusHeight": 20.875,
+      "liveScoreboard": {"width": 135.5, "height": 44, "whiteSpace": "nowrap"},
+      "liveReport": {"width": 135.5, "height": 44, "whiteSpace": "nowrap"}
+    },
+    "320": {
+      "resultWidth": 206,
+      "statusHeight": 20.875,
+      "liveScoreboard": {"width": 99, "height": 44, "whiteSpace": "nowrap"},
+      "liveReport": {"width": 99, "height": 44, "whiteSpace": "nowrap"}
+    }
+  }
+}
