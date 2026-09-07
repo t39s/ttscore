@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createTeamMatch } from "../../team/assets/0.10.0/creator.mjs";
-import { prepareTransition } from "../../team/assets/0.10.0/editor.mjs";
+import { createTeamMatch } from "../../team/assets/0.11.0/creator.mjs";
+import { prepareTransition } from "../../team/assets/0.11.0/editor.mjs";
 import {
   TTSCORE_CURRENT_MEETING_KEY,
   TTSCORE_LIVE_PUBLICATION_KEY,
@@ -11,7 +11,7 @@ import {
   ttScoreLiveReportUrl,
   ttScoreLiveScoreboardUrl,
   updatePendingFinishedMatch
-} from "../../team/assets/0.10.0/ttscore-integration.mjs";
+} from "../../team/assets/0.11.0/ttscore-integration.mjs";
 
 function storageWith(entries = []) {
   const map = new Map(entries);

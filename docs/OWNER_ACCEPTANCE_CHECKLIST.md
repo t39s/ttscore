@@ -1,38 +1,35 @@
-# Owner acceptance — ttScore 0.5.0 + ttscore_team 0.10.0 RC1
+# Owner Acceptance Checklist — Team-level Undo RC1
 
-## Deployment
+## A. Активный командный матч
 
-1. Publish RC1 `firebase-database-rules.json` to Firebase project `ttscore-list`.
-2. Deploy the complete versioned static package.
-3. Hard reload open ttScore/ttscore_team pages.
+1. Иметь минимум одну `finished` и следующую `current` личную встречу.
+2. Открыть Team editor.
+3. Нажать `Подготовить Team-level Undo`.
+4. Проверить preview и опубликовать Firebase.
+5. PASS: последний finished стал current; прежний current стал planned; Team score уменьшился на результат отменённой встречи; Live-ссылки очищены.
 
-## Required happy path
+## B. Report semantics
 
-1. Open a Team current personal match in `ttScore_0.5.0`.
-2. Complete the personal match.
-3. Choose `Новая встреча` → confirm.
-4. Verify Team score advances and next personal match becomes current.
-5. In RTDB verify one record exists under `/individualMatchReportsV1/<teamMatchId>/<recordId>`.
-6. Verify the finished personal match in ttscore_team has an `Отчёт` link.
-7. Open it and verify players, final score, games and rally report.
-8. From the cloud report verify local file export remains available.
+1. До Undo открыть/сохранить URL отчёта отменяемой встречи.
+2. Выполнить Undo.
+3. PASS: в активной Team-записи ссылка отчёта исчезла.
+4. PASS: старый direct report URL по-прежнему открывает historical backup.
 
-## Required temporary-network failure path
+## C. Повторное прохождение
 
-1. Complete a personal match.
-2. Make Firebase/network unavailable before confirming new match.
-3. Confirm `Новая встреча`.
-4. Expected: explicit backup error; Team does not advance; completed match remains on the phone with full rally data.
-5. Restore connectivity within the operational 2–5 minute outage window.
-6. Repeat `Новая встреча` confirmation.
-7. Expected: backup succeeds, Team advances, report link works, no data re-entry is required.
+1. Запустить восстановленную current-пару как новую встречу ttScore.
+2. Завершить её штатно.
+3. PASS: создаётся новый reportUrl; Team получает исправленный результат; предыдущая planned/current последовательность продолжается.
 
-## Regression checks
+Альтернатива force-majeure: внести итог через существующую ручную форму Team. В этом варианте отсутствие нового reportUrl допустимо, поскольку новой canonical ttScore-сессии не было.
 
-- normal scoring and Undo;
-- Live after temporary outage;
-- planned-order stale conflict + RC9 `Перечитать Team` recovery;
-- ttscore_team realtime editor update;
-- autonomous ttScore mode.
+## D. Завершённый командный матч
 
-RC1 becomes baseline only after explicit owner acceptance.
+1. На завершённом Team match выполнить Undo последней finished.
+2. PASS: Team match снова активен, winner/draw снимается, отменённая встреча current.
+
+## E. Concurrency guard
+
+1. Подготовить Undo preview.
+2. До публикации изменить Team с другого клиента.
+3. PASS: stale preview не перезаписывает внешнее изменение; требуется перечитать/повторно подготовить.

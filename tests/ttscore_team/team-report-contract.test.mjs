@@ -7,7 +7,7 @@ import {
   buildTeamReportRecord,
   sameTeamReportPayload,
   validateTeamReportRecord
-} from '../../team/assets/0.10.0/team-report-contract.mjs';
+} from '../../team/assets/0.11.0/team-report-contract.mjs';
 
 function record(overrides = {}) {
   return buildTeamReportRecord({

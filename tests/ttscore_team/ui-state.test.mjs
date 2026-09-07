@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   activeTeamMatchStatusText, movePlannedMatchWithSelection, personalMatchWinPhrase, selectPlannedMatch
-} from "../../team/assets/0.10.0/ui-state.mjs";
+} from "../../team/assets/0.11.0/ui-state.mjs";
 
 test("склонение количества личных встреч учитывает русские окончания", () => {
   for (const [value, expected] of [

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { prepareTeamMatch } from "../../team/assets/0.10.0/model.mjs";
-import { createTeamMatch } from "../../team/assets/0.10.0/creator.mjs";
+import { prepareTeamMatch } from "../../team/assets/0.11.0/model.mjs";
+import { createTeamMatch } from "../../team/assets/0.11.0/creator.mjs";
 
 function baseTeamMatch() {
   return createTeamMatch({

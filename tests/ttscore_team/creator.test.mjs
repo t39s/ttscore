@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   createTeamMatch, generatePairOrder, localCalendarDate, movePair, parseCreationJson
-} from "../../team/assets/0.10.0/creator.mjs";
+} from "../../team/assets/0.11.0/creator.mjs";
 
 function input(teamSize) {
   return {

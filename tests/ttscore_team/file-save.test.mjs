@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { saveJsonArtifact } from "../../team/assets/0.10.0/file-save.mjs";
+import { saveJsonArtifact } from "../../team/assets/0.11.0/file-save.mjs";
 
 const artifact = Object.freeze({
   filename: "test-match.json",

@@ -8,7 +8,7 @@ import {
   pendingTransitionDecision, readTtScoreIntegration, ttScoreFinalResult, ttScoreGameWins,
   ttScoreLiveReportUrl, ttScoreLiveScoreboardUrl, updatePendingFinishedMatch,
   readPendingFinishedMatch, reconcilePendingFinishedMatch
-} from "../../team/assets/0.10.0/ttscore-integration.mjs";
+} from "../../team/assets/0.11.0/ttscore-integration.mjs";
 
 function state(overrides = {}) {
   return {

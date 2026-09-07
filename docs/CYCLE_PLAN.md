@@ -1,12 +1,49 @@
-# Cycle plan — ttScore 0.5.0 + ttscore_team 0.10.0 RC1
+# Cycle Plan — Team-level Undo
 
-1. Preserve accepted RC9 scoring/CAS/rebase behavior.
-2. Add versioned RTDB report-record contract and Security Rules.
-3. Add create-only/idempotent Firebase report transport.
-4. Capture canonical completed JSON before local reset and wait for server-confirmed backup.
-5. Carry generated reportUrl through pendingRelease and apply it with Team finish transition.
-6. Add `source=team` report viewer with integrity validation and local file recovery.
-7. Review temporary-network, ambiguous-acknowledgement, stale Team and regression paths.
-8. Run Node/browser suites and package only if no open blocker remains.
+## Scope
 
-Decision target: STABILIZE for production owner acceptance.
+- ttscore_team: новая административная операция Team-level Undo;
+- новая Team minor version `0.11.0`;
+- ttScore остаётся `0.5.0`;
+- интеграционный кандидат: `v0.5.0 + v0.11.0 RC1`.
+
+## Целевое изменение
+
+`latest finished → current`, существующий `current → planned`, rollback score, clear target result/reportUrl, clear top-level Live links.
+
+## Сохраняется неизменным
+
+- scoring и Undo внутри ttScore;
+- Team operational transition contract;
+- Firebase Rules;
+- report backup branch и create-only semantics;
+- schemaVersion 4;
+- ручной резервный переход;
+- planned ordering и unrelated report URLs.
+
+## Технические решения
+
+1. Pure transform `prepareTeamLevelUndo()` в `editor.mjs`.
+2. Отдельная административная UI-панель.
+3. Двухшаговый UX: подготовить preview → существующая публикация Firebase.
+4. Existing source freshness check перед preview + existing CAS при publish.
+5. Сохранить `assets/0.10.0` для byte-identical ttScore 0.5.0; Team 0.11.0 использует `assets/0.11.0`.
+
+## Проверки
+
+- active Team rollback;
+- completed winner reopen;
+- completed 2×2 draw reopen;
+- no-finished rejection;
+- Live clear;
+- unrelated report preservation;
+- static UI/wiring separation from operational contract;
+- full Team regression;
+- full ttScore regression;
+- syntax checks;
+- byte identity ttScore/Firebase Rules;
+- clean extracted ZIP regression.
+
+## Риски
+
+Главный UX-риск — применение Undo при уже идущей следующей судейской сессии. UI явно позиционирует функцию как administrative force-majeure; локальная ttScore-сессия не изменяется.

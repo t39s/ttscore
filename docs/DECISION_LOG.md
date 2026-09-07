@@ -52,3 +52,11 @@ Decision: keep stale publication fail-closed and permit binding revision rebase 
 - Backup confirmation is a hard barrier before clearing full local completed-match state.
 - reportUrl is applied atomically with Team finish transition.
 - Multi-match offline continuity remains deferred; normal internet with recoverable 2–5 minute interruption is the operating assumption.
+
+## 2026-09-03 — Team-level Undo RC1
+
+- Accepted baseline for cycle: ttScore 0.5.0 + ttscore_team 0.10.0 RC1.
+- Decision: implement Undo as an administrative Team transform in `editor.mjs`, not in operational contract and not in ttScore.
+- Historical report backup is immutable and is not deleted; active `reportUrl` is cleared.
+- Version target: ttScore 0.5.0 unchanged; ttscore_team 0.11.0.
+- Internal decision: STABILIZE pending owner production acceptance.

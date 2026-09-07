@@ -1,3 +1,12 @@
+# v0.11.0 — Team-level Undo (2026-09-03)
+
+- Added administrative rollback of latest finished individual match through editor preview/publish.
+- Undo restores target as current, returns prior current to planned, recalculates Team score, clears target result/reportUrl and active Live links.
+- Historical report backup is retained.
+- ttScore 0.5.0 and Firebase Rules unchanged.
+
+---
+
 # ttScore Team — журнал изменений
 
 Документ содержит историю реализованных версий `ttscore_team`, начиная с `v0.1`.

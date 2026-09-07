@@ -1,29 +1,30 @@
-# Next Cycle Brief — report backup RC1
+# Next Cycle Brief
 
-## Current state
+Current state:
+- Candidate: **ttScore 0.5.0 + ttscore_team 0.11.0 RC1**.
+- Team-level Undo реализован как административный preview/publish workflow.
 
-Implementation candidate: `ttScore 0.5.0 + ttscore_team 0.10.0 RC1`, based on accepted RC9.
+Evidence:
+- Team Node 232/232 PASS.
+- ttScore Node 13/13 PASS.
+- target state-transform tests PASS.
+- static UI/wiring tests PASS.
+- ttScore 0.5.0 and Firebase Rules byte-identical baseline.
 
-## Evidence
+Known limitations:
+- Undo does not restore old ttScore judge session.
+- manual Team correction without replay has no new canonical report.
+- historical backup remains accessible by old direct URL by design.
+- baseline matchId collision risk remains unchanged.
 
-Team Node 226/226; ttScore Node 13/13; Team browser 19/19; pending-rebase 10/10; report backup/retry/viewer 15/15; autonomous 6/6; realtime, external revision guard and same-client race PASS.
+Gap:
+- owner production acceptance of actual Firebase editor workflow and report persistence.
 
-## Known limitations
+Recommended next target:
+- execute `OWNER_ACCEPTANCE_CHECKLIST.md`; fix only reproduced defects of this product goal.
 
-No credentialed production Firebase E2E in build environment. Full offline continuity across multiple personal matches is intentionally out of scope; product assumes normal internet availability with recoverable 2–5 minute interruptions.
+Decision:
+- **STABILIZE**.
 
-## Gap
-
-Real Firebase Rules + RTDB + published URL owner acceptance remains required.
-
-## Recommended next target
-
-Production acceptance of RC1 using happy path and temporary-network failure path. Do not start offline-continuity work.
-
-## Decision
-
-STABILIZE.
-
-## Reason
-
-Implementation and review criteria are met in the available environment; remaining uncertainty is production integration evidence, not an unresolved design/code blocker.
+Reason:
+- implementation and internal evidence satisfy engineering criteria, but a new force-majeure administrative state transition requires owner production acceptance before becoming baseline.

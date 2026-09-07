@@ -6,11 +6,11 @@ import {
   FIREBASE_CONFIG, FIREBASE_SDK_VERSION, assertFirebaseSourceRevision,
   firebaseIndividualMatchReportPath, firebaseTeamMatchPath, firebaseTeamMatchWriteRevision, normalizeFirebaseTeamMatchData,
   prepareFirebaseTeamMatchGuardedWrite, serializeFirebaseTeamMatchWrite, withFirebaseTeamMatchWriteRevision
-} from "../../team/assets/0.10.0/firebase-source.mjs";
-import { createTeamMatch } from "../../team/assets/0.10.0/creator.mjs";
-import { prepareEditableSource, sourceRevision } from "../../team/assets/0.10.0/editor.mjs";
+} from "../../team/assets/0.11.0/firebase-source.mjs";
+import { createTeamMatch } from "../../team/assets/0.11.0/creator.mjs";
+import { prepareEditableSource, sourceRevision } from "../../team/assets/0.11.0/editor.mjs";
 
-const source = readFileSync(new URL("../../team/assets/0.10.0/firebase-source.mjs", import.meta.url), "utf8");
+const source = readFileSync(new URL("../../team/assets/0.11.0/firebase-source.mjs", import.meta.url), "utf8");
 
 test("Firebase использует выделенный проект ttscore-list и europe-west1 RTDB", () => {
   assert.equal(FIREBASE_CONFIG.projectId, "ttscore-list");

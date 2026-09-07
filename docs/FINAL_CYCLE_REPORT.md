@@ -1,29 +1,23 @@
-# Final Cycle Report — ttScore 0.5.0 + ttscore_team 0.10.0 RC1
+# Final Cycle Report — Team-level Undo RC1
 
-## Research
+Version: ttScore 0.5.0 + ttscore_team 0.11.0 RC1
 
-Confirmed that existing RTDB is sufficient and that report payload should be separated from Team operational state. Verified Firebase Web `set()` completion semantics as the server-write barrier.
+Goal: allow an administrator to roll back the latest finished individual match at Team level without restarting the team match, while preserving historical report backup.
 
-## Development
+What changed:
+- new `prepareTeamLevelUndo()` administrative transform;
+- new Team editor Undo panel and preview workflow;
+- target finished result/reportUrl cleared; previous current returned planned; Team score recalculated; Live links cleared;
+- old report backup remains untouched.
 
-Implemented immutable canonical JSON backup, server-confirmed reset barrier, reportUrl-in-transition, Team remote report viewer, integrity verification and local recovery export.
+Evidence:
+- Team 232/232 PASS;
+- ttScore 13/13 PASS;
+- syntax PASS;
+- byte identity of ttScore 0.5.0 and Firebase Rules confirmed.
 
-## Review
+Review findings: no BLOCKER/HIGH defect found. Accepted limitations documented in `GENERAL_REVIEW.md`.
 
-Resolved state-loss ordering, post-transition race, ambiguous acknowledgement/idempotency, oversized Team-node coupling and cloud recovery UI concerns. No open blocker/high/medium finding remains.
+Decision: STABILIZE pending owner production acceptance.
 
-## Evidence
-
-- Team Node 226/226 PASS
-- ttScore Node 13/13 PASS
-- Team E2E 19/19 PASS
-- pending rebase 10/10 PASS
-- report backup/retry/viewer 15/15 PASS
-- autonomous 6/6 PASS
-- realtime editor PASS
-- external revision guard PASS
-- same-client write race PASS
-
-## Decision
-
-**STABILIZE** — RC1 is ready for owner production acceptance. It is not an accepted baseline until explicitly accepted by the owner.
+Next target: owner acceptance checklist.

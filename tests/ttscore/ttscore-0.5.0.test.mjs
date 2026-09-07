@@ -30,7 +30,7 @@ test('Team mode является opt-in через teamMatch и не актив�
   assert.match(source, /if \(!IS_TEAM_MODE && !IS_TEAM_REPORT\) return null;/);
 });
 
-test('Team adapter загружается лениво только из versioned asset 0.10.0', () => {
+test('Team adapter загружается лениво только из versioned asset 0.11.0', () => {
   assert.match(source, /team\/assets\/0\.10\.0\/ttscore-team-adapter\.mjs/);
   assert.match(source, /teamAdapterPromise = import\(TEAM_ADAPTER_MODULE_URL\)/);
 });

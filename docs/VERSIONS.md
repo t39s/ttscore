@@ -1,8 +1,17 @@
 # Versions
 
-| Product | Accepted baseline | Current candidate | Status |
-|---|---|---|---|
-| ttScore | 0.4.0 / RC9 | 0.5.0 RC1 | production acceptance required |
-| ttscore_team | 0.9.0 / RC9 | 0.10.0 RC1 | production acceptance required |
+## Candidate
 
-The candidate pair must be deployed and tested together. `ttscore_team 0.10.0` launches `../ttScore_0.5.0.html`; ttScore Team mode loads `team/assets/0.10.0/ttscore-team-adapter.mjs`.
+- ttScore: **0.5.0** — unchanged from accepted baseline.
+- ttscore_team: **0.11.0** — Team-level Undo.
+- Integration candidate: **v0.5.0 + v0.11.0 RC1**.
+
+## Accepted baseline at cycle start
+
+- ttScore: **0.5.0**.
+- ttscore_team: **0.10.0**.
+- Integration: accepted **RC1** of the report-backup cycle.
+
+## Version rationale
+
+Team-level Undo is a new product capability in ttscore_team, therefore Team gets a minor increment `0.10.0 → 0.11.0`. ttScore runtime is unchanged and remains `0.5.0`.

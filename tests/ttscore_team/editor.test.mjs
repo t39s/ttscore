@@ -3,9 +3,9 @@ import test from "node:test";
 
 import {
   assertSourceUnchanged, movePlannedMatch, parseEditorJson, prepareCombinedEditorChanges, prepareEditableSource,
-  prepareEditorChanges, prepareLinkChanges, prepareOperationalLiveUpdate, prepareTransition, sourceRevision
-} from "../../team/assets/0.10.0/editor.mjs";
-import { createTeamMatch } from "../../team/assets/0.10.0/creator.mjs";
+  prepareEditorChanges, prepareLinkChanges, prepareOperationalLiveUpdate, prepareTeamLevelUndo, prepareTransition, sourceRevision
+} from "../../team/assets/0.11.0/editor.mjs";
+import { createTeamMatch } from "../../team/assets/0.11.0/creator.mjs";
 
 function fixture() {
   const raw = createTeamMatch({
@@ -69,6 +69,88 @@ test("пятая победа завершает встречу и не назн
   assert.equal(result.transition.nextMatchId, null);
   assert.ok(result.data.individualMatches.slice(5).every(match => match.status === "planned"));
   assert.ok(result.prepared.individualMatches.slice(5).every(match => match.status === "not_required"));
+});
+
+test("Team-level Undo откатывает последнюю finished и возвращает текущую встречу в planned", () => {
+  const raw = fixture();
+  finish(raw.individualMatches[0], 3, 1, "m01");
+  raw.individualMatches[1].status = "current";
+  raw.individualMatches[2].reportUrl = "https://reports.example.invalid/future-preserved.html";
+  raw.liveReportUrl = "https://live.example.invalid/report";
+  raw.liveScoreboardUrl = "https://live.example.invalid/scoreboard";
+  const snapshot = JSON.stringify(raw);
+
+  const result = prepareTeamLevelUndo(raw, "2026-09-03T09:00:00Z");
+
+  assert.equal(JSON.stringify(raw), snapshot, "исходный JSON не должен изменяться");
+  assert.equal(result.data.individualMatches[0].status, "current");
+  assert.equal(result.data.individualMatches[0].result, null);
+  assert.equal(result.data.individualMatches[0].reportUrl, null);
+  assert.equal(result.data.individualMatches[1].status, "planned");
+  assert.equal(result.data.individualMatches[2].reportUrl, "https://reports.example.invalid/future-preserved.html");
+  assert.equal(result.data.liveReportUrl, null);
+  assert.equal(result.data.liveScoreboardUrl, null);
+  assert.deepEqual(result.prepared.score, { A: 0, B: 0 });
+  assert.equal(result.prepared.completed, false);
+  assert.equal(result.undo.undoneMatchId, "m01");
+  assert.equal(result.undo.previousCurrentMatchId, "m02");
+  assert.deepEqual(result.undo.previousResult, { gamesA: 3, gamesB: 1 });
+  assert.equal(result.undo.previousReportUrl, "https://reports.example.invalid/m01.html");
+});
+
+test("после Team-level Undo исправленный результат снова запускает штатную следующую пару", () => {
+  const raw = fixture();
+  finish(raw.individualMatches[0], 3, 1, "m01");
+  raw.individualMatches[1].status = "current";
+
+  const undone = prepareTeamLevelUndo(raw, "2026-09-03T09:00:30Z");
+  const corrected = prepareTransition(undone.data, { gamesA: 1, gamesB: 3 }, "2026-09-03T09:00:40Z");
+
+  assert.deepEqual(corrected.prepared.score, { A: 0, B: 1 });
+  assert.equal(corrected.data.individualMatches[0].status, "finished");
+  assert.deepEqual(corrected.data.individualMatches[0].result, { gamesA: 1, gamesB: 3 });
+  assert.equal(corrected.data.individualMatches[1].status, "current");
+  assert.equal(corrected.transition.finishedMatchId, "m01");
+  assert.equal(corrected.transition.nextMatchId, "m02");
+});
+
+test("Team-level Undo снова открывает завершённую командную встречу", () => {
+  const raw = fixture();
+  for (let index = 0; index < 5; index += 1) finish(raw.individualMatches[index], 3, 0, `m0${index + 1}`);
+  const result = prepareTeamLevelUndo(raw, "2026-09-03T09:01:00Z");
+
+  assert.equal(result.prepared.completed, false);
+  assert.equal(result.prepared.winner, null);
+  assert.deepEqual(result.prepared.score, { A: 4, B: 0 });
+  assert.equal(result.data.individualMatches[4].status, "current");
+  assert.equal(result.data.individualMatches[4].result, null);
+  assert.equal(result.data.individualMatches[4].reportUrl, null);
+  assert.ok(result.data.individualMatches.slice(5).every(match => match.status === "planned"));
+});
+
+test("Team-level Undo работает после завершения 2×2 вничью", () => {
+  const raw = createTeamMatch({
+    id: "undo-draw-2x2", date: "2026-09-05", venue: null, teamSize: 2,
+    individualMatchBestOf: 5,
+    teamAName: "A", teamBName: "B", playersA: ["A1", "A2"], playersB: ["B1", "B2"]
+  }, "2026-09-03T08:00:00Z").data;
+  finish(raw.individualMatches[0], 3, 0, "m01");
+  finish(raw.individualMatches[1], 0, 3, "m02");
+  finish(raw.individualMatches[2], 3, 1, "m03");
+  finish(raw.individualMatches[3], 1, 3, "m04");
+
+  const result = prepareTeamLevelUndo(raw, "2026-09-03T09:02:00Z");
+  assert.equal(result.prepared.completed, false);
+  assert.equal(result.prepared.draw, false);
+  assert.deepEqual(result.prepared.score, { A: 2, B: 1 });
+  assert.equal(result.data.individualMatches[3].status, "current");
+});
+
+test("Team-level Undo отклоняется до первой завершённой личной встречи", () => {
+  assert.throws(
+    () => prepareTeamLevelUndo(fixture(), "2026-09-03T09:03:00Z"),
+    /Нет завершённой личной встречи/
+  );
 });
 
 test("зеркальный результат допустим и legacy liveUrl удаляется", () => {

@@ -1,25 +1,48 @@
-# Product Goal — cloud backup and published personal-match report
+# Product Goal — Team-level Undo
 
-**Baseline:** accepted `ttScore 0.4.0 + ttscore_team 0.9.0`, RC9.
+**Продукт:** интеграция ttScore + ttscore_team  
+**Дата цикла:** 2026-09-03
 
-## Goal
+## Цель
 
-For a Team-mode personal match, automatically preserve the full canonical JSON in the existing Firebase RTDB of `ttscore_team` and automatically publish a working HTML-report link in the corresponding finished personal match.
+Администратор командного матча может отменить последнюю завершённую личную встречу на один шаг на уровне Team, исправить ошибочно зафиксированный результат и продолжить тот же командный матч без его пересоздания.
 
-Existing local JSON/HTML saving remains available.
+## Исходное состояние
 
-## Scope
+Принятый baseline: **ttScore 0.5.0 + ttscore_team 0.10.0 RC1**.
 
-In: confirmed RTDB backup before local full-state cleanup; report recovery from backup; automatic `reportUrl`; retry after temporary 2–5 minute connectivity loss; existing CAS/reconciliation preservation.
+## Желаемый результат
 
-Out: multi-match offline continuity; Storage/Functions/separate database; scoring-core changes.
+- в командном редакторе доступна отдельная административная операция Team-level Undo;
+- отменяется только последняя `finished` личная встреча;
+- её `result` и активный `reportUrl` очищаются, а сама встреча становится `current`;
+- существующая следующая `current`, если она есть, возвращается в `planned`;
+- командный счёт и признак завершения пересчитываются из нового Team-state;
+- оперативные Live-ссылки очищаются как относящиеся к прежней текущей встрече;
+- immutable backup ранее опубликованного отчёта в `/individualMatchReportsV1/...` не удаляется;
+- при новом прохождении встречи в ttScore создаётся новый canonical match record и новый report backup/reportUrl; ручная Team-коррекция без ttScore по-прежнему может завершить встречу без reportUrl.
 
-## Acceptance criteria
+## Ограничения
 
-1. Full completed canonical JSON is server-confirmed before full local state can be cleared.
-2. Finished Team personal match receives a working reportUrl.
-3. Report reconstructed from RTDB is equivalent to canonical data.
-4. Temporary network loss never loses scoring/rally data.
-5. Retry is idempotent.
-6. RC9 CAS/reconciliation and autonomous ttScore do not regress.
-7. Existing local file export remains available.
+- Team-level Undo не восстанавливает старую судейскую сессию ttScore и её rally history;
+- операция является административным force-majeure путём, отдельным от обычного Undo внутри ttScore;
+- существующие CAS/freshness guarantees Firebase должны сохраниться;
+- не удалять исторические backup records;
+- не менять ttScore 0.5.0 и Firebase Rules, если цель достижима без этого.
+
+## Критерий достижения
+
+1. Активная Team-встреча: последний `finished` возвращается в `current`, прежний `current` — в `planned`, счёт откатывается ровно на один результат.
+2. Завершённая Team-встреча: Undo снова открывает Team-встречу и корректно пересчитывает winner/draw/score.
+3. У отменённой личной встречи `result=null` и `reportUrl=null`; остальные постоянные ссылки и расписание не повреждаются.
+4. `liveReportUrl/liveScoreboardUrl` очищаются.
+5. Backup branch не изменяется операцией Undo.
+6. Preview требует свежего источника, публикация остаётся под существующим revision CAS.
+7. Regression baseline проходит; ttScore 0.5.0 остаётся byte-identical.
+8. Получен deployable RC-артефакт и evidence.
+
+## Исследование
+
+Обязательно.
+
+Технические решения, внутреннюю архитектуру, порядок работ, тестовую стратегию и исправление найденных дефектов исполнитель определяет самостоятельно в пределах цели. Работа ведётся автономно по продуктовому циклу.

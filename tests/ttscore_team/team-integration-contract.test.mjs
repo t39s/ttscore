@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createTeamMatch } from '../../team/assets/0.10.0/creator.mjs';
+import { createTeamMatch } from '../../team/assets/0.11.0/creator.mjs';
 import {
   TEAM_INTEGRATION_CONTRACT_VERSION, assignmentMatchesBinding, bindAssignment,
   finishedBindingApplied, operationalRevision, prepareOperationalLiveUpdate, prepareTransition, rebaseBinding,
   teamAssignment, validateBoundState
-} from '../../team/assets/0.10.0/team-integration-contract.mjs';
+} from '../../team/assets/0.11.0/team-integration-contract.mjs';
 
 function raw(overrides = {}) {
   const value = createTeamMatch({

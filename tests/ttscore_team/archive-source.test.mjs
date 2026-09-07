@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { prepareArchivedTeamMatch, readArchivedTeamMatch } from "../../team/assets/0.10.0/archive-source.mjs";
-import { createTeamMatch } from "../../team/assets/0.10.0/creator.mjs";
-import { prepareTransition } from "../../team/assets/0.10.0/editor.mjs";
+import { prepareArchivedTeamMatch, readArchivedTeamMatch } from "../../team/assets/0.11.0/archive-source.mjs";
+import { createTeamMatch } from "../../team/assets/0.11.0/creator.mjs";
+import { prepareTransition } from "../../team/assets/0.11.0/editor.mjs";
 
 function createRunning(id = "archive-test") {
   return createTeamMatch({
@@ -32,7 +32,7 @@ test("архив загружается только из team/matches/<id>/<id>
   const payload = { schemaVersion: 4, id: "archive-test" };
   const result = await readArchivedTeamMatch(
     "archive-test",
-    "https://t39s.github.io/ttscore/team/assets/0.10.0/archive-source.mjs",
+    "https://t39s.github.io/ttscore/team/assets/0.11.0/archive-source.mjs",
     async (url, options) => {
       calls.push({ url: url.href, options });
       return { ok: true, status: 200, json: async () => payload };
@@ -44,9 +44,9 @@ test("архив загружается только из team/matches/<id>/<id>
 });
 
 test("404 означает отсутствие архивной копии, остальные HTTP-ошибки не маскируются", async () => {
-  assert.equal(await readArchivedTeamMatch("archive-test", "https://example.test/team/assets/0.10.0/archive-source.mjs", async () => ({ ok: false, status: 404 })), null);
+  assert.equal(await readArchivedTeamMatch("archive-test", "https://example.test/team/assets/0.11.0/archive-source.mjs", async () => ({ ok: false, status: 404 })), null);
   await assert.rejects(
-    readArchivedTeamMatch("archive-test", "https://example.test/team/assets/0.10.0/archive-source.mjs", async () => ({ ok: false, status: 503 })),
+    readArchivedTeamMatch("archive-test", "https://example.test/team/assets/0.11.0/archive-source.mjs", async () => ({ ok: false, status: 503 })),
     /HTTP 503/
   );
 });

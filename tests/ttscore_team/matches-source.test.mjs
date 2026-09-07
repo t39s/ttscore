@@ -3,7 +3,7 @@ import test from "node:test";
 
 import {
   parseTeamMatchRequest, publicTeamMatchUrl, teamMatchArchiveJsonUrl, teamMatchLinkedResourceUrl, teamMatchResourceBaseUrl
-} from "../../team/assets/0.10.0/matches-source.mjs";
+} from "../../team/assets/0.11.0/matches-source.mjs";
 
 test("match выбирает Firebase-источник в публичном режиме", () => {
   assert.deepEqual(parseTeamMatchRequest("?match=test-team-match-2026-09-05"), {
@@ -55,13 +55,13 @@ test("неизвестный и повторный mode отклоняются",
 test("относительный reportUrl сохраняет прежнюю базу team/matches/<id>/", () => {
   const base = teamMatchResourceBaseUrl(
     "north-south-2026",
-    "https://example.com/ttscore/team/assets/0.10.0/matches-source.mjs"
+    "https://example.com/ttscore/team/assets/0.11.0/matches-source.mjs"
   );
   assert.equal(base.href, "https://example.com/ttscore/team/matches/north-south-2026/");
   const url = teamMatchLinkedResourceUrl(
     "north-south-2026",
     "./individual-01.html",
-    "https://example.com/ttscore/team/assets/0.10.0/matches-source.mjs"
+    "https://example.com/ttscore/team/assets/0.11.0/matches-source.mjs"
   );
   assert.equal(url.href, "https://example.com/ttscore/team/matches/north-south-2026/individual-01.html");
 });
@@ -69,7 +69,7 @@ test("относительный reportUrl сохраняет прежнюю б�
 test("архивный JSON имеет канонический путь team/matches/<id>/<id>.json", () => {
   const url = teamMatchArchiveJsonUrl(
     "north-south-2026",
-    "https://example.com/ttscore/team/assets/0.10.0/matches-source.mjs"
+    "https://example.com/ttscore/team/assets/0.11.0/matches-source.mjs"
   );
   assert.equal(url.href, "https://example.com/ttscore/team/matches/north-south-2026/north-south-2026.json");
 });
@@ -78,7 +78,7 @@ test("абсолютная ссылка ресурса не меняется", (
   const url = teamMatchLinkedResourceUrl(
     "north-south-2026",
     "https://reports.example.invalid/match.html",
-    "https://example.com/ttscore/team/assets/0.10.0/matches-source.mjs"
+    "https://example.com/ttscore/team/assets/0.11.0/matches-source.mjs"
   );
   assert.equal(url.href, "https://reports.example.invalid/match.html");
 });
@@ -86,7 +86,7 @@ test("абсолютная ссылка ресурса не меняется", (
 test("публичный URL сохраняет страницу и заменяет параметры режима создания", () => {
   const url = publicTeamMatchUrl(
     "north-south-2026",
-    "https://t39s.github.io/ttscore/team/ttscore_team_0.10.0.html?mode=create#form"
+    "https://t39s.github.io/ttscore/team/ttscore_team_0.11.0.html?mode=create#form"
   );
-  assert.equal(url.href, "https://t39s.github.io/ttscore/team/ttscore_team_0.10.0.html?match=north-south-2026");
+  assert.equal(url.href, "https://t39s.github.io/ttscore/team/ttscore_team_0.11.0.html?match=north-south-2026");
 });
