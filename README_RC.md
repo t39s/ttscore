@@ -1,36 +1,49 @@
-# ttScore integration v0.5.0 + v0.11.0 RC7
+# ttScore integration v0.5.0 + v0.11.0 RC10
 
-Targeted Team-mode UI stabilization candidate based on the owner-accepted **RC3** baseline. RC7 incorporates the RC6 UI change plus the blocking restore-path fix found during RC6 review. RC4 and RC5 remain rejected intermediate candidates.
+Targeted public Team UI candidate based on the owner-accepted **RC7** baseline. RC10 supersedes the reviewed-but-not-accepted RC9 candidate.
 
-## Change
+## Changes retained from RC8/RC9
 
-Only in Team mode:
+- no redundant `Обновить` button; Firebase realtime subscription remains unchanged;
+- no explanatory Firebase/GitHub footer paragraph; `Данные обновлены: …` remains;
+- matches are visually grouped by `teamSize` using spacing only, without labels:
+  - 2×2 → groups of 2;
+  - 3×3 → groups of 3;
+  - 4×4 → groups of 4;
+- smartphone match-card player names remain on one row and truncate with ellipsis if needed;
+- in the current match on smartphone, `Встреча идёт` is a separate row and `Live-табло` / `Live-отчёт` use equal one-line buttons below it.
 
-- sound defaults to `off` on every page opening and every new match;
-- confirming restoration of an aged saved match also forces sound `off`;
-- sound may be enabled manually during the active match;
-- with sound `off`, Repeat Score is removed from layout and Undo spans both original central toolbar columns;
-- with sound `on`, the original Undo + Repeat Score layout returns;
-- standalone behavior is unchanged.
+## RC10 change
+
+Participant display is now context-specific:
+
+- individual-match cards keep the full stored name in the agreed `Фамилия Имя` format;
+- the top team rosters beside the aggregate team score show surname only.
+
+This is presentation-only. Participant data, IDs and JSON are unchanged.
 
 ## Runtime scope
 
-Exactly one runtime file differs from accepted RC3:
+Relative to RC9, exactly one runtime file differs:
 
-- `ttScore_0.5.0.html`
+- `team/assets/0.11.0/app.mjs`
 
-Team Editor, Team integration modules, Firebase Rules, scoring/lifecycle logic and Undo semantics are unchanged.
+Relative to accepted RC7, the public-list candidate scope remains:
+
+- `team/ttscore_team_0.11.0.html`
+- `team/assets/0.11.0/app.mjs`
+- `team/assets/0.11.0/styles.css`
+
+No Firebase rules, Team Editor model, lifecycle or scoring behavior is changed.
 
 ## Verification
 
-- Full Node regression: **256/256 PASS**.
-- Restore-path behavioral test executes `restoreSavedMeeting()` for Team and standalone modes.
-- Inline JavaScript syntax: **PASS**.
-- Direct authoritative RC3 → RC7 runtime scope reviewed: only `ttScore_0.5.0.html` differs.
-- RC6 → RC7 runtime diff is one defensive Team-only assignment in `restoreSavedMeeting()`.
-- Browser E2E remains unavailable because Chromium blocks localhost in the execution environment (`ERR_BLOCKED_BY_ADMINISTRATOR`).
+- Full Node regression: **261/261 PASS**.
+- All Team `.mjs` syntax checks: **PASS**.
+- Added behavioral coverage for surname-only top roster formatting while preserving full names in match cards.
+- Runtime scope reviewed directly against RC9 and accepted RC7.
 
-See `docs/RC7_TEAM_MODE_SOUND_RESTORE_FIX.md` and `evidence/logs/rc7_*`.
+See `docs/RC10_PARTICIPANT_NAME_PRESENTATION.md`.
 
 ## Decision
 

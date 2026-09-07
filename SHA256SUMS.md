@@ -2,7 +2,7 @@
 
 | File | SHA-256 |
 |---|---|
-| `README_RC.md` | `bd5030f906d0ef0b10a2d42ae79d5d240168ddf8f5ff21a792c98046788e1287` |
+| `README_RC.md` | `02a8578e68aaa284da1614a480d9afbb17ff3ea5bc500e701beb9789a654d443` |
 | `docs/ARCHITECTURE_RESEARCH_INPUT.md` | `b021c283aa85e57780162d6433db9d073c509d0317b6bb8f6db80059227bdffc` |
 | `docs/CYCLE_PLAN.md` | `6a9df5cec9d531b1c0c58fa607d2450c20c46091b6ad5df8a7ef48e4dc59c5cd` |
 | `docs/CYCLE_RESEARCH.md` | `27f3a9dd12487af2ee41199c4308e4ee08b41e3c8145ac2435c96cb01eefa2f3` |
@@ -11,9 +11,10 @@
 | `docs/EVIDENCE_INHERITED_v0.10.0.md` | `8ed668e90241f6b6e4b3906280cb641a0f646f8469b705907737fea8c70ade16` |
 | `docs/FINAL_CYCLE_REPORT.md` | `f63437104deeeed2d41f2dd4a810f3f074bc53e81410014d8e23a85c7d462b9c` |
 | `docs/GENERAL_REVIEW.md` | `b0b9920b41bf1c139a2a0a1bba343f6ae10e4c84ba37433bfb453189a1a8c861` |
-| `docs/NEXT_CYCLE_BRIEF.md` | `06f8ac842f400b9d6d45d6f5171c3e391cd4f317e2997482ce5d0a4370b80992` |
+| `docs/NEXT_CYCLE_BRIEF.md` | `8ca3f127caba6c28584082ac3f64c2c1a122fae2df80fb40664b41b9594583f9` |
 | `docs/OWNER_ACCEPTANCE_CHECKLIST.md` | `cd60f95a4e1a6dcaeafb17bcdd5924fff272e7ee3b2c579d0cb225a1fe5811ce` |
 | `docs/PRODUCT_GOAL.md` | `0ab7e55dc046d82e698f53fc88fbafdb5f4876b29df14712d0947224641400db` |
+| `docs/RC10_PARTICIPANT_NAME_PRESENTATION.md` | `26b90ceafd6a980ba74c9f24854f2e9e190146af8cb39439eb25aab565f9aaed` |
 | `docs/RC2_DUPLICATE_FINISH_RECONCILIATION.md` | `739017246c0b428ae2fa071f2b3f278304d8cc65d5fce37cc9898885baa6972b` |
 | `docs/RC3_REALTIME_EDITOR_DEFECT.md` | `3e951a6ec37d82e65b48f540609eba8fff6501865b82733c01ea8017a6fea92e` |
 | `docs/RC3_REPORT_URL_FAIL_CLOSED_REVIEW_FIX.md` | `90ccacc2d48d737a645b3aaaf329fd149d0060a386984a9d17a2f76e8669ecca` |
@@ -23,6 +24,8 @@
 | `docs/RC6_TEAM_MODE_SOUND_UNDO_UI.md` | `ef214d3fdd1df0e123675069426f1fe514a57f1fd12eeb10a947b6fd065395f4` |
 | `docs/RC7_TEAM_MODE_SOUND_RESTORE_FIX.md` | `3280cb9fd86a51320dc9af4d37bab91cdea4b4c18e81b753f66acc7066cd36e6` |
 | `docs/RC8_FALSE_REVISION_CONFLICT.md` | `693774eca01a1fa8291cf2eaccc3056b1bde4484e4331c72acb562510d85d148` |
+| `docs/RC8_MATCH_LIST_UI_PATCH.md` | `c9d236bbdd4e3f4da0742bb86f9db2667df841c82e80003146071a9920f7fc0c` |
+| `docs/RC9_MOBILE_CURRENT_ACTIONS_FIX.md` | `3937beebc2c4b8567a507c34a89e0e6664239ec5ae99d1f6c66c09c7ddc7a583` |
 | `docs/RC9_PENDING_RELEASE_REBASE.md` | `08d5bc7bac1df813824deb2c19180838aa10898ac460f13f30ae3bb8336bc510` |
 | `docs/RELEASE_NOTES.md` | `ba514272883ef67221d045477e33f4e56679df69d394651c46b7539e64849082` |
 | `docs/RELEASE_NOTES_INHERITED_v0.10.0.md` | `94667e6a7ba25d754eb3d5ddd059f300845658dcc4db28fecab88fc00c6cfc7f` |
@@ -31,10 +34,11 @@
 | `docs/TTSCORE_TEAM_CHANGELOG.md` | `c403a6d89ff4c029fa01876539e99505b608fc2e0612ea31747c87135a408303` |
 | `docs/TTSCORE_TEAM_README_v0.10.0.md` | `f71db9531d98f590e363d0b556cf27043caca946aadfa28f8a58695f66dbf816` |
 | `docs/TTSCORE_TEAM_README_v0.11.0.md` | `3ea66ba0323cb257a0853f603ac92f668d96d2eed3df069624e1a56b3e8fc7b9` |
-| `docs/VERSIONS.md` | `fc0bfadfc749cebcc8f029cb6246b529598262ec627af17b6621f00fb08309d4` |
+| `docs/VERSIONS.md` | `d5ec854d88aac1ef8b9c296b2c2654a2235f1d7f6d45cd69a11dd0967e411759` |
 | `evidence/baselines/ttScore_0.3.5_baseline.html` | `5421978a14ba640d2f6b500fca62a8fa4894be1514900903abed581b465567e7` |
 | `evidence/browser-autonomous-result.json` | `37bdd1ab9df798c701940f77da7cdc70f95adc7da1a5b4304e24fd5e0e3c8bfa` |
 | `evidence/browser-e2e-result.json` | `c4afebc8ea030930b9c198c0341bc88090c15ec177a203deeb0882a5ec7a2d17` |
+| `evidence/fixtures/rc9_3x3_fullnames.html` | `612b8256e53af31d1ea2633654739aff531e3a925493a972a0426f01e5acf700` |
 | `evidence/harness/browser-autonomous-fixture.html` | `d50f7b981678ea5f3f50eb90ef77b5a9e5465fbf8617337ef2b83bddd874a4fa` |
 | `evidence/harness/browser-e2e-fixture.html` | `439bde0f5b76b947623b75adfc2aa5ef364974dbbbded2a44ba5891388164aef` |
 | `evidence/harness/browser-pending-rebase-fixture.html` | `a8d34050aef43eebea83fc633e0760b268d037bdfd1bf9f78aa64be11828f271` |
@@ -69,12 +73,18 @@
 | `evidence/logs/rc7_runtime_scope.log` | `3d775e536b98ad43f69a4213b3e9b3dde6d631c616d9701a7187d209f26b1f17` |
 | `evidence/logs/rc7_syntax.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 | `evidence/logs/rc7_ttscore_inline_runtime.js` | `474f61b47c725a2529d6d3575d48fdfe73cbf947b57391a0540c7a5e5c290b61` |
+| `evidence/logs/rc8_mjs_syntax.log` | `9912797dca697a94d6a81429cd91a3deaf295451422177bb91cbeb5aff1a2ad4` |
+| `evidence/logs/rc8_node_tests.log` | `4bfe042fa3327256a3cc5864102edc55db1f267de248b4faa2bef49bfaabdc1e` |
+| `evidence/logs/rc8_node_tests_final.log` | `2a7fabd97cee69488a1d1dd4a4a55b04038dd15a5c2712d106ad914d34477e60` |
+| `evidence/logs/rc8_runtime_scope.log` | `75a51c704e777fc83aadb5b8ef6ef5d961c0a540b9c48f3ed68d1a35047938d0` |
 | `evidence/logs/rc9_browser_autonomous.log` | `844357ece8587652f95bc99680b10f82febded1ada7cd23ba4ec0fa370ada630` |
 | `evidence/logs/rc9_browser_team_e2e.log` | `ee2d8e9cdf6862ecb06a6a709c34ca75a13c5bd4eb662188398f093c7b495111` |
-| `evidence/logs/rc9_node_tests.log` | `1acc2cc88c44fc98094abe2887baed9f14ef0c6808debc1185c39603509b2811` |
+| `evidence/logs/rc9_mobile_layout_metrics.json` | `03d04c0b482f971e84d80f181da9f28c9c997c4528faf7d2dc91a75ec80b4ad1` |
+| `evidence/logs/rc9_node_tests.log` | `add35bbc9cca6a2111cd67942b02f032a1128cd8c4d6aeab5be78a48b324721e` |
 | `evidence/logs/rc9_pending_rebase.log` | `e308654f271a2955d1fa25ff376ebdcfa0eb72402d2f63912492e651da265a87` |
 | `evidence/logs/rc9_runtime_scope.log` | `49e1544d35f659c9ed7c94a2e8d198cb13a2753897d8febb241e615290bd3842` |
 | `evidence/logs/rc9_same_client_write_race.log` | `f2a82b4b38081358a4dcdf33beba1fdbe68f1a2859594cad2a88a34271849b99` |
+| `evidence/logs/rc9_syntax.log` | `d0816bd72f65250501e18d88d249d9739d0160c56a4456af4dc378bc36adb6c1` |
 | `evidence/logs/rc9_team_editor_realtime.log` | `2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7` |
 | `evidence/logs/rc9_team_editor_revision_guard.log` | `b6dcc8807528fa86a0d8babde6262fe8abc57b5b32a30c9699478168c4cec864` |
 | `evidence/logs/rc9_team_node_tests.log` | `ba5c31f16df8f4c00f6ad2c8362956820f6e3efe1a10fd933497bcccbf0b6f2c` |
@@ -97,6 +107,7 @@
 | `evidence/rc2_duplicate_finish_reconciliation.json` | `df61767b429f077e8280c6e6b45ac8df12c09d389b4ecf0dbdd1be65b08d776a` |
 | `evidence/report-backup-result.json` | `c1e2d40e7efc727a9c051f66faf4addf0533543f6deeaf7c31daa19c389d951f` |
 | `evidence/same-client-write-race-result.json` | `3baad35a35cd33f959096e1b70e21fce75c2a03f5f6e80fb89cc12cd09b54089` |
+| `evidence/screenshots/rc9_mobile_393_3x3_fullnames.png` | `06449544e42bf5bac025ee6f1d56c8441c24ea0837c903b3dbda3a7e031b213a` |
 | `evidence/team-editor-realtime-result.json` | `235d89f91dd6b6e8ae6f9765d84adb6737e77e9b4aa905d644a80dfd33ef47e4` |
 | `evidence/team-editor-revision-guard-result.json` | `2324f0d00fd371f3f67a77df31ad04fc26b77a0a64c138d002ea3d281a4456a3` |
 | `evidence/team-level-undo-result.json` | `afb106f5587289aff5d88d0f6aca07cb86f89cc1b93b8867f6331e26a28cec7a` |
@@ -115,7 +126,7 @@
 | `team/assets/0.10.0/ttscore-integration.mjs` | `6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d` |
 | `team/assets/0.10.0/ttscore-team-adapter.mjs` | `22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b` |
 | `team/assets/0.10.0/ui-state.mjs` | `b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931` |
-| `team/assets/0.11.0/app.mjs` | `48649f546880403dfefffe640a6933faac991a1e342c5cccc44520086917dd3e` |
+| `team/assets/0.11.0/app.mjs` | `785db3e2a4eef4193cda35cd14e4fdaaafe61c915f15f171ad0971fd48b6e83a` |
 | `team/assets/0.11.0/archive-source.mjs` | `707eecd5014e6b4433e4c32e41d16875ce883168f28a629f68fc1fc2bf55ae8a` |
 | `team/assets/0.11.0/creator.mjs` | `c1e26b193dc2fdd444e943b831145f4b60c582c6da3c258e337679bbb4992500` |
 | `team/assets/0.11.0/editor.mjs` | `5f7762cf3489e11c74c6b299409ada5bf8b10e5064fd72f7bcc6338b74d45e68` |
@@ -123,13 +134,13 @@
 | `team/assets/0.11.0/firebase-source.mjs` | `cedecb961fb76af6f3269f21c6814cbfcb0d2881d4aa6ba0873a25fe8d083bc6` |
 | `team/assets/0.11.0/matches-source.mjs` | `857a3291e447a5039cac43740d09ce7eb67cafc663f2416c967e11dede22ade0` |
 | `team/assets/0.11.0/model.mjs` | `976d55383c54610985fc4e5e04cb175e4ce41b0497ad1ef42afc91000fff5f0e` |
-| `team/assets/0.11.0/styles.css` | `e5ca03d5986b2e91226f11671ea75d13c69198204c4e7a03f55a03d6542afb01` |
+| `team/assets/0.11.0/styles.css` | `390268073f804cd542bbb9be8c0d3eca327e13669ed86f02a4cb89b7b6115f4f` |
 | `team/assets/0.11.0/team-integration-contract.mjs` | `0f15c1f10e875e8636de713fa2478a099ce1e7ec78c8209174e90c05a4de9068` |
 | `team/assets/0.11.0/team-report-contract.mjs` | `0ad490997ec331b1cf5c20e8238a1fc6ac5b7e18338c4553f2411a4938517f79` |
 | `team/assets/0.11.0/ttscore-integration.mjs` | `6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d` |
 | `team/assets/0.11.0/ttscore-team-adapter.mjs` | `22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b` |
 | `team/assets/0.11.0/ui-state.mjs` | `b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931` |
-| `team/ttscore_team_0.11.0.html` | `a4832b877c0d712ef322c5dfe9cfedcf7e01ace27e76aaf266b8ac471146f996` |
+| `team/ttscore_team_0.11.0.html` | `76c3429c18783be5b115656141c0685d0c6aa7bf3971acd848851d345db39a02` |
 | `tests/ttscore/ttscore-0.5.0.test.mjs` | `c015e7577503402bc8adaba55dcd57a35edfc293fe08d9749d1a7a0bc812bcf6` |
 | `tests/ttscore_team/archive-source.test.mjs` | `da89c7101fbf9a958aae2f0bdf4a32d0cd58b7d05705eb3547149133ce40dea3` |
 | `tests/ttscore_team/automation-workflow.test.mjs` | `cd45e4c8a9810f43941780e4a3745524a603fe185a99ba4aa901ad550964dedb` |
@@ -140,7 +151,7 @@
 | `tests/ttscore_team/firebase-source.test.mjs` | `1b9b536995b9a7988afa7bd8cb195fc5d9417ce418686d70cce722ba30017724` |
 | `tests/ttscore_team/matches-source.test.mjs` | `1e7e82e37c0ab388bd24697bfadda550cefd9a209524a2c267496034d037ed67` |
 | `tests/ttscore_team/model.test.mjs` | `34d113fa92ef4452b54eac37f98125d4e45a2ff269d16592f1f46b049b20726e` |
-| `tests/ttscore_team/static-structure.test.mjs` | `fa57bc40efa1fbe0693815d81a6d5b26be365a6985e17b913062a836429a75bb` |
+| `tests/ttscore_team/static-structure.test.mjs` | `e844776f6ed7939b492c2d167676dca2c737b274a859490e5a92d1c7191487f1` |
 | `tests/ttscore_team/team-integration-contract.test.mjs` | `3ac2ac076ffd677a8f0abfc0afe6949e3950ad93a0101535e0d0dad3965599b8` |
 | `tests/ttscore_team/team-report-contract.test.mjs` | `24d17562c08ed9fb203f78afbb1ec63e9e7c365dffb01c7b669a4e3ffaf7b9a3` |
 | `tests/ttscore_team/ttscore-integration.test.mjs` | `9f6b3865d09dd37a54f0fc66938c9e2b327e552400bbd585d7e6a89a47b1aa14` |

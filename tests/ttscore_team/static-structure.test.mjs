@@ -358,7 +358,6 @@ test("v0.11.0 публикует Live-отчёт и Live-табло текуще
   assert.match(editor, /liveReportUrl/);
   assert.match(editor, /liveScoreboardUrl/);
   assert.match(html, /После безопасного подтверждения завершения результат публикуется в Firebase без ручного переноса/);
-  assert.match(html, /Live-отчёт и Live-табло текущей встречи доступны публично/);
 });
 
 
@@ -511,4 +510,57 @@ test('RC2 stabilization: ttScore 0.5.0 runtime adapter умеет reconciliate e
   }
   assert.equal(contract010, contract011);
   assert.equal(adapter010, adapter011);
+});
+
+
+test("public list UI убирает ручное обновление и служебный footer, сохраняя timestamp", () => {
+  const html = read("team/ttscore_team_0.11.0.html");
+  const app = read("team/assets/0.11.0/app.mjs");
+  assert.doesNotMatch(html, /id="refresh"/);
+  assert.doesNotMatch(app, /elements\.refresh\b/);
+  assert.doesNotMatch(html, /Firebase Realtime Database остаётся основным источником/);
+  assert.match(html, /id="updated"/);
+  assert.match(app, /Данные обновлены:/);
+});
+
+test("public list визуально группирует встречи по teamSize без подписей туров", () => {
+  const html = read("team/ttscore_team_0.11.0.html");
+  const app = read("team/assets/0.11.0/app.mjs");
+  const css = read("team/assets/0.11.0/styles.css");
+  assert.match(app, /individual_matches\.dataset\.teamSize = String\(teamMatch\.teamSize\)/);
+  assert.match(css, /data-team-size="2"[\s\S]*nth-child\(2n \+ 1\)/);
+  assert.match(css, /data-team-size="3"[\s\S]*nth-child\(3n \+ 1\)/);
+  assert.match(css, /data-team-size="4"[\s\S]*nth-child\(4n \+ 1\)/);
+  assert.match(css, /margin-top: 16px/);
+  assert.doesNotMatch(html, />\s*Тур\s*\d+/i);
+  assert.doesNotMatch(app, /["'`]Тур\s/);
+});
+
+test("mobile public list сохраняет фамилии соперников в одной строке", () => {
+  const css = read("team/assets/0.11.0/styles.css");
+  const mobile = css.match(/@media \(max-width: 680px\) \{[\s\S]*?\n\}/)?.[0] ?? "";
+  assert.match(mobile, /\.individual-match__players \{ display: flex;[^}]*white-space: nowrap;/);
+  assert.match(mobile, /\.individual-match__separator \{ display: inline;/);
+  assert.match(mobile, /\.individual-match__player \{[^}]*text-overflow: ellipsis;[^}]*white-space: nowrap;/);
+});
+
+test("mobile current match keeps status separate and Live buttons in one-line equal columns", () => {
+  const css = read("team/assets/0.11.0/styles.css");
+  const mobile = css.match(/@media \(max-width: 680px\) \{[\s\S]*?\n\}/)?.[0] ?? "";
+  assert.match(mobile, /\.individual-match--current \.individual-match__result \{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  assert.match(mobile, /\.individual-match--current \.individual-match__result > \.muted \{ grid-column: 1 \/ -1; \}/);
+  assert.match(mobile, /\.individual-match--current \.individual-match__result > \.button \{[\s\S]*width: 100%;[\s\S]*white-space: nowrap;/);
+});
+
+test("RC10: верхний командный блок показывает фамилии, карточки встреч сохраняют полные имена", () => {
+  const app = read("team/assets/0.11.0/app.mjs");
+  const surnameFunction = app.match(/function playerSurname\(name\) \{([\s\S]*?)\n\}/);
+  assert.ok(surnameFunction, "Не найдена функция playerSurname");
+  const playerSurname = new Function("name", surnameFunction[1]);
+  assert.equal(playerSurname("Иванов Иван"), "Иванов");
+  assert.equal(playerSurname("  Петров   Пётр  "), "Петров");
+  assert.equal(playerSurname("Сидоров"), "Сидоров");
+  assert.match(app, /renderPlayers\(container, players\)[\s\S]*playerSurname\(player\.name\)/);
+  assert.match(app, /text\("span", match\.playerA\.name, "individual-match__player"\)/);
+  assert.match(app, /text\("span", match\.playerB\.name, "individual-match__player"\)/);
 });

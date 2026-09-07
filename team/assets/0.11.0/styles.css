@@ -132,20 +132,12 @@ h2 {
   letter-spacing: -0.025em;
 }
 
-.refresh {
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 750;
-}
-
-.refresh:disabled { opacity: 0.55; }
-
 .individual-matches { display: grid; gap: 10px; }
+.individual-matches[data-team-size="2"] > .individual-match:nth-child(2n + 1):not(:first-child),
+.individual-matches[data-team-size="3"] > .individual-match:nth-child(3n + 1):not(:first-child),
+.individual-matches[data-team-size="4"] > .individual-match:nth-child(4n + 1):not(:first-child) {
+  margin-top: 16px;
+}
 
 .individual-match {
   display: grid;
@@ -233,14 +225,6 @@ h2 {
 
 .updated {
   margin: 16px 2px 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
-.public-note {
-  margin: 28px 0 0;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.84rem;
 }
@@ -379,8 +363,23 @@ h2 {
   .score { min-width: 0; padding: 8px 4px; border-radius: 18px; }
   .individual-match { grid-template-columns: 44px minmax(0, 1fr); gap: 10px; }
   .individual-match__result { grid-column: 2; justify-content: flex-start; text-align: left; }
-  .individual-match__players { display: grid; gap: 1px; }
-  .individual-match__separator { display: none; }
+  .individual-match--current .individual-match__result {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .individual-match--current .individual-match__result > .muted { grid-column: 1 / -1; }
+  .individual-match--current .individual-match__result > .button {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 8px;
+    white-space: nowrap;
+  }
+  .individual-match--current .individual-match__result > .button:only-of-type { grid-column: 1 / -1; }
+  .individual-match__players { display: flex; gap: 6px; min-width: 0; white-space: nowrap; }
+  .individual-match__player { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .individual-match__separator { display: inline; flex: 0 0 auto; }
   .editor { padding: 18px 14px; }
   .editor__matches div { grid-template-columns: 1fr; gap: 2px; }
   .editor__base-fields, .editor__teams { grid-template-columns: 1fr; }

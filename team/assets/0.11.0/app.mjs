@@ -29,7 +29,7 @@ import {
 const elements = Object.fromEntries([
   "loading", "error", "content", "team-match-title", "team-match-meta", "team-a-name", "team-b-name",
   "team-a-score", "team-b-score", "team-a-players", "team-b-players", "team-match-status",
-  "individual-matches", "updated", "refresh", "editor", "editor-current", "editor-next", "transition-form",
+  "individual-matches", "updated", "editor", "editor-current", "editor-next", "transition-form",
   "games-a", "games-b", "editor-error", "preview", "preview-summary",
   "preview-json", "download-json", "prepare-update", "editor-status", "creator", "creator-form", "creator-id",
   "creator-date", "creator-venue", "creator-team-size", "creator-individual-match-best-of", "creator-team-a-name", "creator-team-b-name",
@@ -203,8 +203,12 @@ function link(label, href, className) {
   return node;
 }
 
+function playerSurname(name) {
+  return String(name ?? "").trim().split(/\s+/)[0] || "";
+}
+
 function renderPlayers(container, players) {
-  container.replaceChildren(...players.map(player => text("li", player.name)));
+  container.replaceChildren(...players.map(player => text("li", playerSurname(player.name))));
 }
 
 function renderIndividualMatch(match, teamMatch) {
@@ -265,7 +269,6 @@ function setEditorBusy(value) {
   elements.prepare_undo.disabled = value || elements.editor_undo_section.hidden;
   elements.download_json.disabled = value;
   elements.editor_refresh_source.disabled = value || busy;
-  elements.refresh.disabled = value || busy;
   refreshFirebasePublishControls();
   if (!value) {
     flushPendingRealtimeEditorData();
@@ -758,7 +761,6 @@ function renderEditorPlanned(teamMatch) {
 function configureEditor(teamMatch) {
   if (request.mode !== "edit") return;
   elements.editor.hidden = false;
-  elements.refresh.hidden = true;
   elements.editor_refresh_source.hidden = request.source === "local";
   elements.editor_source_status.textContent = request.source === "local"
     ? "Источник: локальный файл. Firebase не загружается и не сравнивается."
@@ -829,6 +831,7 @@ function render(teamMatch, { source = "firebase" } = {}) {
     elements.team_match_status.textContent = activeTeamMatchStatusText(teamMatch);
     elements.team_match_status.className = "team-match-status";
   }
+  elements.individual_matches.dataset.teamSize = String(teamMatch.teamSize);
   elements.individual_matches.replaceChildren(...teamMatch.individualMatches.map(match => renderIndividualMatch(match, teamMatch)));
   elements.updated.textContent = `Данные обновлены: ${formatDateTime(teamMatch.updatedAt)}`;
   if (request?.mode === "edit") reconcilePendingFinishedMatch(localStorage, teamMatch);
@@ -973,7 +976,6 @@ async function loadTeamMatch({ manual = false } = {}) {
   if (busy || editorBusy) return;
   busy = true;
   let loadedSuccessfully = false;
-  elements.refresh.disabled = true;
   try {
     request = parseTeamMatchRequest(location.search);
     const loaded = await fetchPublishedRaw();
@@ -1003,14 +1005,12 @@ async function loadTeamMatch({ manual = false } = {}) {
     showLoadError(error);
   } finally {
     busy = false;
-    elements.refresh.disabled = false;
     if (loadedSuccessfully) requestTtScoreAutomation();
     flushPendingRealtimeEditorData();
   }
 }
 
 async function startFirebaseRealtimeView() {
-  elements.refresh.disabled = true;
   try {
     firebaseViewUnsubscribe?.();
     firebaseViewUnsubscribe = await subscribeFirebaseTeamMatch(request.id, loaded => {
@@ -1028,8 +1028,6 @@ async function startFirebaseRealtimeView() {
     }, error => { void handlePublicFirebaseError(error); });
   } catch (error) {
     void handlePublicFirebaseError(error);
-  } finally {
-    elements.refresh.disabled = false;
   }
 }
 
@@ -1436,7 +1434,6 @@ function start() {
   }
 }
 
-elements.refresh.addEventListener("click", () => request?.mode === "view" ? void startFirebaseRealtimeView() : void loadTeamMatch({ manual: true }));
 elements.archive_open.addEventListener("click", openArchiveFallback);
 elements.editor_links_form.addEventListener("submit", event => event.preventDefault());
 elements.editor_details_form.addEventListener("submit", event => event.preventDefault());
