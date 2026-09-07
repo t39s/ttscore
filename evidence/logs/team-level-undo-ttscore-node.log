@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: версия 0.5.0 объявлена, но локальный protocol namespace 0.3.5 сохранён
+ok 1 - версия 0.5.0 объявлена, но локальный protocol namespace 0.3.5 сохранён
+  ---
+  duration_ms: 2.090633
+  type: 'test'
+  ...
+# Subtest: Team mode является opt-in через teamMatch и не активируется автономно
+ok 2 - Team mode является opt-in через teamMatch и не активируется автономно
+  ---
+  duration_ms: 0.678058
+  type: 'test'
+  ...
+# Subtest: Team adapter загружается лениво только из versioned asset 0.11.0
+ok 3 - Team adapter загружается лениво только из versioned asset 0.11.0
+  ---
+  duration_ms: 0.296033
+  type: 'test'
+  ...
+# Subtest: Team assignment предзаполняет только дату, bestOf и имена игроков
+ok 4 - Team assignment предзаполняет только дату, bestOf и имена игроков
+  ---
+  duration_ms: 1.060036
+  type: 'test'
+  ...
+# Subtest: Team UI блокирует только assignment-поля, не решения судьи о подаче/стороне/форе
+ok 5 - Team UI блокирует только assignment-поля, не решения судьи о подаче/стороне/форе
+  ---
+  duration_ms: 0.591876
+  type: 'test'
+  ...
+# Subtest: запуск Team-встречи создаёт binding до сохранения рабочего state
+ok 6 - запуск Team-встречи создаёт binding до сохранения рабочего state
+  ---
+  duration_ms: 0.605943
+  type: 'test'
+  ...
+# Subtest: финальный Team result фиксируется только при выходе из завершённой встречи
+ok 7 - финальный Team result фиксируется только при выходе из завершённой встречи
+  ---
+  duration_ms: 1.178735
+  type: 'test'
+  ...
+# Subtest: pending release сохраняется локально до попытки Firebase publication
+ok 8 - pending release сохраняется локально до попытки Firebase publication
+  ---
+  duration_ms: 0.582188
+  type: 'test'
+  ...
+# Subtest: Перечитать Team явно разрешает rebase pending release, автоматический reconnect — нет
+ok 9 - Перечитать Team явно разрешает rebase pending release, автоматический reconnect — нет
+  ---
+  duration_ms: 1.403853
+  type: 'test'
+  ...
+# Subtest: Team-mode закрытие завершённой встречи подтверждает cloud backup до очистки scoring state
+ok 10 - Team-mode закрытие завершённой встречи подтверждает cloud backup до очистки scoring state
+  ---
+  duration_ms: 0.978243
+  type: 'test'
+  ...
+# Subtest: Team report является remote read-only source и проверяет hash перед canonical parse
+ok 11 - Team report является remote read-only source и проверяет hash перед canonical parse
+  ---
+  duration_ms: 1.015656
+  type: 'test'
+  ...
+# Subtest: критические scoring/Undo функции baseline остаются byte-identical
+ok 12 - критические scoring/Undo функции baseline остаются byte-identical
+  ---
+  duration_ms: 4.031862
+  type: 'test'
+  ...
+# Subtest: Team subscriptions освобождаются, reconnect повторяет pending/live sync
+ok 13 - Team subscriptions освобождаются, reconnect повторяет pending/live sync
+  ---
+  duration_ms: 0.827543
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 269.899199
