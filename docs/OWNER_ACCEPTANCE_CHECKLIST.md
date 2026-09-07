@@ -1,35 +1,28 @@
-# Owner Acceptance Checklist — Team-level Undo RC1
+# Owner Acceptance Checklist — RC2 duplicate finish reconciliation
 
-## A. Активный командный матч
+## Primary reproduced scenario
 
-1. Иметь минимум одну `finished` и следующую `current` личную встречу.
-2. Открыть Team editor.
-3. Нажать `Подготовить Team-level Undo`.
-4. Проверить preview и опубликовать Firebase.
-5. PASS: последний finished стал current; прежний current стал planned; Team score уменьшился на результат отменённой встречи; Live-ссылки очищены.
+1. Open the same active Team match in Team Editor and in Team-mode `ttScore 0.5.0` in the same browser/origin.
+2. Complete the current individual match in ttScore.
+3. Use the normal end-of-match flow that previously produced the assignment conflict.
+4. PASS: the final result reaches Team exactly once.
+5. PASS: the completed individual match has its canonical `reportUrl`.
+6. PASS: the next assignment is not advanced twice or otherwise changed unexpectedly.
+7. PASS: no message `Team assignment изменился; запись заблокирована` remains for the already-applied same result.
 
-## B. Report semantics
+## Recovery of an already pending local result
 
-1. До Undo открыть/сохранить URL отчёта отменяемой встречи.
-2. Выполнить Undo.
-3. PASS: в активной Team-записи ссылка отчёта исчезла.
-4. PASS: старый direct report URL по-прежнему открывает historical backup.
+If a pending result from the old RC1 state is still present:
 
-## C. Повторное прохождение
+1. Open the same Team match with RC2.
+2. Sign in if needed.
+3. Press `Перечитать Team`.
+4. PASS: if Team already contains the same finished result, RC2 reconciles the canonical `reportUrl` and clears the pending release.
+5. PASS: if Team contains a different result or the bound match identity no longer corresponds, RC2 remains fail-closed and does not overwrite Team.
 
-1. Запустить восстановленную current-пару как новую встречу ttScore.
-2. Завершить её штатно.
-3. PASS: создаётся новый reportUrl; Team получает исправленный результат; предыдущая planned/current последовательность продолжается.
+## Regression checks
 
-Альтернатива force-majeure: внести итог через существующую ручную форму Team. В этом варианте отсутствие нового reportUrl допустимо, поскольку новой canonical ttScore-сессии не было.
-
-## D. Завершённый командный матч
-
-1. На завершённом Team match выполнить Undo последней finished.
-2. PASS: Team match снова активен, winner/draw снимается, отменённая встреча current.
-
-## E. Concurrency guard
-
-1. Подготовить Undo preview.
-2. До публикации изменить Team с другого клиента.
-3. PASS: stale preview не перезаписывает внешнее изменение; требуется перечитать/повторно подготовить.
+- Normal Team-mode completion without an open Team Editor still works.
+- Planned-order edit while current match identity is unchanged still uses the existing explicit rebase behavior.
+- Team-level Undo still works.
+- Live links and report backup remain functional.

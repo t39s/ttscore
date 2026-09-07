@@ -2,16 +2,16 @@
 
 ## Candidate
 
-- ttScore: **0.5.0** — unchanged from accepted baseline.
-- ttscore_team: **0.11.0** — Team-level Undo.
-- Integration candidate: **v0.5.0 + v0.11.0 RC1**.
+- ttScore: **0.5.0**.
+- ttscore_team: **0.11.0**.
+- Integration candidate: **v0.5.0 + v0.11.0 RC2**.
 
 ## Accepted baseline at cycle start
 
 - ttScore: **0.5.0**.
-- ttscore_team: **0.10.0**.
-- Integration: accepted **RC1** of the report-backup cycle.
+- ttscore_team: **0.11.0**.
+- Integration: accepted **v0.5.0 + v0.11.0 RC1**.
 
 ## Version rationale
 
-Team-level Undo is a new product capability in ttscore_team, therefore Team gets a minor increment `0.10.0 → 0.11.0`. ttScore runtime is unchanged and remains `0.5.0`.
+RC2 is a stabilization-only correction of duplicate finish reconciliation. It adds no product capability and does not change external data schema or Firebase Rules, therefore product versions remain unchanged.

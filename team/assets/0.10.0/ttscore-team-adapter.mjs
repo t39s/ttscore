@@ -9,6 +9,7 @@ import {
 } from './firebase-source.mjs';
 import {
   assignmentMatchesBinding, bindAssignment, finishedBindingApplied, rebaseBinding,
+  prepareFinishedReportUpdate,
   prepareOperationalLiveUpdate,
   prepareTransition,
   teamAssignment,
@@ -82,8 +83,13 @@ export async function publishTeamLive(teamMatchId, binding, ttScoreState, liveLi
 }
 
 export async function publishTeamFinished(teamMatchId, binding, ttScoreState, result, reportUrl = undefined) {
+  validateBoundState(binding, ttScoreState);
+  if (ttScoreState?.matchId !== binding?.ttScoreMatchId) throw new Error('ttScore matchId не совпадает с сохранённым Team binding.');
   const published = await transactFirebaseTeamMatch(teamMatchId, current => {
     if (finishedBindingApplied(current, binding, result, reportUrl)) return current;
+    if (reportUrl !== undefined && finishedBindingApplied(current, binding, result)) {
+      return prepareFinishedReportUpdate(current, binding, result, reportUrl, new Date().toISOString()).data;
+    }
     const transitionInput = reportUrl === undefined ? result : { ...result, reportUrl };
     return prepareTransition(current, transitionInput, new Date().toISOString(), undefined, binding, ttScoreState).data;
   });

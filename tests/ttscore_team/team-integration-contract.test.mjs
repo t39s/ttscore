@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createTeamMatch } from '../../team/assets/0.11.0/creator.mjs';
 import {
   TEAM_INTEGRATION_CONTRACT_VERSION, assignmentMatchesBinding, bindAssignment,
-  finishedBindingApplied, operationalRevision, prepareOperationalLiveUpdate, prepareTransition, rebaseBinding,
+  finishedBindingApplied, operationalRevision, prepareFinishedReportUpdate, prepareOperationalLiveUpdate, prepareTransition, rebaseBinding,
   teamAssignment, validateBoundState
 } from '../../team/assets/0.11.0/team-integration-contract.mjs';
 
@@ -94,6 +94,76 @@ test('finish transition публикует reportUrl атомарно с рез�
   assert.equal(out.data.individualMatches[0].reportUrl, reportUrl);
   assert.equal(finishedBindingApplied(out.data, b, { gamesA: 3, gamesB: 1 }, reportUrl), true);
   assert.equal(finishedBindingApplied(out.data, b, { gamesA: 3, gamesB: 1 }, 'https://example.invalid/other'), false);
+});
+
+test('повторная finish-публикация после editor-first transition дописывает reportUrl без второго lifecycle transition', () => {
+  const source = raw();
+  const assignment = teamAssignment(source);
+  const state = scoreState(assignment);
+  const binding = bindAssignment(assignment, state);
+  const result = { gamesA: 3, gamesB: 1 };
+  const reportUrl = 'https://example.invalid/ttScore_0.5.0.html?page=report&source=team&teamMatch=team-contract&record=2026-0905-abcd';
+
+  // Имитируем гонку: открытый Team Editor успел применить тот же результат первым, но без backup reportUrl.
+  const editorFirst = prepareTransition(source, result, '2026-09-02T10:00:00Z', undefined, binding, state).data;
+  const nextBefore = teamAssignment(editorFirst);
+  const revisionBefore = operationalRevision(editorFirst);
+
+  assert.equal(finishedBindingApplied(editorFirst, binding, result), true);
+  assert.equal(finishedBindingApplied(editorFirst, binding, result, reportUrl), false);
+  assert.notEqual(nextBefore.individualMatchId, binding.individualMatchId);
+
+  const recovered = prepareFinishedReportUpdate(
+    editorFirst, binding, result, reportUrl, '2026-09-02T10:00:01Z'
+  );
+  const finished = recovered.data.individualMatches.find(match => match.id === binding.individualMatchId);
+
+  assert.equal(finished.status, 'finished');
+  assert.deepEqual(finished.result, result);
+  assert.equal(finished.reportUrl, reportUrl);
+  assert.equal(operationalRevision(recovered.data), revisionBefore);
+  assert.equal(recovered.assignment.individualMatchId, nextBefore.individualMatchId);
+  assert.equal(recovered.assignment.revision, nextBefore.revision);
+});
+
+test('reconciliation finished report запрещает перезапись существующего другого reportUrl', () => {
+  const source = raw();
+  const assignment = teamAssignment(source);
+  const state = scoreState(assignment);
+  const binding = bindAssignment(assignment, state);
+  const result = { gamesA: 3, gamesB: 1 };
+  const existingReportUrl = 'https://example.invalid/report-a';
+  const replacementReportUrl = 'https://example.invalid/report-b';
+  const finished = prepareTransition(
+    source, { ...result, reportUrl: existingReportUrl }, '2026-09-02T10:00:00Z', undefined, binding, state
+  ).data;
+  const revisionBefore = operationalRevision(finished);
+
+  assert.equal(finishedBindingApplied(finished, binding, result, existingReportUrl), true);
+  assert.equal(finishedBindingApplied(finished, binding, result, replacementReportUrl), false);
+  assert.throws(() => prepareFinishedReportUpdate(
+    finished, binding, result, replacementReportUrl, '2026-09-02T10:00:01Z'
+  ), /другой reportUrl/);
+  assert.equal(finished.individualMatches[0].reportUrl, existingReportUrl);
+  assert.equal(operationalRevision(finished), revisionBefore);
+});
+
+test('reconciliation finished report остаётся fail-closed при другом результате или другой встрече', () => {
+  const source = raw();
+  const assignment = teamAssignment(source);
+  const state = scoreState(assignment);
+  const binding = bindAssignment(assignment, state);
+  const applied = prepareTransition(source, { gamesA: 3, gamesB: 1 }, '2026-09-02T10:00:00Z', undefined, binding, state).data;
+  const reportUrl = 'https://example.invalid/report';
+
+  assert.throws(() => prepareFinishedReportUpdate(
+    applied, binding, { gamesA: 3, gamesB: 0 }, reportUrl, '2026-09-02T10:00:01Z'
+  ), /не совпадает/);
+
+  const wrongBinding = { ...binding, individualMatchId: 'm02' };
+  assert.throws(() => prepareFinishedReportUpdate(
+    applied, wrongBinding, { gamesA: 3, gamesB: 1 }, reportUrl, '2026-09-02T10:00:01Z'
+  ), /не совпадает/);
 });
 
 test('legacy transition без reportUrl сохраняет прежнюю необязательную семантику', () => {

@@ -490,3 +490,25 @@ test("report backup использует только существующие F
   assert.match(firebase, /individualMatchReportsV1/);
   assert.match(read("firebase-database-rules.json"), /"individualMatchReportsV1"/);
 });
+
+
+test('RC2 stabilization: ttScore 0.5.0 runtime adapter умеет reconciliate editor-first finished result с backup reportUrl', () => {
+  const html = read('ttScore_0.5.0.html');
+  const contract010 = read('team/assets/0.10.0/team-integration-contract.mjs');
+  const adapter010 = read('team/assets/0.10.0/ttscore-team-adapter.mjs');
+  const contract011 = read('team/assets/0.11.0/team-integration-contract.mjs');
+  const adapter011 = read('team/assets/0.11.0/ttscore-team-adapter.mjs');
+
+  assert.match(html, /team\/assets\/0\.10\.0\/ttscore-team-adapter\.mjs/);
+  for (const source of [contract010, contract011]) {
+    assert.match(source, /export function prepareFinishedReportUpdate/);
+    assert.match(source, /finishedBindingMatch/);
+    assert.match(source, /Восстановление reportUrl попыталось изменить спортивные данные/);
+  }
+  for (const source of [adapter010, adapter011]) {
+    assert.match(source, /finishedBindingApplied\(current, binding, result\)\) \{/);
+    assert.match(source, /prepareFinishedReportUpdate\(current, binding, result, reportUrl/);
+  }
+  assert.equal(contract010, contract011);
+  assert.equal(adapter010, adapter011);
+});
