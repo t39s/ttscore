@@ -1,0 +1,1498 @@
+TAP version 13
+# Subtest: версия 0.5.0 объявлена, но локальный protocol namespace 0.3.5 сохранён
+ok 1 - версия 0.5.0 объявлена, но локальный protocol namespace 0.3.5 сохранён
+  ---
+  duration_ms: 1.221299
+  type: 'test'
+  ...
+# Subtest: Team mode является opt-in через teamMatch и не активируется автономно
+ok 2 - Team mode является opt-in через teamMatch и не активируется автономно
+  ---
+  duration_ms: 0.279481
+  type: 'test'
+  ...
+# Subtest: Team adapter загружается лениво только из versioned asset 0.11.0
+ok 3 - Team adapter загружается лениво только из versioned asset 0.11.0
+  ---
+  duration_ms: 0.182304
+  type: 'test'
+  ...
+# Subtest: Team assignment предзаполняет только дату, bestOf и имена игроков
+ok 4 - Team assignment предзаполняет только дату, bestOf и имена игроков
+  ---
+  duration_ms: 0.443668
+  type: 'test'
+  ...
+# Subtest: Team UI блокирует только assignment-поля, не решения судьи о подаче/стороне/форе
+ok 5 - Team UI блокирует только assignment-поля, не решения судьи о подаче/стороне/форе
+  ---
+  duration_ms: 0.440744
+  type: 'test'
+  ...
+# Subtest: запуск Team-встречи создаёт binding до сохранения рабочего state
+ok 6 - запуск Team-встречи создаёт binding до сохранения рабочего state
+  ---
+  duration_ms: 0.357739
+  type: 'test'
+  ...
+# Subtest: финальный Team result фиксируется только при выходе из завершённой встречи
+ok 7 - финальный Team result фиксируется только при выходе из завершённой встречи
+  ---
+  duration_ms: 0.729768
+  type: 'test'
+  ...
+# Subtest: pending release сохраняется локально до попытки Firebase publication
+ok 8 - pending release сохраняется локально до попытки Firebase publication
+  ---
+  duration_ms: 0.369206
+  type: 'test'
+  ...
+# Subtest: Перечитать Team явно разрешает rebase pending release, автоматический reconnect — нет
+ok 9 - Перечитать Team явно разрешает rebase pending release, автоматический reconnect — нет
+  ---
+  duration_ms: 0.833204
+  type: 'test'
+  ...
+# Subtest: Team-mode закрытие завершённой встречи подтверждает cloud backup до очистки scoring state
+ok 10 - Team-mode закрытие завершённой встречи подтверждает cloud backup до очистки scoring state
+  ---
+  duration_ms: 0.539922
+  type: 'test'
+  ...
+# Subtest: Team report является remote read-only source и проверяет hash перед canonical parse
+ok 11 - Team report является remote read-only source и проверяет hash перед canonical parse
+  ---
+  duration_ms: 0.630228
+  type: 'test'
+  ...
+# Subtest: критические scoring/Undo функции baseline остаются byte-identical
+ok 12 - критические scoring/Undo функции baseline остаются byte-identical
+  ---
+  duration_ms: 2.34515
+  type: 'test'
+  ...
+# Subtest: Team subscriptions освобождаются, reconnect повторяет pending/live sync
+ok 13 - Team subscriptions освобождаются, reconnect повторяет pending/live sync
+  ---
+  duration_ms: 0.593583
+  type: 'test'
+  ...
+# Subtest: архив загружается только из team/matches/<id>/<id>.json без кэша
+ok 14 - архив загружается только из team/matches/<id>/<id>.json без кэша
+  ---
+  duration_ms: 1.794421
+  type: 'test'
+  ...
+# Subtest: 404 означает отсутствие архивной копии, остальные HTTP-ошибки не маскируются
+ok 15 - 404 означает отсутствие архивной копии, остальные HTTP-ошибки не маскируются
+  ---
+  duration_ms: 0.694796
+  type: 'test'
+  ...
+# Subtest: архив допускается только для завершённой встречи с совпадающим id
+ok 16 - архив допускается только для завершённой встречи с совпадающим id
+  ---
+  duration_ms: 7.568041
+  type: 'test'
+  ...
+# Subtest: штатный цикл: финал → точная следующая пара → transition + Live без ручного переноса
+ok 17 - штатный цикл: финал → точная следующая пара → transition + Live без ручного переноса
+  ---
+  duration_ms: 6.09934
+  type: 'test'
+  ...
+# Subtest: штатный цикл: выход через «Новая встреча» подтверждает финал, не обходя Undo
+ok 18 - штатный цикл: выход через «Новая встреча» подтверждает финал, не обходя Undo
+  ---
+  duration_ms: 1.406256
+  type: 'test'
+  ...
+# Subtest: генератор создаёт полный формат 2×2
+ok 19 - генератор создаёт полный формат 2×2
+  ---
+  duration_ms: 3.522021
+  type: 'test'
+  ...
+# Subtest: генератор создаёт полный формат 3×3
+ok 20 - генератор создаёт полный формат 3×3
+  ---
+  duration_ms: 1.080737
+  type: 'test'
+  ...
+# Subtest: генератор создаёт полный формат 4×4
+ok 21 - генератор создаёт полный формат 4×4
+  ---
+  duration_ms: 0.389516
+  type: 'test'
+  ...
+# Subtest: название и ID спортсменов формируются автоматически
+ok 22 - название и ID спортсменов формируются автоматически
+  ---
+  duration_ms: 0.863549
+  type: 'test'
+  ...
+# Subtest: новый JSON не содержит liveUrl и создаёт пустые публичные live-ссылки
+ok 23 - новый JSON не содержит liveUrl и создаёт пустые публичные live-ссылки
+  ---
+  duration_ms: 0.358229
+  type: 'test'
+  ...
+# Subtest: пары формируются в циклическом порядке
+ok 24 - пары формируются в циклическом порядке
+  ---
+  duration_ms: 0.240743
+  type: 'test'
+  ...
+# Subtest: неподдерживаемый формат отклоняется
+ok 25 - неподдерживаемый формат отклоняется
+  ---
+  duration_ms: 0.372261
+  type: 'test'
+  ...
+# Subtest: создатель сохраняет форматы из 3, 5 и 7 партий
+ok 26 - создатель сохраняет форматы из 3, 5 и 7 партий
+  ---
+  duration_ms: 0.910751
+  type: 'test'
+  ...
+# Subtest: неполный состав отклоняется
+ok 27 - неполный состав отклоняется
+  ---
+  duration_ms: 0.323507
+  type: 'test'
+  ...
+# Subtest: невалидный ID отклоняется моделью
+ok 28 - невалидный ID отклоняется моделью
+  ---
+  duration_ms: 0.37829
+  type: 'test'
+  ...
+# Subtest: дата создания определяется по локальному календарному дню
+ok 29 - дата создания определяется по локальному календарному дню
+  ---
+  duration_ms: 0.483748
+  type: 'test'
+  ...
+# Subtest: пара перемещается вверх и вниз без изменения исходного массива
+ok 30 - пара перемещается вверх и вниз без изменения исходного массива
+  ---
+  duration_ms: 0.174673
+  type: 'test'
+  ...
+# Subtest: пользовательский порядок определяет номера и current
+ok 31 - пользовательский порядок определяет номера и current
+  ---
+  duration_ms: 0.376937
+  type: 'test'
+  ...
+# Subtest: неполный, повторный и неизвестный порядок пар отклоняются
+ok 32 - неполный, повторный и неизвестный порядок пар отклоняются
+  ---
+  duration_ms: 0.175904
+  type: 'test'
+  ...
+# Subtest: локальный JSON schemaVersion 4 восстанавливает поля, имя и порядок пар
+ok 33 - локальный JSON schemaVersion 4 восстанавливает поля, имя и порядок пар
+  ---
+  duration_ms: 0.797421
+  type: 'test'
+  ...
+# Subtest: импорт не поддерживает schemaVersion 3 и ошибочный JSON
+ok 34 - импорт не поддерживает schemaVersion 3 и ошибочный JSON
+  ---
+  duration_ms: 0.677389
+  type: 'test'
+  ...
+# Subtest: импорт требует точное исходное имя и канонический title
+ok 35 - импорт требует точное исходное имя и канонический title
+  ---
+  duration_ms: 0.413472
+  type: 'test'
+  ...
+# Subtest: JSON начатой встречи нельзя загрузить в режим создания
+ok 36 - JSON начатой встречи нельзя загрузить в режим создания
+  ---
+  duration_ms: 0.426122
+  type: 'test'
+  ...
+# Subtest: V5-R01: ID спортсменов проверяются до восстановления формы
+ok 37 - V5-R01: ID спортсменов проверяются до восстановления формы
+  ---
+  duration_ms: 0.357759
+  type: 'test'
+  ...
+# Subtest: переход завершает current и начинает следующую встречу
+ok 38 - переход завершает current и начинает следующую встречу
+  ---
+  duration_ms: 7.830235
+  type: 'test'
+  ...
+# Subtest: пятая победа завершает встречу и не назначает следующую
+ok 39 - пятая победа завершает встречу и не назначает следующую
+  ---
+  duration_ms: 2.457158
+  type: 'test'
+  ...
+# Subtest: Team-level Undo откатывает последнюю finished и возвращает текущую встречу в planned
+ok 40 - Team-level Undo откатывает последнюю finished и возвращает текущую встречу в planned
+  ---
+  duration_ms: 1.098583
+  type: 'test'
+  ...
+# Subtest: после Team-level Undo исправленный результат снова запускает штатную следующую пару
+ok 41 - после Team-level Undo исправленный результат снова запускает штатную следующую пару
+  ---
+  duration_ms: 2.11294
+  type: 'test'
+  ...
+# Subtest: Team-level Undo снова открывает завершённую командную встречу
+ok 42 - Team-level Undo снова открывает завершённую командную встречу
+  ---
+  duration_ms: 0.913745
+  type: 'test'
+  ...
+# Subtest: Team-level Undo работает после завершения 2×2 вничью
+ok 43 - Team-level Undo работает после завершения 2×2 вничью
+  ---
+  duration_ms: 0.81084
+  type: 'test'
+  ...
+# Subtest: Team-level Undo отклоняется до первой завершённой личной встречи
+ok 44 - Team-level Undo отклоняется до первой завершённой личной встречи
+  ---
+  duration_ms: 0.895598
+  type: 'test'
+  ...
+# Subtest: зеркальный результат допустим и legacy liveUrl удаляется
+ok 45 - зеркальный результат допустим и legacy liveUrl удаляется
+  ---
+  duration_ms: 1.670084
+  type: 'test'
+  ...
+# Subtest: недопустимый результат отклоняется
+ok 46 - недопустимый результат отклоняется
+  ---
+  duration_ms: 2.96947
+  type: 'test'
+  ...
+# Subtest: переход допускает завершение без reportUrl
+ok 47 - переход допускает завершение без reportUrl
+  ---
+  duration_ms: 1.44821
+  type: 'test'
+  ...
+# Subtest: встреча без current не обновляется
+ok 48 - встреча без current не обновляется
+  ---
+  duration_ms: 0.877681
+  type: 'test'
+  ...
+# Subtest: завершённая командная встреча повторно не обновляется
+ok 49 - завершённая командная встреча повторно не обновляется
+  ---
+  duration_ms: 0.412842
+  type: 'test'
+  ...
+# Subtest: некорректный updatedAt отклоняется
+ok 50 - некорректный updatedAt отклоняется
+  ---
+  duration_ms: 0.348134
+  type: 'test'
+  ...
+# Subtest: ревизия источника не зависит от порядка ключей объекта
+ok 51 - ревизия источника не зависит от порядка ключей объекта
+  ---
+  duration_ms: 1.049821
+  type: 'test'
+  ...
+# Subtest: изменившийся опубликованный JSON отклоняется
+ok 52 - изменившийся опубликованный JSON отклоняется
+  ---
+  duration_ms: 0.594895
+  type: 'test'
+  ...
+# Subtest: неканонический id не используется для имени файла
+ok 53 - неканонический id не используется для имени файла
+  ---
+  duration_ms: 0.238029
+  type: 'test'
+  ...
+# Subtest: последний переход формата 2×2 может завершить встречу вничью
+ok 54 - последний переход формата 2×2 может завершить встречу вничью
+  ---
+  duration_ms: 0.657479
+  type: 'test'
+  ...
+# Subtest: редактор принимает результаты форматов из 3 и 7 партий
+ok 55 - редактор принимает результаты форматов из 3 и 7 партий
+  ---
+  duration_ms: 1.107076
+  type: 'test'
+  ...
+# Subtest: редактирование сведений не изменяет ссылки, схему, ID и пары
+ok 56 - редактирование сведений не изменяет ссылки, схему, ID и пары
+  ---
+  duration_ms: 0.782137
+  type: 'test'
+  ...
+# Subtest: planned-встречи меняют только order, finished и current остаются на месте
+ok 57 - planned-встречи меняют только order, finished и current остаются на месте
+  ---
+  duration_ms: 0.756839
+  type: 'test'
+  ...
+# Subtest: после перестановки переход запускает первую встречу нового planned-порядка
+ok 58 - после перестановки переход запускает первую встречу нового planned-порядка
+  ---
+  duration_ms: 5.657946
+  type: 'test'
+  ...
+# Subtest: порядок planned требует точный набор стабильных ID
+ok 59 - порядок planned требует точный набор стабильных ID
+  ---
+  duration_ms: 0.966375
+  type: 'test'
+  ...
+# Subtest: локальный источник требует schemaVersion 4 и точное имя, но принимает завершённую встречу
+ok 60 - локальный источник требует schemaVersion 4 и точное имя, но принимает завершённую встречу
+  ---
+  duration_ms: 11.327308
+  type: 'test'
+  ...
+# Subtest: подготовка отчётов изменяет только reportUrl и updatedAt и удаляет legacy liveUrl
+ok 61 - подготовка отчётов изменяет только reportUrl и updatedAt и удаляет legacy liveUrl
+  ---
+  duration_ms: 1.624695
+  type: 'test'
+  ...
+# Subtest: необязательный reportUrl можно ввести, заменить и очистить
+ok 62 - необязательный reportUrl можно ввести, заменить и очистить
+  ---
+  duration_ms: 0.830029
+  type: 'test'
+  ...
+# Subtest: reportUrl завершённой личной встречи можно очистить
+ok 63 - reportUrl завершённой личной встречи можно очистить
+  ---
+  duration_ms: 0.760074
+  type: 'test'
+  ...
+# Subtest: опасный reportUrl отклоняется
+ok 64 - опасный reportUrl отклоняется
+  ---
+  duration_ms: 0.648897
+  type: 'test'
+  ...
+# Subtest: отчёты завершённой командной встречи остаются редактируемыми
+ok 65 - отчёты завершённой командной встречи остаются редактируемыми
+  ---
+  duration_ms: 0.977852
+  type: 'test'
+  ...
+# Subtest: набор ссылок требует все ID без дублей
+ok 66 - набор ссылок требует все ID без дублей
+  ---
+  duration_ms: 0.638791
+  type: 'test'
+  ...
+# Subtest: единая подготовка сохраняет одновременно отчёты, сведения и planned-порядок
+ok 67 - единая подготовка сохраняет одновременно отчёты, сведения и planned-порядок
+  ---
+  duration_ms: 1.360869
+  type: 'test'
+  ...
+# Subtest: единая подготовка завершённой командной встречи изменяет только ссылки
+ok 68 - единая подготовка завершённой командной встречи изменяет только ссылки
+  ---
+  duration_ms: 0.786053
+  type: 'test'
+  ...
+# Subtest: JSON v0.8.5 без верхнеуровневых live-полей читается и нормализуется в null/null
+ok 69 - JSON v0.8.5 без верхнеуровневых live-полей читается и нормализуется в null/null
+  ---
+  duration_ms: 0.469857
+  type: 'test'
+  ...
+# Subtest: единая подготовка автоматически сохраняет обнаруженные live-ссылки текущей встречи
+ok 70 - единая подготовка автоматически сохраняет обнаруженные live-ссылки текущей встречи
+  ---
+  duration_ms: 1.151944
+  type: 'test'
+  ...
+# Subtest: единая подготовка без локальной live-публикации сохраняет уже опубликованные live-ссылки
+ok 71 - единая подготовка без локальной live-публикации сохраняет уже опубликованные live-ссылки
+  ---
+  duration_ms: 1.126706
+  type: 'test'
+  ...
+# Subtest: V5-R01: неканонический порядок ID спортсменов отклоняется до редактирования
+ok 72 - V5-R01: неканонический порядок ID спортсменов отклоняется до редактирования
+  ---
+  duration_ms: 0.431109
+  type: 'test'
+  ...
+# Subtest: изменение спортивного формата через редактор не предусмотрено
+ok 73 - изменение спортивного формата через редактор не предусмотрено
+  ---
+  duration_ms: 0.509747
+  type: 'test'
+  ...
+# Subtest: пакетный переход записывает live следующей встречи одновременно с finished предыдущей
+ok 74 - пакетный переход записывает live следующей встречи одновременно с finished предыдущей
+  ---
+  duration_ms: 1.491755
+  type: 'test'
+  ...
+# Subtest: пакетный переход можно подготовить без live следующей встречи
+ok 75 - пакетный переход можно подготовить без live следующей встречи
+  ---
+  duration_ms: 0.961848
+  type: 'test'
+  ...
+# Subtest: операционное автообновление Live изменяет только верхнеуровневые live-ссылки и updatedAt
+ok 76 - операционное автообновление Live изменяет только верхнеуровневые live-ссылки и updatedAt
+  ---
+  duration_ms: 1.371634
+  type: 'test'
+  ...
+# Subtest: операционное автообновление может атомарно на уровне модели очистить обе Live-ссылки
+ok 77 - операционное автообновление может атомарно на уровне модели очистить обе Live-ссылки
+  ---
+  duration_ms: 0.982709
+  type: 'test'
+  ...
+# Subtest: операционное автообновление отвергает неполную пару Live-ссылок
+ok 78 - операционное автообновление отвергает неполную пару Live-ссылок
+  ---
+  duration_ms: 0.555035
+  type: 'test'
+  ...
+# Subtest: showSaveFilePicker выбирается первым и получает точные имя и байты
+ok 79 - showSaveFilePicker выбирается первым и получает точные имя и байты
+  ---
+  duration_ms: 3.145074
+  type: 'test'
+  ...
+# Subtest: Web Share выбирается вторым без промежуточного асинхронного шага
+ok 80 - Web Share выбирается вторым без промежуточного асинхронного шага
+  ---
+  duration_ms: 0.578521
+  type: 'test'
+  ...
+# Subtest: Blob download используется последним и URL не отзывается немедленно
+ok 81 - Blob download используется последним и URL не отзывается немедленно
+  ---
+  duration_ms: 0.427774
+  type: 'test'
+  ...
+# Subtest: отмена file picker не запускает Web Share или Blob
+ok 82 - отмена file picker не запускает Web Share или Blob
+  ---
+  duration_ms: 0.411279
+  type: 'test'
+  ...
+# Subtest: отмена Web Share не запускает Blob
+ok 83 - отмена Web Share не запускает Blob
+  ---
+  duration_ms: 0.28552
+  type: 'test'
+  ...
+# Subtest: ошибка file picker переходит к Web Share
+ok 84 - ошибка file picker переходит к Web Share
+  ---
+  duration_ms: 0.34585
+  type: 'test'
+  ...
+# Subtest: ошибки file picker и Web Share переходят к Blob
+ok 85 - ошибки file picker и Web Share переходят к Blob
+  ---
+  duration_ms: 0.306782
+  type: 'test'
+  ...
+# Subtest: canShare=false сразу использует Blob
+ok 86 - canShare=false сразу использует Blob
+  ---
+  duration_ms: 0.230447
+  type: 'test'
+  ...
+# Subtest: ошибка всех механизмов выдаёт единое сообщение и сохраняет исходный artifact
+ok 87 - ошибка всех механизмов выдаёт единое сообщение и сохраняет исходный artifact
+  ---
+  duration_ms: 1.017802
+  type: 'test'
+  ...
+# Subtest: некорректный artifact отклоняется до обращения к браузерным API
+ok 88 - некорректный artifact отклоняется до обращения к браузерным API
+  ---
+  duration_ms: 0.622026
+  type: 'test'
+  ...
+# Subtest: RC6: create authorization остаётся совместимой с allowlist trust boundary
+ok 89 - RC6: create authorization остаётся совместимой с allowlist trust boundary
+  ---
+  duration_ms: 1.605606
+  type: 'test'
+  ...
+# Subtest: RC6: transport revision валидируется на leaf, а не смешивается с parent write authorization
+ok 90 - RC6: transport revision валидируется на leaf, а не смешивается с parent write authorization
+  ---
+  duration_ms: 0.135143
+  type: 'test'
+  ...
+# Subtest: RC6: exact revision expression разрешает create/legacy migration и только N→N+1
+ok 91 - RC6: exact revision expression разрешает create/legacy migration и только N→N+1
+  ---
+  duration_ms: 0.303116
+  type: 'test'
+  ...
+# Subtest: RC6: deletion Team node остаётся fail-closed
+ok 92 - RC6: deletion Team node остаётся fail-closed
+  ---
+  duration_ms: 0.123656
+  type: 'test'
+  ...
+# Subtest: report backup branch закрывает listing и разрешает только direct public leaf read
+ok 93 - report backup branch закрывает listing и разрешает только direct public leaf read
+  ---
+  duration_ms: 0.093832
+  type: 'test'
+  ...
+# Subtest: report backup create-only: только allowlisted editor и существующий Team match
+ok 94 - report backup create-only: только allowlisted editor и существующий Team match
+  ---
+  duration_ms: 0.114162
+  type: 'test'
+  ...
+# Subtest: report backup schema/path identity и immutable payload валидируются Rules
+ok 95 - report backup schema/path identity и immutable payload валидируются Rules
+  ---
+  duration_ms: 0.171148
+  type: 'test'
+  ...
+# Subtest: Firebase использует выделенный проект ttscore-list и europe-west1 RTDB
+ok 96 - Firebase использует выделенный проект ttscore-list и europe-west1 RTDB
+  ---
+  duration_ms: 7.918979
+  type: 'test'
+  ...
+# Subtest: командная встреча хранится одним JSON-узлом /teamMatches/<id>
+ok 97 - командная встреча хранится одним JSON-узлом /teamMatches/<id>
+  ---
+  duration_ms: 0.459021
+  type: 'test'
+  ...
+# Subtest: report backup хранится в отдельной versioned-ветке той же RTDB
+ok 98 - report backup хранится в отдельной versioned-ветке той же RTDB
+  ---
+  duration_ms: 0.343057
+  type: 'test'
+  ...
+# Subtest: runtime использует realtime onValue, Email/Password и server-enforced revision CAS
+ok 99 - runtime использует realtime onValue, Email/Password и server-enforced revision CAS
+  ---
+  duration_ms: 0.309906
+  type: 'test'
+  ...
+# Subtest: создание получает writeRevision=1, existing-node write увеличивает её на один
+ok 100 - создание получает writeRevision=1, existing-node write увеличивает её на один
+  ---
+  duration_ms: 0.29198
+  type: 'test'
+  ...
+# Subtest: transport metadata не попадает в domain Team JSON
+ok 101 - transport metadata не попадает в domain Team JSON
+  ---
+  duration_ms: 0.221954
+  type: 'test'
+  ...
+# Subtest: legacy Firebase node без writeRevision мигрирует при первой guarded write
+ok 102 - legacy Firebase node без writeRevision мигрирует при первой guarded write
+  ---
+  duration_ms: 1.838246
+  type: 'test'
+  ...
+# Subtest: последующие guarded writes монотонно увеличивают writeRevision
+ok 103 - последующие guarded writes монотонно увеличивают writeRevision
+  ---
+  duration_ms: 0.426993
+  type: 'test'
+  ...
+# Subtest: повреждённая writeRevision блокирует write до domain transform
+ok 104 - повреждённая writeRevision блокирует write до domain transform
+  ---
+  duration_ms: 0.344228
+  type: 'test'
+  ...
+# Subtest: реально отсутствующий existing-node остаётся fail-closed
+ok 105 - реально отсутствующий existing-node остаётся fail-closed
+  ---
+  duration_ms: 0.311949
+  type: 'test'
+  ...
+# Subtest: editor sourceRevision не зависит от transport writeRevision
+ok 106 - editor sourceRevision не зависит от transport writeRevision
+  ---
+  duration_ms: 2.422856
+  type: 'test'
+  ...
+# Subtest: Firebase adapter восстанавливает nullable-поля, удаляемые Realtime Database
+ok 107 - Firebase adapter восстанавливает nullable-поля, удаляемые Realtime Database
+  ---
+  duration_ms: 0.853545
+  type: 'test'
+  ...
+# Subtest: Firebase adapter не маскирует отсутствие обязательного finished-result
+ok 108 - Firebase adapter не маскирует отсутствие обязательного finished-result
+  ---
+  duration_ms: 0.169044
+  type: 'test'
+  ...
+# Subtest: mode=edit принимает реальный RTDB snapshot после удаления null-полей
+ok 109 - mode=edit принимает реальный RTDB snapshot после удаления null-полей
+  ---
+  duration_ms: 1.602612
+  type: 'test'
+  ...
+# Subtest: same-client Team writes сериализуются целиком и не создают ложный revision conflict
+ok 110 - same-client Team writes сериализуются целиком и не создают ложный revision conflict
+  ---
+  duration_ms: 11.826761
+  type: 'test'
+  ...
+# Subtest: ошибка одной same-client Team write не блокирует следующую очередь
+ok 111 - ошибка одной same-client Team write не блокирует следующую очередь
+  ---
+  duration_ms: 0.393152
+  type: 'test'
+  ...
+# Subtest: match выбирает Firebase-источник в публичном режиме
+ok 112 - match выбирает Firebase-источник в публичном режиме
+  ---
+  duration_ms: 2.331729
+  type: 'test'
+  ...
+# Subtest: mode=edit включает Firebase-редактор
+ok 113 - mode=edit включает Firebase-редактор
+  ---
+  duration_ms: 0.163526
+  type: 'test'
+  ...
+# Subtest: mode=edit без match выбирает строго локальный источник
+ok 114 - mode=edit без match выбирает строго локальный источник
+  ---
+  duration_ms: 0.147232
+  type: 'test'
+  ...
+# Subtest: явный mode=view допустим
+ok 115 - явный mode=view допустим
+  ---
+  duration_ms: 0.115304
+  type: 'test'
+  ...
+# Subtest: mode=create работает без match
+ok 116 - mode=create работает без match
+  ---
+  duration_ms: 1.107627
+  type: 'test'
+  ...
+# Subtest: mode=create отклоняет match
+ok 117 - mode=create отклоняет match
+  ---
+  duration_ms: 0.417759
+  type: 'test'
+  ...
+# Subtest: отсутствующий match отклоняется в view, повторный и пустой — во всех режимах
+ok 118 - отсутствующий match отклоняется в view, повторный и пустой — во всех режимах
+  ---
+  duration_ms: 0.291559
+  type: 'test'
+  ...
+# Subtest: обход пути отклоняется после URL-декодирования
+ok 119 - обход пути отклоняется после URL-декодирования
+  ---
+  duration_ms: 0.207673
+  type: 'test'
+  ...
+# Subtest: верхний регистр и подчёркивание отклоняются
+ok 120 - верхний регистр и подчёркивание отклоняются
+  ---
+  duration_ms: 0.27221
+  type: 'test'
+  ...
+# Subtest: неизвестный и повторный mode отклоняются
+ok 121 - неизвестный и повторный mode отклоняются
+  ---
+  duration_ms: 0.381784
+  type: 'test'
+  ...
+# Subtest: относительный reportUrl сохраняет прежнюю базу team/matches/<id>/
+ok 122 - относительный reportUrl сохраняет прежнюю базу team/matches/<id>/
+  ---
+  duration_ms: 0.219581
+  type: 'test'
+  ...
+# Subtest: архивный JSON имеет канонический путь team/matches/<id>/<id>.json
+ok 123 - архивный JSON имеет канонический путь team/matches/<id>/<id>.json
+  ---
+  duration_ms: 0.201112
+  type: 'test'
+  ...
+# Subtest: абсолютная ссылка ресурса не меняется
+ok 124 - абсолютная ссылка ресурса не меняется
+  ---
+  duration_ms: 0.0994
+  type: 'test'
+  ...
+# Subtest: публичный URL сохраняет страницу и заменяет параметры режима создания
+ok 125 - публичный URL сохраняет страницу и заменяет параметры режима создания
+  ---
+  duration_ms: 0.134442
+  type: 'test'
+  ...
+# Subtest: исходные девять пар и current проходят
+ok 126 - исходные девять пар и current проходят
+  ---
+  duration_ms: 5.724947
+  type: 'test'
+  ...
+# Subtest: пять побед завершают командную встречу
+ok 127 - пять побед завершают командную встречу
+  ---
+  duration_ms: 1.257413
+  type: 'test'
+  ...
+# Subtest: результат после завершения командной встречи отклоняется с универсальным сообщением
+ok 128 - результат после завершения командной встречи отклоняется с универсальным сообщением
+  ---
+  duration_ms: 2.483848
+  type: 'test'
+  ...
+# Subtest: finished после current отклоняется
+ok 129 - finished после current отклоняется
+  ---
+  duration_ms: 0.598801
+  type: 'test'
+  ...
+# Subtest: current после planned отклоняется
+ok 130 - current после planned отклоняется
+  ---
+  duration_ms: 1.218895
+  type: 'test'
+  ...
+# Subtest: четыре-четыре и девятая current проходят
+ok 131 - четыре-четыре и девятая current проходят
+  ---
+  duration_ms: 0.557419
+  type: 'test'
+  ...
+# Subtest: неизвестное поле отклоняется
+ok 132 - неизвестное поле отклоняется
+  ---
+  duration_ms: 0.469607
+  type: 'test'
+  ...
+# Subtest: legacy liveUrl принимается при чтении и не попадает в prepared-модель
+ok 133 - legacy liveUrl принимается при чтении и не попадает в prepared-модель
+  ---
+  duration_ms: 0.50534
+  type: 'test'
+  ...
+# Subtest: finished без reportUrl допускается
+ok 134 - finished без reportUrl допускается
+  ---
+  duration_ms: 0.573433
+  type: 'test'
+  ...
+# Subtest: reportUrl принимает HTML, защищённую ссылку и JSON
+ok 135 - reportUrl принимает HTML, защищённую ссылку и JSON
+  ---
+  duration_ms: 4.734181
+  type: 'test'
+  ...
+# Subtest: верхнеуровневые live-ссылки текущей встречи принимаются парой
+ok 136 - верхнеуровневые live-ссылки текущей встречи принимаются парой
+  ---
+  duration_ms: 0.340372
+  type: 'test'
+  ...
+# Subtest: верхнеуровневые live-ссылки должны быть заданы или отсутствовать одновременно
+ok 137 - верхнеуровневые live-ссылки должны быть заданы или отсутствовать одновременно
+  ---
+  duration_ms: 0.496677
+  type: 'test'
+  ...
+# Subtest: live-ссылки запрещены без текущей личной встречи
+ok 138 - live-ссылки запрещены без текущей личной встречи
+  ---
+  duration_ms: 0.435045
+  type: 'test'
+  ...
+# Subtest: завершённая командная встреча не принимает live-ссылки текущей встречи
+ok 139 - завершённая командная встреча не принимает live-ссылки текущей встречи
+  ---
+  duration_ms: 0.361444
+  type: 'test'
+  ...
+# Subtest: несуществующая календарная дата отклоняется
+ok 140 - несуществующая календарная дата отклоняется
+  ---
+  duration_ms: 0.21925
+  type: 'test'
+  ...
+# Subtest: активная схема URL отклоняется
+ok 141 - активная схема URL отклоняется
+  ---
+  duration_ms: 0.3981
+  type: 'test'
+  ...
+# Subtest: повтор пары отклоняется
+ok 142 - повтор пары отклоняется
+  ---
+  duration_ms: 0.306421
+  type: 'test'
+  ...
+# Subtest: прежняя schemaVersion 2 отклоняется
+ok 143 - прежняя schemaVersion 2 отклоняется
+  ---
+  duration_ms: 0.203767
+  type: 'test'
+  ...
+# Subtest: schemaVersion 3 читается как формат из 5 партий
+ok 144 - schemaVersion 3 читается как формат из 5 партий
+  ---
+  duration_ms: 0.290127
+  type: 'test'
+  ...
+# Subtest: schemaVersion 4 строго требует формат личных встреч
+ok 145 - schemaVersion 4 строго требует формат личных встреч
+  ---
+  duration_ms: 0.875418
+  type: 'test'
+  ...
+# Subtest: результат проверяется для форматов из 3, 5 и 7 партий
+ok 146 - результат проверяется для форматов из 3, 5 и 7 партий
+  ---
+  duration_ms: 3.728292
+  type: 'test'
+  ...
+# Subtest: старое поле matches отклоняется
+ok 147 - старое поле matches отклоняется
+  ---
+  duration_ms: 0.203767
+  type: 'test'
+  ...
+# Subtest: начальные и конечные пробелы отклоняются
+ok 148 - начальные и конечные пробелы отклоняются
+  ---
+  duration_ms: 0.213932
+  type: 'test'
+  ...
+# Subtest: обратные косые черты и кодированный переход отклоняются
+ok 149 - обратные косые черты и кодированный переход отклоняются
+  ---
+  duration_ms: 0.537089
+  type: 'test'
+  ...
+# Subtest: некорректное percent-encoding ссылки отклоняется
+ok 150 - некорректное percent-encoding ссылки отклоняется
+  ---
+  duration_ms: 0.379141
+  type: 'test'
+  ...
+# Subtest: updatedAt требует ISO 8601 с часовым поясом
+ok 151 - updatedAt требует ISO 8601 с часовым поясом
+  ---
+  duration_ms: 0.286912
+  type: 'test'
+  ...
+# Subtest: updatedAt отклоняет невозможные дату, время и смещение
+ok 152 - updatedAt отклоняет невозможные дату, время и смещение
+  ---
+  duration_ms: 0.531219
+  type: 'test'
+  ...
+# Subtest: updatedAt принимает високосную дату и предельное смещение
+ok 153 - updatedAt принимает високосную дату и предельное смещение
+  ---
+  duration_ms: 0.235805
+  type: 'test'
+  ...
+# Subtest: числовые поля JSON не допускают строк и boolean
+ok 154 - числовые поля JSON не допускают строк и boolean
+  ---
+  duration_ms: 0.938212
+  type: 'test'
+  ...
+# Subtest: формат 2×2 может завершиться вничью 2:2
+ok 155 - формат 2×2 может завершиться вничью 2:2
+  ---
+  duration_ms: 0.323958
+  type: 'test'
+  ...
+# Subtest: формат 4×4 может завершиться вничью 8:8
+ok 156 - формат 4×4 может завершиться вничью 8:8
+  ---
+  duration_ms: 0.646513
+  type: 'test'
+  ...
+# Subtest: формат 2×2 завершается досрочно после третьей победы
+ok 157 - формат 2×2 завершается досрочно после третьей победы
+  ---
+  duration_ms: 0.286401
+  type: 'test'
+  ...
+# Subtest: неверный winsToFinish отклоняется
+ok 158 - неверный winsToFinish отклоняется
+  ---
+  duration_ms: 0.2194
+  type: 'test'
+  ...
+# Subtest: разный размер команд отклоняется
+ok 159 - разный размер команд отклоняется
+  ---
+  duration_ms: 0.188544
+  type: 'test'
+  ...
+# Subtest: HTML подключает общие assets версии 0.11.0
+ok 160 - HTML подключает общие assets версии 0.11.0
+  ---
+  duration_ms: 1.660249
+  type: 'test'
+  ...
+# Subtest: переименование matches-source выполнено полностью
+ok 161 - переименование matches-source выполнено полностью
+  ---
+  duration_ms: 1.982454
+  type: 'test'
+  ...
+# Subtest: Firebase остаётся оперативным источником, GitHub JSON используется только как public read-only fallback
+ok 162 - Firebase остаётся оперативным источником, GitHub JSON используется только как public read-only fallback
+  ---
+  duration_ms: 0.940015
+  type: 'test'
+  ...
+# Subtest: относительные reportUrl по-прежнему разрешаются от team/matches/<id>/
+ok 163 - относительные reportUrl по-прежнему разрешаются от team/matches/<id>/
+  ---
+  duration_ms: 0.749728
+  type: 'test'
+  ...
+# Subtest: данные примера отсутствуют в общем исходном коде
+ok 164 - данные примера отсутствуют в общем исходном коде
+  ---
+  duration_ms: 1.43501
+  type: 'test'
+  ...
+# Subtest: HTML не содержит встроенных CSS и JavaScript
+ok 165 - HTML не содержит встроенных CSS и JavaScript
+  ---
+  duration_ms: 0.383767
+  type: 'test'
+  ...
+# Subtest: публичная страница не предлагает переход в редактор
+ok 166 - публичная страница не предлагает переход в редактор
+  ---
+  duration_ms: 0.707385
+  type: 'test'
+  ...
+# Subtest: редактор проверяет свежесть перед preview и очищает форму после ручного обновления
+ok 167 - редактор проверяет свежесть перед preview и очищает форму после ручного обновления
+  ---
+  duration_ms: 0.628886
+  type: 'test'
+  ...
+# Subtest: Team-level Undo отделён от operational transition и требует preview перед публикацией
+ok 168 - Team-level Undo отделён от operational transition и требует preview перед публикацией
+  ---
+  duration_ms: 0.673393
+  type: 'test'
+  ...
+# Subtest: одно адаптивное сохранение выбирает picker, Web Share и только затем Blob
+ok 169 - одно адаптивное сохранение выбирает picker, Web Share и только затем Blob
+  ---
+  duration_ms: 0.7511
+  type: 'test'
+  ...
+# Subtest: V6-R01: сохранение редактора использует захваченный подготовленный artifact
+ok 170 - V6-R01: сохранение редактора использует захваченный подготовленный artifact
+  ---
+  duration_ms: 0.469526
+  type: 'test'
+  ...
+# Subtest: режим edit разделяет опубликованный и локальный источники
+ok 171 - режим edit разделяет опубликованный и локальный источники
+  ---
+  duration_ms: 0.961718
+  type: 'test'
+  ...
+# Subtest: идущая встреча редактирует сведения и planned-порядок единым preview
+ok 172 - идущая встреча редактирует сведения и planned-порядок единым preview
+  ---
+  duration_ms: 1.396072
+  type: 'test'
+  ...
+# Subtest: отчёты свернуты в редакторе и входят в единый preview без liveUrl
+ok 173 - отчёты свернуты в редакторе и входят в единый preview без liveUrl
+  ---
+  duration_ms: 0.858442
+  type: 'test'
+  ...
+# Subtest: v0.11.0 сворачивает все рабочие разделы edit кроме завершения текущей встречи
+ok 174 - v0.11.0 сворачивает все рабочие разделы edit кроме завершения текущей встречи
+  ---
+  duration_ms: 0.547624
+  type: 'test'
+  ...
+# Subtest: v0.11.0 показывает операционные Live-табло и Live-отчёт и использует названия команд в итоговом счёте
+ok 175 - v0.11.0 показывает операционные Live-табло и Live-отчёт и использует названия команд в итоговом счёте
+  ---
+  duration_ms: 0.516197
+  type: 'test'
+  ...
+# Subtest: mode=edit показывает редактор до полного списка личных встреч
+ok 176 - mode=edit показывает редактор до полного списка личных встреч
+  ---
+  duration_ms: 0.245589
+  type: 'test'
+  ...
+# Subtest: редактор выделяет одну встречу нажатием и после перемещения
+ok 177 - редактор выделяет одну встречу нажатием и после перемещения
+  ---
+  duration_ms: 0.63782
+  type: 'test'
+  ...
+# Subtest: редактор не предлагает изменение спортивного формата
+ok 178 - редактор не предлагает изменение спортивного формата
+  ---
+  duration_ms: 0.348695
+  type: 'test'
+  ...
+# Subtest: режим create подключён без GitHub API
+ok 179 - режим create подключён без GitHub API
+  ---
+  duration_ms: 0.861026
+  type: 'test'
+  ...
+# Subtest: создатель показывает перестановку пар, путь JSON и публичный URL
+ok 180 - создатель показывает перестановку пар, путь JSON и публичный URL
+  ---
+  duration_ms: 1.055739
+  type: 'test'
+  ...
+# Subtest: создатель загружает локальный JSON без GitHub API и миграции schemaVersion 3
+ok 181 - создатель загружает локальный JSON без GitHub API и миграции schemaVersion 3
+  ---
+  duration_ms: 0.906635
+  type: 'test'
+  ...
+# Subtest: формат личных встреч показан только как «Из N партий»
+ok 182 - формат личных встреч показан только как «Из N партий»
+  ---
+  duration_ms: 0.621746
+  type: 'test'
+  ...
+# Subtest: все DOM-элементы приложения присутствуют в HTML
+ok 183 - все DOM-элементы приложения присутствуют в HTML
+  ---
+  duration_ms: 2.386071
+  type: 'test'
+  ...
+# Subtest: v0.11.0 сохраняет локальную интеграцию ttScore без backend
+ok 184 - v0.11.0 сохраняет локальную интеграцию ttScore без backend
+  ---
+  duration_ms: 0.77761
+  type: 'test'
+  ...
+# Subtest: reportUrl необязателен в UI и публичный рендер не создаёт пустую ссылку
+ok 185 - reportUrl необязателен в UI и публичный рендер не создаёт пустую ссылку
+  ---
+  duration_ms: 3.428791
+  type: 'test'
+  ...
+# Subtest: v0.11.0 не создаёт и не редактирует liveUrl в командном JSON
+ok 186 - v0.11.0 не создаёт и не редактирует liveUrl в командном JSON
+  ---
+  duration_ms: 1.100106
+  type: 'test'
+  ...
+# Subtest: v0.11.0 публикует Live-отчёт и Live-табло текущей встречи из верхнего уровня JSON
+ok 187 - v0.11.0 публикует Live-отчёт и Live-табло текущей встречи из верхнего уровня JSON
+  ---
+  duration_ms: 1.254608
+  type: 'test'
+  ...
+# Subtest: v0.11.0 использует Firebase как опубликованный источник и realtime для public view
+ok 188 - v0.11.0 использует Firebase как опубликованный источник и realtime для public view
+  ---
+  duration_ms: 0.657981
+  type: 'test'
+  ...
+# Subtest: v0.11.0 Firebase-editor подписан на внешние realtime updates и защищает локальный draft
+ok 189 - v0.11.0 Firebase-editor подписан на внешние realtime updates и защищает локальный draft
+  ---
+  duration_ms: 0.362745
+  type: 'test'
+  ...
+# Subtest: Firebase rules разделяют authorization и revision validation
+ok 190 - Firebase rules разделяют authorization и revision validation
+  ---
+  duration_ms: 0.221674
+  type: 'test'
+  ...
+# Subtest: v0.11.0 после запуска следующей ttScore-встречи не перезаписывает ручную корректировку pending-результата событиями live
+ok 191 - v0.11.0 после запуска следующей ttScore-встречи не перезаписывает ручную корректировку pending-результата событиями live
+  ---
+  duration_ms: 0.30594
+  type: 'test'
+  ...
+# Subtest: v0.11.0 автоматически публикует только подтверждённые ttScore-переходы и операционные Live-ссылки
+ok 192 - v0.11.0 автоматически публикует только подтверждённые ttScore-переходы и операционные Live-ссылки
+  ---
+  duration_ms: 0.557178
+  type: 'test'
+  ...
+# Subtest: v0.11.0 не записывает состояние ttScore и не изменяет его локальный протокол
+ok 193 - v0.11.0 не записывает состояние ttScore и не изменяет его локальный протокол
+  ---
+  duration_ms: 0.386863
+  type: 'test'
+  ...
+# Subtest: v0.11.0 даёт Firebase-editor действие запуска текущей пары в ttScore Team mode
+ok 194 - v0.11.0 даёт Firebase-editor действие запуска текущей пары в ttScore Team mode
+  ---
+  duration_ms: 0.419711
+  type: 'test'
+  ...
+# Subtest: deployable bundle сохраняет общий корень ttScore 0.5.0 и Team assets 0.11.0
+ok 195 - deployable bundle сохраняет общий корень ttScore 0.5.0 и Team assets 0.11.0
+  ---
+  duration_ms: 1.519397
+  type: 'test'
+  ...
+# Subtest: report backup использует только существующие Firebase Auth + RTDB, без Storage/Functions
+ok 196 - report backup использует только существующие Firebase Auth + RTDB, без Storage/Functions
+  ---
+  duration_ms: 0.225439
+  type: 'test'
+  ...
+# Subtest: RC2 stabilization: ttScore 0.5.0 runtime adapter умеет reconciliate editor-first finished result с backup reportUrl
+ok 197 - RC2 stabilization: ttScore 0.5.0 runtime adapter умеет reconciliate editor-first finished result с backup reportUrl
+  ---
+  duration_ms: 1.163301
+  type: 'test'
+  ...
+# Subtest: contract v1 выдаёт current assignment с датой, форматом и стабильными player id
+ok 198 - contract v1 выдаёт current assignment с датой, форматом и стабильными player id
+  ---
+  duration_ms: 6.449818
+  type: 'test'
+  ...
+# Subtest: binding фиксирует assignment revision и конкретный ttScore matchId
+ok 199 - binding фиксирует assignment revision и конкретный ttScore matchId
+  ---
+  duration_ms: 3.641711
+  type: 'test'
+  ...
+# Subtest: bound state fail-closed при другой дате, формате, паре или matchId
+ok 200 - bound state fail-closed при другой дате, формате, паре или matchId
+  ---
+  duration_ms: 1.624094
+  type: 'test'
+  ...
+# Subtest: операционная revision не меняется из-за updatedAt и Live-ссылок
+ok 201 - операционная revision не меняется из-за updatedAt и Live-ссылок
+  ---
+  duration_ms: 0.796329
+  type: 'test'
+  ...
+# Subtest: Live update меняет только operational links/updatedAt и сохраняет binding revision
+ok 202 - Live update меняет только operational links/updatedAt и сохраняет binding revision
+  ---
+  duration_ms: 2.546658
+  type: 'test'
+  ...
+# Subtest: Live update требует пару ссылок одновременно
+ok 203 - Live update требует пару ссылок одновременно
+  ---
+  duration_ms: 0.918773
+  type: 'test'
+  ...
+# Subtest: finish transition завершает binding match и назначает следующую planned-пару
+ok 204 - finish transition завершает binding match и назначает следующую planned-пару
+  ---
+  duration_ms: 1.564094
+  type: 'test'
+  ...
+# Subtest: finish transition публикует reportUrl атомарно с результатом
+ok 205 - finish transition публикует reportUrl атомарно с результатом
+  ---
+  duration_ms: 1.697184
+  type: 'test'
+  ...
+# Subtest: повторная finish-публикация после editor-first transition дописывает reportUrl без второго lifecycle transition
+ok 206 - повторная finish-публикация после editor-first transition дописывает reportUrl без второго lifecycle transition
+  ---
+  duration_ms: 2.957421
+  type: 'test'
+  ...
+# Subtest: reconciliation finished report остаётся fail-closed при другом результате или другой встрече
+ok 207 - reconciliation finished report остаётся fail-closed при другом результате или другой встрече
+  ---
+  duration_ms: 1.705547
+  type: 'test'
+  ...
+# Subtest: legacy transition без reportUrl сохраняет прежнюю необязательную семантику
+ok 208 - legacy transition без reportUrl сохраняет прежнюю необязательную семантику
+  ---
+  duration_ms: 1.582802
+  type: 'test'
+  ...
+# Subtest: finish transition отклоняет stale assignment после изменения planned-порядка
+ok 209 - finish transition отклоняет stale assignment после изменения planned-порядка
+  ---
+  duration_ms: 1.131002
+  type: 'test'
+  ...
+# Subtest: явный rebase pending binding после изменения planned-порядка сохраняет текущую встречу и принимает новую очередь
+ok 210 - явный rebase pending binding после изменения planned-порядка сохраняет текущую встречу и принимает новую очередь
+  ---
+  duration_ms: 1.89324
+  type: 'test'
+  ...
+# Subtest: изменение Team после rebase снова блокируется до следующего перечитывания
+ok 211 - изменение Team после rebase снова блокируется до следующего перечитывания
+  ---
+  duration_ms: 0.897461
+  type: 'test'
+  ...
+# Subtest: finish transition не допускает невалидный итог bestOf
+ok 212 - finish transition не допускает невалидный итог bestOf
+  ---
+  duration_ms: 0.725341
+  type: 'test'
+  ...
+# Subtest: повторная доставка распознаёт уже применённый тот же finished-result
+ok 213 - повторная доставка распознаёт уже применённый тот же finished-result
+  ---
+  duration_ms: 1.012504
+  type: 'test'
+  ...
+# Subtest: повторный raw transition старого binding остаётся fail-closed и не двигает следующую пару
+ok 214 - повторный raw transition старого binding остаётся fail-closed и не двигает следующую пару
+  ---
+  duration_ms: 1.108349
+  type: 'test'
+  ...
+# Subtest: report backup schema v1 валидирует self-describing record
+ok 215 - report backup schema v1 валидирует self-describing record
+  ---
+  duration_ms: 1.859689
+  type: 'test'
+  ...
+# Subtest: path identity должна совпадать с Team binding
+ok 216 - path identity должна совпадать с Team binding
+  ---
+  duration_ms: 1.305014
+  type: 'test'
+  ...
+# Subtest: idempotent equality игнорирует только savedAt
+ok 217 - idempotent equality игнорирует только savedAt
+  ---
+  duration_ms: 0.314333
+  type: 'test'
+  ...
+# Subtest: report backup отклоняет лишние поля и превышение size guard
+ok 218 - report backup отклоняет лишние поля и превышение size guard
+  ---
+  duration_ms: 0.39225
+  type: 'test'
+  ...
+# Subtest: currentMeeting отсутствует без ошибки
+ok 219 - currentMeeting отсутствует без ошибки
+  ---
+  duration_ms: 1.77387
+  type: 'test'
+  ...
+# Subtest: currentMeeting принимает существующий envelope ttScore 0.3.5
+ok 220 - currentMeeting принимает существующий envelope ttScore 0.3.5
+  ---
+  duration_ms: 0.538911
+  type: 'test'
+  ...
+# Subtest: несовместимые envelope, формат и дата отклоняются локально
+ok 221 - несовместимые envelope, формат и дата отклоняются локально
+  ---
+  duration_ms: 0.359321
+  type: 'test'
+  ...
+# Subtest: имена нормализуются только по пробелам и регистру
+ok 222 - имена нормализуются только по пробелам и регистру
+  ---
+  duration_ms: 0.45212
+  type: 'test'
+  ...
+# Subtest: сопоставление определяет прямое и обратное направление
+ok 223 - сопоставление определяет прямое и обратное направление
+  ---
+  duration_ms: 0.358329
+  type: 'test'
+  ...
+# Subtest: неоднозначные одинаковые имена и несовпадение не применяются
+ok 224 - неоднозначные одинаковые имена и несовпадение не применяются
+  ---
+  duration_ms: 0.192761
+  type: 'test'
+  ...
+# Subtest: счёт партий использует games и pendingGame
+ok 225 - счёт партий использует games и pendingGame
+  ---
+  duration_ms: 0.361133
+  type: 'test'
+  ...
+# Subtest: финальный результат определяется для форматов 3, 5 и 7
+ok 226 - финальный результат определяется для форматов 3, 5 и 7
+  ---
+  duration_ms: 0.39237
+  type: 'test'
+  ...
+# Subtest: незавершённая встреча не предлагает финальный результат
+ok 227 - незавершённая встреча не предлагает финальный результат
+  ---
+  duration_ms: 0.327924
+  type: 'test'
+  ...
+# Subtest: обратное сопоставление меняет стороны результата
+ok 228 - обратное сопоставление меняет стороны результата
+  ---
+  duration_ms: 0.43841
+  type: 'test'
+  ...
+# Subtest: livePublication проверяет matchId, дату, срок и версию
+ok 229 - livePublication проверяет matchId, дату, срок и версию
+  ---
+  duration_ms: 1.226636
+  type: 'test'
+  ...
+# Subtest: live report URL строится в существующем формате ttScore
+ok 230 - live report URL строится в существующем формате ttScore
+  ---
+  duration_ms: 0.414554
+  type: 'test'
+  ...
+# Subtest: live scoreboard URL использует тот же publisher и ключ, но page=scoreboard
+ok 231 - live scoreboard URL использует тот же publisher и ключ, но page=scoreboard
+  ---
+  duration_ms: 0.261413
+  type: 'test'
+  ...
+# Subtest: единое чтение возвращает result и операционные live URL только при однозначном совпадении
+ok 232 - единое чтение возвращает result и операционные live URL только при однозначном совпадении
+  ---
+  duration_ms: 0.662798
+  type: 'test'
+  ...
+# Subtest: ошибка доступа к storage деградирует в invalid без исключения наружу
+ok 233 - ошибка доступа к storage деградирует в invalid без исключения наружу
+  ---
+  duration_ms: 0.161904
+  type: 'test'
+  ...
+# Subtest: финал текущей ttScore-встречи сохраняется в pendingFinishedMatch с датой и минимальным результатом
+ok 234 - финал текущей ttScore-встречи сохраняется в pendingFinishedMatch с датой и минимальным результатом
+  ---
+  duration_ms: 0.983791
+  type: 'test'
+  ...
+# Subtest: Undo той же ttScore-встречи автоматически удаляет pendingFinishedMatch
+ok 235 - Undo той же ttScore-встречи автоматически удаляет pendingFinishedMatch
+  ---
+  duration_ms: 0.423197
+  type: 'test'
+  ...
+# Subtest: новый matchId сохраняет предыдущий pending и распознаёт только следующую planned-пару и её live
+ok 236 - новый matchId сохраняет предыдущий pending и распознаёт только следующую planned-пару и её live
+  ---
+  duration_ms: 0.43153
+  type: 'test'
+  ...
+# Subtest: неправильная следующая пара не принимается как новая current
+ok 237 - неправильная следующая пара не принимается как новая current
+  ---
+  duration_ms: 0.327583
+  type: 'test'
+  ...
+# Subtest: reconciliation удаляет pending, когда опубликованный JSON уже содержит тот же finished-результат
+ok 238 - reconciliation удаляет pending, когда опубликованный JSON уже содержит тот же finished-результат
+  ---
+  duration_ms: 0.168364
+  type: 'test'
+  ...
+# Subtest: ttScore-встреча другой даты не попадает в pending
+ok 239 - ttScore-встреча другой даты не попадает в pending
+  ---
+  duration_ms: 0.185859
+  type: 'test'
+  ...
+# Subtest: финальный oldValue распознаётся независимо от текущего contents localStorage
+ok 240 - финальный oldValue распознаётся независимо от текущего contents localStorage
+  ---
+  duration_ms: 0.19965
+  type: 'test'
+  ...
+# Subtest: удаление currentMeeting подтверждает finished только если oldValue был финалом ожидаемой пары
+ok 241 - удаление currentMeeting подтверждает finished только если oldValue был финалом ожидаемой пары
+  ---
+  duration_ms: 0.376647
+  type: 'test'
+  ...
+# Subtest: прямой storage-переход финал → точная следующая пара тоже подтверждает завершение
+ok 242 - прямой storage-переход финал → точная следующая пара тоже подтверждает завершение
+  ---
+  duration_ms: 0.483498
+  type: 'test'
+  ...
+# Subtest: автопереход сохраняет окно Undo до подтверждённого выхода или точной следующей пары
+ok 243 - автопереход сохраняет окно Undo до подтверждённого выхода или точной следующей пары
+  ---
+  duration_ms: 0.206181
+  type: 'test'
+  ...
+# Subtest: склонение количества личных встреч учитывает русские окончания
+ok 244 - склонение количества личных встреч учитывает русские окончания
+  ---
+  duration_ms: 0.699433
+  type: 'test'
+  ...
+# Subtest: активный статус показывает номер текущей встречи и грамматический порог побед
+ok 245 - активный статус показывает номер текущей встречи и грамматический порог побед
+  ---
+  duration_ms: 0.17933
+  type: 'test'
+  ...
+# Subtest: статус без current сохраняет порог побед
+ok 246 - статус без current сохраняет порог побед
+  ---
+  duration_ms: 0.091167
+  type: 'test'
+  ...
+# Subtest: простое выделение принимает только ID запланированной встречи
+ok 247 - простое выделение принимает только ID запланированной встречи
+  ---
+  duration_ms: 0.588566
+  type: 'test'
+  ...
+# Subtest: после перемещения выделяется стабильный ID перемещённой встречи
+ok 248 - после перемещения выделяется стабильный ID перемещённой встречи
+  ---
+  duration_ms: 0.180952
+  type: 'test'
+  ...
+1..248
+# tests 248
+# suites 0
+# pass 248
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 442.510295

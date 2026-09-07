@@ -1,0 +1,14 @@
+{
+  "candidate": "ttScore 0.5.0 + ttscore_team 0.11.0 RC2",
+  "reported_defect": "Результат сохранён локально, Team не изменён: Team assignment изменился; запись заблокирована. Перечитать Team не сработало.",
+  "root_cause": "editor-first duplicate finish can advance assignment before direct ttScore publication with canonical reportUrl",
+  "fix": "same-binding same-result finished reconciliation attaches reportUrl without second lifecycle transition",
+  "node_tests": { "pass": 248, "total": 248 },
+  "syntax": "PASS",
+  "safety": [
+    "different result remains blocked",
+    "different individual match remains blocked",
+    "operational revision unchanged by report-only reconciliation",
+    "Firebase transaction/CAS remains in force"
+  ]
+}
