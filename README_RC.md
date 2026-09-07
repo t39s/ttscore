@@ -1,33 +1,41 @@
-# ttScore + ttScore Team integration release candidate
+# ttScore 0.5.0 + ttscore_team 0.10.0 — RC1
 
-## Pair
+Baseline: accepted integration RC9 (`ttScore 0.4.0 + ttscore_team 0.9.0`).
 
-- `ttScore v0.4.0` — release candidate; accepted baseline remains v0.3.5 until owner acceptance.
-- `ttscore_team v0.9.0` — release candidate; accepted baseline remains v0.8.12 until owner acceptance.
+## Product change
 
-## Deployable layout
+RC1 adds automatic cloud backup and published personal-match reports for Team mode while preserving existing local JSON/HTML export.
 
-Keep this relative layout unchanged on the same static origin:
+Flow:
 
-- `/ttScore_0.4.0.html`
-- `/team/ttscore_team_0.9.0.html`
-- `/team/assets/0.9.0/*`
+1. personal match is completed in ttScore;
+2. before full local state is cleared, canonical completed JSON is created and SHA-256 checked;
+3. immutable backup is committed to the existing `ttscore-list` Realtime Database under `/individualMatchReportsV1/<teamMatchId>/<recordId>`;
+4. only after confirmed backup, ttScore may reset local full match state;
+5. the normal Team transition publishes result and `reportUrl` atomically;
+6. `?page=report&source=team&teamMatch=...&record=...` reads the backup and renders the normal HTML report;
+7. Team report viewer can again save/share the files locally.
 
-The Team editor action resolves to `../ttScore_0.4.0.html?teamMatch=<id>`. ttScore Team mode lazy-loads `./team/assets/0.9.0/ttscore-team-adapter.mjs`.
+No Firebase Storage, Functions, Hosting or separate database is introduced.
 
-No Node.js runtime/server is required by the products. Node is used only for the included automated test suite.
+## Failure semantics
 
-## Reproducible verification after extraction
+- backup failure: new match is not started; full completed local state remains; Team is not advanced;
+- retry after restored connectivity is idempotent;
+- if backup exists but acknowledgement was lost, the same payload is reconciled instead of duplicated;
+- different data at the same backup path is fail-closed;
+- after confirmed backup, existing RC9 pending-release/CAS/rebase semantics remain in force.
 
-From the extracted bundle root:
+## Verification
 
-- `node --test tests/ttscore_team/*.test.mjs` → 201/201 PASS in the final cycle run.
-- `node --test tests/ttscore/*.test.mjs` → 10/10 PASS.
-- Browser harnesses are in `evidence/harness/`; they use Playwright/Chromium only as development evidence and are not product dependencies.
-- `sha256sum -c SHA256SUMS.md` verifies artifact integrity.
+- ttscore_team Node: 226/226 PASS
+- ttScore Node: 13/13 PASS
+- normal Team browser E2E: 19/19 PASS
+- pending-rebase browser: 10/10 PASS
+- report backup/retry/viewer browser: 15/15 PASS
+- autonomous ttScore browser: 6/6 PASS
+- realtime editor: PASS
+- external revision guard: PASS
+- same-client write race: PASS
 
-The accepted v0.3.5 HTML included under `evidence/baselines/` is evidence-only and is not a deploy target.
-
-## Acceptance
-
-The engineering cycle decision is `STOP`; this is not automatic owner acceptance. Use `docs/OWNER_ACCEPTANCE_CHECKLIST.md` with the real Firebase editor account before promoting these release candidates to accepted baselines.
+See `docs/REPORT_BACKUP_AND_PUBLISHED_REPORT.md`, `docs/GENERAL_REVIEW.md`, `docs/OWNER_ACCEPTANCE_CHECKLIST.md`, and `docs/NEXT_CYCLE_BRIEF.md`.

@@ -1,14 +1,38 @@
-# Owner acceptance checklist — ttScore 0.4.0 + ttscore_team 0.9.0
+# Owner acceptance — ttScore 0.5.0 + ttscore_team 0.10.0 RC1
 
-Use the real deployed Firebase/editor account and a disposable Team match.
+## Deployment
 
-1. Open Team `mode=edit` for a Firebase match and press `Открыть в ttScore`. Confirm `ttScore_0.4.0.html?teamMatch=<id>` opens.
-2. Confirm date, current pair and best-of are prefilled and locked; server, side and handicap remain selectable.
-3. Start the individual match and enable Live. Confirm Team receives current Live scoreboard/report links.
-4. Finish the match. Before leaving the final result, use Undo once and confirm Team has not moved current → finished. Re-finish the match.
-5. Choose `Новая встреча` and confirm exit. Verify exactly the completed individual match becomes `finished`, score is correct, and the next planned match becomes `current`.
-6. Confirm ttScore setup is automatically prefilled with the next pair.
-7. Reload/network-interrupt around final delivery once; verify same-result retry reconciles without a second schedule transition.
-8. Separately open ttScore without `teamMatch`; confirm ordinary autonomous setup/scoring still works.
+1. Publish RC1 `firebase-database-rules.json` to Firebase project `ttscore-list`.
+2. Deploy the complete versioned static package.
+3. Hard reload open ttScore/ttscore_team pages.
 
-Acceptance decision remains with the product owner.
+## Required happy path
+
+1. Open a Team current personal match in `ttScore_0.5.0`.
+2. Complete the personal match.
+3. Choose `Новая встреча` → confirm.
+4. Verify Team score advances and next personal match becomes current.
+5. In RTDB verify one record exists under `/individualMatchReportsV1/<teamMatchId>/<recordId>`.
+6. Verify the finished personal match in ttscore_team has an `Отчёт` link.
+7. Open it and verify players, final score, games and rally report.
+8. From the cloud report verify local file export remains available.
+
+## Required temporary-network failure path
+
+1. Complete a personal match.
+2. Make Firebase/network unavailable before confirming new match.
+3. Confirm `Новая встреча`.
+4. Expected: explicit backup error; Team does not advance; completed match remains on the phone with full rally data.
+5. Restore connectivity within the operational 2–5 minute outage window.
+6. Repeat `Новая встреча` confirmation.
+7. Expected: backup succeeds, Team advances, report link works, no data re-entry is required.
+
+## Regression checks
+
+- normal scoring and Undo;
+- Live after temporary outage;
+- planned-order stale conflict + RC9 `Перечитать Team` recovery;
+- ttscore_team realtime editor update;
+- autonomous ttScore mode.
+
+RC1 becomes baseline only after explicit owner acceptance.

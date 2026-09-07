@@ -1,15 +1,29 @@
-# Next Cycle Brief
+# Next Cycle Brief — report backup RC1
 
-Current state: `ttScore 0.4.0` and `ttscore_team 0.9.0` release candidates implement direct Team integration through a shared operational contract; open Team editor is no longer required during scoring.
+## Current state
 
-Evidence: Team automated tests 201/201 PASS; ttScore checks 10/10 PASS; scoring/Undo baseline integrity; Team browser E2E PASS; autonomous browser smoke PASS; syntax PASS.
+Implementation candidate: `ttScore 0.5.0 + ttscore_team 0.10.0 RC1`, based on accepted RC9.
 
-Known limitations: authenticated production Firebase E2E was not available in the execution environment; same editor credential retains administrative rights under existing Rules.
+## Evidence
 
-Gap: no engineering gap remains inside the agreed goal. Owner/device acceptance in real Firebase remains release acceptance evidence, not a new development target.
+Team Node 226/226; ttScore Node 13/13; Team browser 19/19; pending-rebase 10/10; report backup/retry/viewer 15/15; autonomous 6/6; realtime, external revision guard and same-client race PASS.
 
-Recommended next target: after owner testing, either accept both release candidates as baselines or report any observed defect. Do not expand integration architecture without a new product goal.
+## Known limitations
 
-Decision: STOP.
+No credentialed production Firebase E2E in build environment. Full offline continuity across multiple personal matches is intentionally out of scope; product assumes normal internet availability with recoverable 2–5 minute interruptions.
 
-Reason: agreed end-to-end behavior is implemented and supported by available evidence; remaining work without new observations would be improvement beyond the current goal.
+## Gap
+
+Real Firebase Rules + RTDB + published URL owner acceptance remains required.
+
+## Recommended next target
+
+Production acceptance of RC1 using happy path and temporary-network failure path. Do not start offline-continuity work.
+
+## Decision
+
+STABILIZE.
+
+## Reason
+
+Implementation and review criteria are met in the available environment; remaining uncertainty is production integration evidence, not an unresolved design/code blocker.

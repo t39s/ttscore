@@ -17,7 +17,7 @@ Decision: **STOP** — согласованная цель интеграцио�
 - Добавлено идемпотентное reconciliation: повторная доставка уже применённого того же результата считается успешной; иной результат остаётся conflict/fail-closed.
 - Локальный protocol namespace `ttScore:0.3.5:*` сохранён, поэтому обновление до `ttScore 0.4.0` не скрывает незавершённую встречу и не ломает резервный localStorage/BroadcastChannel bridge.
 - `schemaVersion: 4`, Firebase Rules, спортивная модель и статический hosting сохранены; нового server-side runtime/build dependency нет.
-- Evidence: `ttscore_team` **201/201 PASS**, `ttScore 0.4.0` **10/10 PASS**, Team DOM E2E PASS, autonomous browser smoke PASS.
+- Evidence: `ttscore_team` **205/205 PASS**, `ttScore 0.4.0` **10/10 PASS**, Team DOM E2E PASS, autonomous browser smoke PASS.
 - Ограничение evidence: credentialed production Firebase E2E в среде исполнителя не выполнялся из-за отсутствия editor credentials; версия остаётся release candidate до отдельного принятия владельцем.
 
 ## v0.8.12 — 2026-08-31
@@ -924,3 +924,55 @@ SHA-256: `d62b07752f4efb95f489b45ba56da4a7f1b5070437644a718caf3c45bffab47e`
 
 Артефакт: `ttscore_team_static_v0.1.zip`  
 SHA-256: `1831bcb8780ca23c14f288b4825ba63fbe840b7cb4fc86c526bfd4b7767d173b`
+
+### RC2 correction — Firebase transaction initial null
+- Исправлен acceptance-дефект direct `ttScore → Firebase` publication: начальный `null` callback `runTransaction()` больше не трактуется как удалённая командная встреча.
+- При фактическом отсутствии узла fail-closed ошибка сохраняется.
+- Добавлена regression-проверка; полный suite после RC3: **203/203 PASS**.
+
+
+### RC3 correction — realtime Firebase editor
+- Исправлена регрессия RC2: открытый `mode=edit&match=<id>` теперь получает внешние Team updates через Firebase `onValue()` без перезагрузки страницы.
+- При чистом editor новое состояние принимается автоматически; командный счёт и текущая пара перерисовываются.
+- При несохранённом ручном draft внешнее состояние не перетирает ввод и показывается явное предупреждение; после ручной перезагрузки источника актуальный Firebase state применяется.
+- Runtime diff относительно RC2: только `team/assets/0.9.0/app.mjs`.
+- Regression evidence: **203/203 PASS** + отдельный Chromium realtime-editor scenario PASS.
+
+
+### RC4 correction — safe existing-node Firebase transaction retry
+
+- Owner test exposed `Командная встреча больше не существует в Firebase.` when publishing a manually reordered planned schedule.
+- Removed the RC2 behavior that returned `null` from a provisional transaction callback.
+- Existing-node transactions now confirm node existence, abort provisional-null attempts without a write, then re-read and retry.
+- Real node deletion stays fail-closed; revision checks remain inside `runTransaction()`.
+- RC3 realtime editor auto-update remains unchanged and was reverified.
+- Regression evidence: **205/205 PASS** + Team E2E **19/19 PASS** + realtime-editor browser scenario PASS.
+
+### RC5 stabilization — server-enforced Firebase revision CAS
+
+- Existing-node `runTransaction()` removed; the provisional-null defect class is removed from update/publish paths.
+- Added transport-only `_writeRevision` to Firebase Team nodes; domain `schemaVersion: 4` is unchanged and transport metadata is stripped before model/revision logic.
+- Existing-node writes now use SDK `get()` + `set()`, with atomic stale-write rejection enforced by Realtime Database Security Rules (`new revision = server revision + 1`).
+- Legacy Team nodes without transport revision migrate on first successful RC5 write to `_writeRevision: 1`.
+- Create remains transaction-based create-if-absent.
+- RC3 realtime editor behavior is unchanged; a new browser regression also covers optimistic local `set()` events and server rollback on rejected concurrent writes.
+- REST ETag CAS prototype was rejected from RC5 because browser visibility of the ETag response header was not sufficiently evidenced for this static-client architecture.
+- Regression evidence: Team **207/207**, ttScore **10/10**, Team E2E **19/19**, realtime editor PASS, revision-guard browser PASS, autonomous smoke **6/6**.
+
+
+### RC6 correction — Firebase Rules authorization/validation split
+
+- Owner acceptance rejected RC5: legal Team writes returned `permission-denied`, including creation of a new Team match.
+- The `/editors/<uid> === true` authorization predicate is unchanged from accepted v0.8.12/RC4 and is retained.
+- Removed `_writeRevision` state-transition logic from parent `.write`.
+- Parent `.write` now handles only authenticated allowlisted write authorization plus non-delete protection.
+- `_writeRevision` monotonic transition is validated at the `_writeRevision` child: missing→1 or N→N+1.
+- Runtime JavaScript is byte-identical to RC5; production functional diff is `firebase-database-rules.json` only.
+- Regression evidence: Team **211/211**, ttScore **10/10**, Team E2E **19/19**, realtime editor PASS, revision-guard browser PASS, autonomous smoke **6/6**.
+
+
+## RC9 stabilization
+
+- Added explicit safe pending-result rebase after `Перечитать Team` when only the operational revision changed while the same individual match remains current.
+- Preserved first stale-write rejection and second-change rejection.
+- Runtime diff limited to `ttScore_0.4.0.html`, `team-integration-contract.mjs`, and `ttscore-team-adapter.mjs`; Rules/`firebase-source.mjs` unchanged.

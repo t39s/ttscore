@@ -1,61 +1,55 @@
-# General review — ttScore 0.4.0 + ttscore_team 0.9.0
+# General review — ttScore 0.5.0 + ttscore_team 0.10.0 RC1
 
 ## Review stance
 
-Ревью пыталось опровергнуть выполнение цели: корректность assignment/binding, Undo boundary, concurrency, retry, regression scoring, автономность и Firebase security boundary.
+Review attempted to disprove data durability, idempotency, report identity, Team atomicity, CAS compatibility, security isolation, viewer integrity, local-export preservation, and autonomous scoring regression.
 
 ## Findings resolved
 
-### HIGH — non-atomic editor publication
-Baseline `get → revision check → set` оставлял race window. Исправлено: общий `transactFirebaseTeamMatch()` использует `runTransaction()` и проверяет revision/contract на фактическом transaction snapshot.
+### HIGH — full state could be lost if backup happened after reset
+Resolved by placing confirmed cloud backup before `resetToSetup()` clears rallies/full state.
 
-### HIGH — possible loss of v0.3.5 local state on version namespace change
-Первый кандидат сменил `ttScore:0.3.5:*` на `0.4.0:*`. Это могло скрыть незавершённую встречу после обновления. Исправлено: local protocol namespace сохранён `0.3.5`, так как schema не менялась.
+### HIGH — separate post-transition reportUrl write would add a race
+Resolved by carrying `reportUrl` in the existing pending release and applying it atomically with result/status transition.
 
-### HIGH — retry after already committed transition
-Если другой writer или предыдущая попытка уже применили тот же result, старый binding становился stale и pending мог застрять. Исправлено: `finishedBindingApplied()` reconciles exact same result; different result остаётся fail-closed.
+### HIGH — ambiguous network acknowledgement could create duplicate/conflict
+Resolved by create-only server rule plus idempotent reconciliation. Equality excludes only `savedAt`; canonical JSON/hash/identity must match exactly.
 
-### HIGH — Team launch URL did not target the paired versioned ttScore artifact
-Финальный release review обнаружил, что первый кандидат строил Team launch от корня сайта (`../`). Исторический ttScore публикуется версионными HTML-файлами, поэтому root URL не является гарантированным entry point. Исправлено: общий `ttScoreBaseUrl()` явно указывает `../ttScore_0.4.0.html`; этот же base используется launch action и legacy Live URL generation. Добавлена structural regression assertion.
+### MEDIUM — embedding backup under teamMatches would enlarge operational CAS/realtime payloads
+Resolved by separate versioned RTDB branch `individualMatchReportsV1` in the same Firebase database.
 
-### MEDIUM — duplicated assignment/binding comparison in ttScore
-Первый кандидат дублировал часть contract logic. Исправлено: ttScore делегирует `assignmentMatchesTeamBinding()` adapter/contract.
+### MEDIUM — backup existed but recovery UI only rendered HTML
+Resolved by exposing the existing local file export control in Team remote-report mode.
 
-### MEDIUM — Team launch action in local editor
-Локальный JSON editor не является Firebase operational source. Исправлено: action запуска Team mode скрыт вне Firebase editor.
+## Regression boundaries
 
-### MEDIUM — release-candidate tests were not relocatable after packaging
-Первый общий RC переместил Team tests в `tests/ttscore_team/`, но сохранил их старые относительные imports; ttScore regression-test также не содержал baseline v0.3.5 внутри архива. Исправлено: относительные пути адаптированы к RC layout, baseline помещён в `evidence/baselines/`, browser harness сделан относительным к собственному каталогу. Полный suite повторно запущен из распакованного RC.
+Scoring/Undo critical functions remain byte-identical to the accepted scoring baseline. RC9 CAS, pending-release rebase, realtime editor and same-client write serialization remain active.
 
-## Regression
+Runtime delta from RC9 is concentrated in:
 
-- 9 критических scoring/Undo функций ttScore byte-identical с v0.3.5.
-- localStorage/BroadcastChannel protocol сохранён.
-- legacy Team editor bridge сохранён.
-- Team schemaVersion остаётся 4.
+- `ttScore_0.5.0.html`;
+- `team/assets/0.10.0/firebase-source.mjs`;
+- `team/assets/0.10.0/team-integration-contract.mjs`;
+- `team/assets/0.10.0/ttscore-team-adapter.mjs`;
+- version-routing references in Team HTML/app;
+- Firebase Database Rules for the new report branch.
 
-## Concurrency
+## Evidence
 
-Operational revision включает дату, bestOf, player identities/names, порядок/status/result всех individual matches. Не включает Live links, reportUrl и updatedAt. Это позволяет безопасно сохранять независимые link/admin изменения из актуального transaction snapshot, но блокирует изменение расписания/assignment.
+- Team Node 226/226
+- ttScore Node 13/13
+- Team E2E 19/19
+- pending rebase 10/10
+- report backup/retry/viewer 15/15
+- autonomous 6/6
+- realtime editor PASS
+- external CAS conflict PASS
+- same-client race PASS
 
-## Security
+No credentialed production Firebase E2E was executed in the build environment. Owner acceptance must validate the published Rules and actual RTDB write/read path.
 
-`firebase-database-rules.json` сохраняет allowlisted editor UID. Client contract не рассматривается как защита от компрометированного admin credential; он защищает штатный automatic writer от stale/wrong operations. Для технического ограничения одного credential только operational-полями потребовалась бы отдельная role/custom claim/credential, что не входит в текущую цель.
+## Decision
 
-Classification: **ACCEPTED LIMITATION**, не blocker acceptance criteria.
+BLOCKER 0; HIGH open 0; MEDIUM open 0.
 
-## Environment limitations
-
-Обычный localhost/file navigation Chromium блокируется policy среды. Это не product defect. Для browser evidence использован DevTools `Page.setDocumentContent` в чистом about:blank context; применялся реальный ttScore DOM/JS, а mock заменял только Team Firebase adapter boundary. Отдельно выполнен autonomous browser smoke.
-
-Реальный authenticated Firebase write не выполнялся из-за отсутствия editor credentials. Claims о production Firebase E2E не делаются.
-
-## Final review result
-
-BLOCKER: 0  
-HIGH open: 0  
-MEDIUM open: 0  
-LOW: 0 существенных  
-ACCEPTED LIMITATION: 2 (credential trust boundary; no live credentialed Firebase E2E in execution environment)
-
-Goal acceptance criteria имеют достаточное альтернативное evidence. Решение: `STOP`.
+Decision: STABILIZE — issue RC1 for owner production acceptance.
