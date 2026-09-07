@@ -321,6 +321,9 @@
       position: relative;
       z-index: 2;
     }
+    body.team-sound-off #undoButton {
+      grid-column: 2 / span 2;
+    }
     .toolbar button {
       min-height: var(--game-badge-height);
       padding: 10px 12px;
@@ -2338,7 +2341,7 @@
       history: [],
       status: "setup",
       sideChangeAcknowledgedForGame: false,
-      speechEnabled: true,
+      speechEnabled: !IS_TEAM_MODE,
       speechRate: 1.05
     });
 
@@ -2350,6 +2353,7 @@
       : (IS_IMPORT_PICKER ? null : loadStoredMeeting());
     let pendingRestoreState = PAGE_CAPABILITIES.writesLocalMeeting && storedMeeting?.needsConfirmation ? storedMeeting.state : null;
     let state = storedMeeting && (IS_REPORT_PAGE || !storedMeeting.needsConfirmation) ? storedMeeting.state : defaultState();
+    if (IS_TEAM_MODE) state.speechEnabled = false;
     let importedCanonicalSource = importedSessionResult?.source || null;
     let importLoadError = importedSessionResult?.error || "";
     let protectedReportLoading = IS_PROTECTED_REPORT;
@@ -4670,6 +4674,7 @@
     function restoreSavedMeeting() {
       if (!pendingRestoreState) return;
       state = pendingRestoreState;
+      if (IS_TEAM_MODE) state.speechEnabled = false;
       lastMatchId = state.matchId;
       pendingRestoreState = null;
       historyStack = [];
@@ -7152,6 +7157,9 @@ ${buildStandaloneReportRoot().outerHTML}
       );
       els.speechButton.setAttribute("aria-pressed", state.speechEnabled ? "true" : "false");
       els.speechButton.classList.toggle("sound-off", !state.speechEnabled);
+      const teamSoundOff = IS_TEAM_MODE && !state.speechEnabled;
+      document.body.classList.toggle("team-sound-off", teamSoundOff);
+      els.speechRepeatButton.hidden = teamSoundOff;
       els.speechButton.disabled = !speechAvailable;
       els.speechRepeatButton.disabled = !speechAvailable || !state.speechEnabled;
       els.speechRepeatButton.setAttribute(

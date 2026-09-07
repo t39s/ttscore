@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const baseline = readFileSync(new URL('../../evidence/baselines/ttScore_0.3.5_baseline.html', import.meta.url), 'utf8');
 const source = readFileSync(new URL('../../ttScore_0.5.0.html', import.meta.url), 'utf8');
@@ -123,4 +124,74 @@ test('Team subscriptions освобождаются, reconnect повторяе�
   assert.match(source, /attemptPendingTeamRelease\(\)/);
   assert.match(source, /requestTeamLiveSync\(\)/);
   assert.match(source, /reloadTeamContext\(\)/);
+});
+
+
+test('Team defaultState задаёт звук off, standalone сохраняет прежний default on', () => {
+  assert.match(source, /speechEnabled: !IS_TEAM_MODE,/);
+});
+
+test('Team mode при повторном открытии не восстанавливает сохранённый sound on', () => {
+  assert.match(source, /let state = storedMeeting[^;]+;\s*if \(IS_TEAM_MODE\) state\.speechEnabled = false;/);
+});
+
+test('Team mode при подтверждённом восстановлении старой встречи также принудительно выключает звук', () => {
+  const block = functionBlock(source, 'restoreSavedMeeting');
+  assert.match(block, /state = pendingRestoreState;\s*if \(IS_TEAM_MODE\) state\.speechEnabled = false;/);
+  assert.ok(block.indexOf('state = pendingRestoreState;') < block.indexOf('render();'));
+});
+
+test('restoreSavedMeeting исполняемо сбрасывает sound on только в Team mode', () => {
+  const block = functionBlock(source, 'restoreSavedMeeting');
+  const executeRestore = IS_TEAM_MODE => {
+    const context = {
+      IS_TEAM_MODE,
+      pendingRestoreState: { matchId: 'saved-match', speechEnabled: true },
+      state: null,
+      lastMatchId: null,
+      historyStack: ['old'],
+      teamAssignment: null,
+      closeModal() {},
+      render() {},
+      handleTeamAssignment() {},
+      livePublicationMatchesCurrentMeeting() { return false; },
+      resumeLivePublication() {},
+      result: null
+    };
+    runInNewContext(`${block}\nrestoreSavedMeeting();\nresult = { speechEnabled: state.speechEnabled, pendingRestoreState, lastMatchId, historyLength: historyStack.length };`, context);
+    return context.result;
+  };
+
+  const teamResult = executeRestore(true);
+  assert.equal(teamResult.speechEnabled, false);
+  assert.equal(teamResult.pendingRestoreState, null);
+  assert.equal(teamResult.lastMatchId, 'saved-match');
+  assert.equal(teamResult.historyLength, 0);
+
+  const standaloneResult = executeRestore(false);
+  assert.equal(standaloneResult.speechEnabled, true);
+  assert.equal(standaloneResult.pendingRestoreState, null);
+  assert.equal(standaloneResult.lastMatchId, 'saved-match');
+  assert.equal(standaloneResult.historyLength, 0);
+});
+
+test('startMatch создаёт новое состояние через mode-aware defaultState без отдельного setup preference', () => {
+  const block = functionBlock(source, 'startMatch');
+  assert.match(block, /state = defaultState\(\);/);
+  assert.doesNotMatch(block, /currentSpeechEnabled|speechEnabled\s*=\s*willEnable|setupSpeech/);
+});
+
+test('Team sound off скрывает Repeat и расширяет Undo на две исходные центральные колонки', () => {
+  assert.match(source, /body\.team-sound-off #undoButton \{\s*grid-column: 2 \/ span 2;\s*\}/);
+  assert.match(source, /const teamSoundOff = IS_TEAM_MODE && !state\.speechEnabled;/);
+  assert.match(source, /document\.body\.classList\.toggle\("team-sound-off", teamSoundOff\);/);
+  assert.match(source, /els\.speechRepeatButton\.hidden = teamSoundOff;/);
+});
+
+test('ручное включение/выключение звука во время матча остаётся штатным и вызывает render', () => {
+  const block = functionBlock(source, 'toggleSpeech');
+  assert.match(block, /const willEnable = !state\.speechEnabled;/);
+  assert.match(block, /state\.speechEnabled = willEnable;/);
+  assert.match(block, /render\(\);/);
+  assert.doesNotMatch(block, /IS_TEAM_MODE/);
 });

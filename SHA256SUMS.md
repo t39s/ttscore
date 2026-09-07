@@ -1,137 +1,148 @@
-# SHA256SUMS
+# SHA-256 checksums
 
-```text
-0d02b35de336ee553e80093c51db52e344740684193cc0705858fe352db397da  ./README_RC.md
-b021c283aa85e57780162d6433db9d073c509d0317b6bb8f6db80059227bdffc  ./docs/ARCHITECTURE_RESEARCH_INPUT.md
-6a9df5cec9d531b1c0c58fa607d2450c20c46091b6ad5df8a7ef48e4dc59c5cd  ./docs/CYCLE_PLAN.md
-27f3a9dd12487af2ee41199c4308e4ee08b41e3c8145ac2435c96cb01eefa2f3  ./docs/CYCLE_RESEARCH.md
-8dec466c105774bdb6d1e1d21d8511c79a6cfd30c90e6f5bce1cf304bcbc1167  ./docs/DECISION_LOG.md
-5e54180eca32b76a6744ee9fc6978ecbf7b64bf0e051e8f640339fc2c0407103  ./docs/EVIDENCE.md
-8ed668e90241f6b6e4b3906280cb641a0f646f8469b705907737fea8c70ade16  ./docs/EVIDENCE_INHERITED_v0.10.0.md
-f63437104deeeed2d41f2dd4a810f3f074bc53e81410014d8e23a85c7d462b9c  ./docs/FINAL_CYCLE_REPORT.md
-b0b9920b41bf1c139a2a0a1bba343f6ae10e4c84ba37433bfb453189a1a8c861  ./docs/GENERAL_REVIEW.md
-c5a7165a94fa46062a3b378b999f8348ae23693dbad99c48f6e9a7df1188a302  ./docs/NEXT_CYCLE_BRIEF.md
-cd60f95a4e1a6dcaeafb17bcdd5924fff272e7ee3b2c579d0cb225a1fe5811ce  ./docs/OWNER_ACCEPTANCE_CHECKLIST.md
-0ab7e55dc046d82e698f53fc88fbafdb5f4876b29df14712d0947224641400db  ./docs/PRODUCT_GOAL.md
-739017246c0b428ae2fa071f2b3f278304d8cc65d5fce37cc9898885baa6972b  ./docs/RC2_DUPLICATE_FINISH_RECONCILIATION.md
-3e951a6ec37d82e65b48f540609eba8fff6501865b82733c01ea8017a6fea92e  ./docs/RC3_REALTIME_EDITOR_DEFECT.md
-90ccacc2d48d737a645b3aaaf329fd149d0060a386984a9d17a2f76e8669ecca  ./docs/RC3_REPORT_URL_FAIL_CLOSED_REVIEW_FIX.md
-d2faefac31bd59112b8f1347faa1bf6c7ed4df1a8127672bcc1b01878ffcfb14  ./docs/RC4_FIREBASE_EDITOR_PUBLISH_DEFECT.md
-4158dd0acfec01912fa6b23e048a18d816c1011fd96ac36646d656c48388a498  ./docs/RC5_TRANSPORT_DECISION_ADDENDUM.md
-20bb1985209093daa1137aea0dc8a70e8e15994bb7913994f911a751771ac535  ./docs/RC6_FIREBASE_RULES_DEFECT.md
-693774eca01a1fa8291cf2eaccc3056b1bde4484e4331c72acb562510d85d148  ./docs/RC8_FALSE_REVISION_CONFLICT.md
-08d5bc7bac1df813824deb2c19180838aa10898ac460f13f30ae3bb8336bc510  ./docs/RC9_PENDING_RELEASE_REBASE.md
-ba514272883ef67221d045477e33f4e56679df69d394651c46b7539e64849082  ./docs/RELEASE_NOTES.md
-94667e6a7ba25d754eb3d5ddd059f300845658dcc4db28fecab88fc00c6cfc7f  ./docs/RELEASE_NOTES_INHERITED_v0.10.0.md
-a29800c96aa3a7ce5bd69344820127be9a8af9aed9f097f9db14434d67052e17  ./docs/REPORT_BACKUP_AND_PUBLISHED_REPORT.md
-aa3e337701d17a5b283fa9f95ab635c02fb2d6e0087d00afe0e56c3e80d25467  ./docs/TEAM_LEVEL_UNDO.md
-c403a6d89ff4c029fa01876539e99505b608fc2e0612ea31747c87135a408303  ./docs/TTSCORE_TEAM_CHANGELOG.md
-f71db9531d98f590e363d0b556cf27043caca946aadfa28f8a58695f66dbf816  ./docs/TTSCORE_TEAM_README_v0.10.0.md
-3ea66ba0323cb257a0853f603ac92f668d96d2eed3df069624e1a56b3e8fc7b9  ./docs/TTSCORE_TEAM_README_v0.11.0.md
-fc0bfadfc749cebcc8f029cb6246b529598262ec627af17b6621f00fb08309d4  ./docs/VERSIONS.md
-5421978a14ba640d2f6b500fca62a8fa4894be1514900903abed581b465567e7  ./evidence/baselines/ttScore_0.3.5_baseline.html
-37bdd1ab9df798c701940f77da7cdc70f95adc7da1a5b4304e24fd5e0e3c8bfa  ./evidence/browser-autonomous-result.json
-c4afebc8ea030930b9c198c0341bc88090c15ec177a203deeb0882a5ec7a2d17  ./evidence/browser-e2e-result.json
-d50f7b981678ea5f3f50eb90ef77b5a9e5465fbf8617337ef2b83bddd874a4fa  ./evidence/harness/browser-autonomous-fixture.html
-439bde0f5b76b947623b75adfc2aa5ef364974dbbbded2a44ba5891388164aef  ./evidence/harness/browser-e2e-fixture.html
-a8d34050aef43eebea83fc633e0760b268d037bdfd1bf9f78aa64be11828f271  ./evidence/harness/browser-pending-rebase-fixture.html
-bd067e4d414c458db30e334b4da8ab1f6fcfc28eb2ccc8d228ae552db5f76e21  ./evidence/harness/realtime-editor/states.json
-9fef0cb7997fa5f9ab2afcd8632bd85883c7c962dc84baf7b49e447fe55cdddb  ./evidence/harness/run_autonomous_smoke_playwright.py
-356e1eb3261589c1f6d40ffdd164c0aa930fde37a74c1710bda7c7a3d77f6565  ./evidence/harness/run_browser_e2e.py
-2578e6e1c65686b3518df0eae87956743610781aeb01750578dc192637b27e2d  ./evidence/harness/run_pending_rebase_playwright.py
-c023c0450b4c7e857fbe0605d0a22d378a2cedaada09b141500adc78b7262885  ./evidence/harness/run_report_backup_playwright.py
-65b5dfd9416f841332c5737efcb9b9598455050bd5f4776628c01433f25b90d9  ./evidence/harness/run_same_client_write_race_playwright.py
-ec9acbf8e13bb23fd30cc88b18164d52ba8ed74c6bb1c5b5dc6854a01389e3d9  ./evidence/harness/run_team_editor_realtime_playwright.py
-27b67791c5691bf078e0eaceeb4dad4316548d0055e5b3c700a4e1f6acdc4b55  ./evidence/harness/run_team_editor_revision_guard_playwright.py
-844357ece8587652f95bc99680b10f82febded1ada7cd23ba4ec0fa370ada630  ./evidence/logs/browser_autonomous_smoke.log
-cca9c070efc47cf62e8ed12fcdda3a187fdcd0e337fc77ab32d5868c28c22d56  ./evidence/logs/browser_pending_rebase.log
-87030b70bd719f3de703eaa9aad1f5e78dc3b31ca1a2755dfe35885475c550d2  ./evidence/logs/browser_report_backup.log
-f2a82b4b38081358a4dcdf33beba1fdbe68f1a2859594cad2a88a34271849b99  ./evidence/logs/browser_same_client_write_race.log
-42c9852cef3c34f08966a463e042abf8abaf752ef58a6a340c7558d6b15ccd3e  ./evidence/logs/browser_team_e2e.log
-2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7  ./evidence/logs/browser_team_editor_realtime.log
-b6dcc8807528fa86a0d8babde6262fe8abc57b5b32a30c9699478168c4cec864  ./evidence/logs/browser_team_editor_revision_guard.log
-b0563eec37e5b06f897d0c3176e92204e91f5093566abb7a0ab9a359ba4cc33e  ./evidence/logs/checksums.log
-dcf095edbebde84c3b36b0b8d47b7895b1c5f45f292c38175584703829c4ff42  ./evidence/logs/paired_url_resolution.log
-6f565ac2dbbcff1a67fd3ba97f1171a264ccc5a09f097f55c241e5cca51a7282  ./evidence/logs/rc2_node_tests.log
-b56a32b935aa62718e27fb2bee953dc395735445be5491498be350078d094895  ./evidence/logs/rc2_runtime.diff
-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./evidence/logs/rc2_syntax_checks.log
-acbebde024453624ac9e1d6e6e45771fd7775c5f13bc07ac61916f7d4ae22060  ./evidence/logs/rc3_node_tests.log
-7fdb615d30b7ca601e5b1e126688e4d4f9df6240e3eda3df9fc4b99c6bab0314  ./evidence/logs/rc3_syntax.log
-844357ece8587652f95bc99680b10f82febded1ada7cd23ba4ec0fa370ada630  ./evidence/logs/rc9_browser_autonomous.log
-ee2d8e9cdf6862ecb06a6a709c34ca75a13c5bd4eb662188398f093c7b495111  ./evidence/logs/rc9_browser_team_e2e.log
-1acc2cc88c44fc98094abe2887baed9f14ef0c6808debc1185c39603509b2811  ./evidence/logs/rc9_node_tests.log
-e308654f271a2955d1fa25ff376ebdcfa0eb72402d2f63912492e651da265a87  ./evidence/logs/rc9_pending_rebase.log
-49e1544d35f659c9ed7c94a2e8d198cb13a2753897d8febb241e615290bd3842  ./evidence/logs/rc9_runtime_scope.log
-f2a82b4b38081358a4dcdf33beba1fdbe68f1a2859594cad2a88a34271849b99  ./evidence/logs/rc9_same_client_write_race.log
-2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7  ./evidence/logs/rc9_team_editor_realtime.log
-b6dcc8807528fa86a0d8babde6262fe8abc57b5b32a30c9699478168c4cec864  ./evidence/logs/rc9_team_editor_revision_guard.log
-ba5c31f16df8f4c00f6ad2c8362956820f6e3efe1a10fd933497bcccbf0b6f2c  ./evidence/logs/rc9_team_node_tests.log
-a4368db6b746e95884c312e0e79fd57892461e561bdf5d0555425412f9229f35  ./evidence/logs/rc9_ttscore_node_tests.log
-c843a9a98c79fc96c448de21e151e64959ba01fd48126546ba20d8dcbab45f59  ./evidence/logs/rc9_verification_summary.log
-fca789644a398be2e69a984797838b24a625cf1c7735b4693fedbb2401e722c3  ./evidence/logs/runtime_diff_rc4_rc5.log
-eee6b5ac788382c5e5f0e2a3b94957b64b3dfe3e38f8ae64aadea6d1f27e1fb2  ./evidence/logs/runtime_diff_rc5_rc6.log
-7312a4f201469a368770e0f7f131067e3d3ba41914a72bc95c82ff6b8b3ca958  ./evidence/logs/runtime_diff_rc6_rc8.log
-0f7bfe12e7beee35fff41728cdba78d57c93239e5e3aebcee4b43b73cef9e4c4  ./evidence/logs/runtime_diff_rc8_rc9_adapter.diff
-ef31e26f773c0dfef81acefa9cd8fcb5d66847b7507bf38e1c6b0cc0544ec0c0  ./evidence/logs/runtime_diff_rc8_rc9_contract.diff
-b9e0db5f003ea71d87c8c8d675da136e1c2a4944dec041c76e334dec2c0249f0  ./evidence/logs/runtime_diff_rc8_rc9_ttscore.html.diff
-c80e6ea5ec5d718d423e0df9164364100f5c5540619c075ad8ead94190538cb2  ./evidence/logs/syntax_checks.log
-16c1c1e8a51a6fd7eb9d3498fa01ab167c2a8d401f7552b9905d108af9ed046d  ./evidence/logs/team-level-undo-team-node.log
-dff09d7d760cb69efb313b5160f26bccc981b9d80f5eeb8a4c54000e4534d311  ./evidence/logs/team-level-undo-ttscore-node.log
-2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7  ./evidence/logs/team_editor_realtime.log
-85754623235ac8c29ab7cc331bff321bac1a5fda5eb55e004e3ab96ea76c2e98  ./evidence/logs/ttscore_inline_runtime.js
-bd0f3cfa3ce7514300aed10d3996f676ce877fded93b227136436c3dedc24b17  ./evidence/logs/ttscore_team_tests.log
-6eb28e532cd679e1f9ff96f970f6069f41b28880f62f62259dcb7cd4b1303155  ./evidence/logs/ttscore_tests.log
-d2520303908b23dbd4c1b33b4fadc2a5a5896d00e491f7233e533b21545bbf7b  ./evidence/pending-rebase-result.json
-df61767b429f077e8280c6e6b45ac8df12c09d389b4ecf0dbdd1be65b08d776a  ./evidence/rc2_duplicate_finish_reconciliation.json
-c1e2d40e7efc727a9c051f66faf4addf0533543f6deeaf7c31daa19c389d951f  ./evidence/report-backup-result.json
-3baad35a35cd33f959096e1b70e21fce75c2a03f5f6e80fb89cc12cd09b54089  ./evidence/same-client-write-race-result.json
-235d89f91dd6b6e8ae6f9765d84adb6737e77e9b4aa905d644a80dfd33ef47e4  ./evidence/team-editor-realtime-result.json
-2324f0d00fd371f3f67a77df31ad04fc26b77a0a64c138d002ea3d281a4456a3  ./evidence/team-editor-revision-guard-result.json
-afb106f5587289aff5d88d0f6aca07cb86f89cc1b93b8867f6331e26a28cec7a  ./evidence/team-level-undo-result.json
-6f256cd0fcd1f33d30f4d7f5c263b32a48b6635e0a77937ad6edbc36430ada4e  ./firebase-database-rules.json
-973cc74805de33d0f150d5e1d37ff9b941924cdc9bbc5c5c360600bf8e8cad93  ./team/assets/0.10.0/app.mjs
-707eecd5014e6b4433e4c32e41d16875ce883168f28a629f68fc1fc2bf55ae8a  ./team/assets/0.10.0/archive-source.mjs
-c1e26b193dc2fdd444e943b831145f4b60c582c6da3c258e337679bbb4992500  ./team/assets/0.10.0/creator.mjs
-4b10c0bd1c5ddb35e33ee79c99307cd3d0779a3db52d1c6779a7b378d5754e58  ./team/assets/0.10.0/editor.mjs
-3ed4ae6ca4b6fad9c61ac9083e9009fe3cbb9c060c6c14a06b047e8082f6c851  ./team/assets/0.10.0/file-save.mjs
-cedecb961fb76af6f3269f21c6814cbfcb0d2881d4aa6ba0873a25fe8d083bc6  ./team/assets/0.10.0/firebase-source.mjs
-857a3291e447a5039cac43740d09ce7eb67cafc663f2416c967e11dede22ade0  ./team/assets/0.10.0/matches-source.mjs
-976d55383c54610985fc4e5e04cb175e4ce41b0497ad1ef42afc91000fff5f0e  ./team/assets/0.10.0/model.mjs
-e5ca03d5986b2e91226f11671ea75d13c69198204c4e7a03f55a03d6542afb01  ./team/assets/0.10.0/styles.css
-0f15c1f10e875e8636de713fa2478a099ce1e7ec78c8209174e90c05a4de9068  ./team/assets/0.10.0/team-integration-contract.mjs
-0ad490997ec331b1cf5c20e8238a1fc6ac5b7e18338c4553f2411a4938517f79  ./team/assets/0.10.0/team-report-contract.mjs
-6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d  ./team/assets/0.10.0/ttscore-integration.mjs
-22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b  ./team/assets/0.10.0/ttscore-team-adapter.mjs
-b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931  ./team/assets/0.10.0/ui-state.mjs
-48649f546880403dfefffe640a6933faac991a1e342c5cccc44520086917dd3e  ./team/assets/0.11.0/app.mjs
-707eecd5014e6b4433e4c32e41d16875ce883168f28a629f68fc1fc2bf55ae8a  ./team/assets/0.11.0/archive-source.mjs
-c1e26b193dc2fdd444e943b831145f4b60c582c6da3c258e337679bbb4992500  ./team/assets/0.11.0/creator.mjs
-5f7762cf3489e11c74c6b299409ada5bf8b10e5064fd72f7bcc6338b74d45e68  ./team/assets/0.11.0/editor.mjs
-3ed4ae6ca4b6fad9c61ac9083e9009fe3cbb9c060c6c14a06b047e8082f6c851  ./team/assets/0.11.0/file-save.mjs
-cedecb961fb76af6f3269f21c6814cbfcb0d2881d4aa6ba0873a25fe8d083bc6  ./team/assets/0.11.0/firebase-source.mjs
-857a3291e447a5039cac43740d09ce7eb67cafc663f2416c967e11dede22ade0  ./team/assets/0.11.0/matches-source.mjs
-976d55383c54610985fc4e5e04cb175e4ce41b0497ad1ef42afc91000fff5f0e  ./team/assets/0.11.0/model.mjs
-e5ca03d5986b2e91226f11671ea75d13c69198204c4e7a03f55a03d6542afb01  ./team/assets/0.11.0/styles.css
-0f15c1f10e875e8636de713fa2478a099ce1e7ec78c8209174e90c05a4de9068  ./team/assets/0.11.0/team-integration-contract.mjs
-0ad490997ec331b1cf5c20e8238a1fc6ac5b7e18338c4553f2411a4938517f79  ./team/assets/0.11.0/team-report-contract.mjs
-6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d  ./team/assets/0.11.0/ttscore-integration.mjs
-22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b  ./team/assets/0.11.0/ttscore-team-adapter.mjs
-b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931  ./team/assets/0.11.0/ui-state.mjs
-a4832b877c0d712ef322c5dfe9cfedcf7e01ace27e76aaf266b8ac471146f996  ./team/ttscore_team_0.11.0.html
-6b51f7c2f64c4791d25f50779d57aed864123fd8696b8f73ccd37e8796f4700d  ./tests/ttscore/ttscore-0.5.0.test.mjs
-da89c7101fbf9a958aae2f0bdf4a32d0cd58b7d05705eb3547149133ce40dea3  ./tests/ttscore_team/archive-source.test.mjs
-cd45e4c8a9810f43941780e4a3745524a603fe185a99ba4aa901ad550964dedb  ./tests/ttscore_team/automation-workflow.test.mjs
-5c5476b772bc816aecf0b4ea94c78bb268b3da7bf44952312a6a549332574aab  ./tests/ttscore_team/creator.test.mjs
-f3ded0587e4b76e4edee02c396a67ad62d3c32353393fe9ea44fb1988300c83d  ./tests/ttscore_team/editor.test.mjs
-9ee3a32f8b886a2a593f369c92a016762008581c0d46938decf5e22f6ef09cb9  ./tests/ttscore_team/file-save.test.mjs
-45c68394e8de67bda95e43dd94aef9749662a57fec03470db53a2d33a27ed565  ./tests/ttscore_team/firebase-rules.test.mjs
-1b9b536995b9a7988afa7bd8cb195fc5d9417ce418686d70cce722ba30017724  ./tests/ttscore_team/firebase-source.test.mjs
-1e7e82e37c0ab388bd24697bfadda550cefd9a209524a2c267496034d037ed67  ./tests/ttscore_team/matches-source.test.mjs
-34d113fa92ef4452b54eac37f98125d4e45a2ff269d16592f1f46b049b20726e  ./tests/ttscore_team/model.test.mjs
-fa57bc40efa1fbe0693815d81a6d5b26be365a6985e17b913062a836429a75bb  ./tests/ttscore_team/static-structure.test.mjs
-3ac2ac076ffd677a8f0abfc0afe6949e3950ad93a0101535e0d0dad3965599b8  ./tests/ttscore_team/team-integration-contract.test.mjs
-24d17562c08ed9fb203f78afbb1ec63e9e7c365dffb01c7b669a4e3ffaf7b9a3  ./tests/ttscore_team/team-report-contract.test.mjs
-9f6b3865d09dd37a54f0fc66938c9e2b327e552400bbd585d7e6a89a47b1aa14  ./tests/ttscore_team/ttscore-integration.test.mjs
-b6f87510ef7d318d22914c3d52d58fd407259a98b1ad0e4a136e8a9c0eed0556  ./tests/ttscore_team/ui-state.test.mjs
-8850b0d54593245fec446579f4fd9c6e7fa2593fa5f8ae8c4183eb361326aaeb  ./ttScore_0.5.0.html
-```
+| File | SHA-256 |
+|---|---|
+| `README_RC.md` | `bd5030f906d0ef0b10a2d42ae79d5d240168ddf8f5ff21a792c98046788e1287` |
+| `docs/ARCHITECTURE_RESEARCH_INPUT.md` | `b021c283aa85e57780162d6433db9d073c509d0317b6bb8f6db80059227bdffc` |
+| `docs/CYCLE_PLAN.md` | `6a9df5cec9d531b1c0c58fa607d2450c20c46091b6ad5df8a7ef48e4dc59c5cd` |
+| `docs/CYCLE_RESEARCH.md` | `27f3a9dd12487af2ee41199c4308e4ee08b41e3c8145ac2435c96cb01eefa2f3` |
+| `docs/DECISION_LOG.md` | `8dec466c105774bdb6d1e1d21d8511c79a6cfd30c90e6f5bce1cf304bcbc1167` |
+| `docs/EVIDENCE.md` | `5e54180eca32b76a6744ee9fc6978ecbf7b64bf0e051e8f640339fc2c0407103` |
+| `docs/EVIDENCE_INHERITED_v0.10.0.md` | `8ed668e90241f6b6e4b3906280cb641a0f646f8469b705907737fea8c70ade16` |
+| `docs/FINAL_CYCLE_REPORT.md` | `f63437104deeeed2d41f2dd4a810f3f074bc53e81410014d8e23a85c7d462b9c` |
+| `docs/GENERAL_REVIEW.md` | `b0b9920b41bf1c139a2a0a1bba343f6ae10e4c84ba37433bfb453189a1a8c861` |
+| `docs/NEXT_CYCLE_BRIEF.md` | `06f8ac842f400b9d6d45d6f5171c3e391cd4f317e2997482ce5d0a4370b80992` |
+| `docs/OWNER_ACCEPTANCE_CHECKLIST.md` | `cd60f95a4e1a6dcaeafb17bcdd5924fff272e7ee3b2c579d0cb225a1fe5811ce` |
+| `docs/PRODUCT_GOAL.md` | `0ab7e55dc046d82e698f53fc88fbafdb5f4876b29df14712d0947224641400db` |
+| `docs/RC2_DUPLICATE_FINISH_RECONCILIATION.md` | `739017246c0b428ae2fa071f2b3f278304d8cc65d5fce37cc9898885baa6972b` |
+| `docs/RC3_REALTIME_EDITOR_DEFECT.md` | `3e951a6ec37d82e65b48f540609eba8fff6501865b82733c01ea8017a6fea92e` |
+| `docs/RC3_REPORT_URL_FAIL_CLOSED_REVIEW_FIX.md` | `90ccacc2d48d737a645b3aaaf329fd149d0060a386984a9d17a2f76e8669ecca` |
+| `docs/RC4_FIREBASE_EDITOR_PUBLISH_DEFECT.md` | `d2faefac31bd59112b8f1347faa1bf6c7ed4df1a8127672bcc1b01878ffcfb14` |
+| `docs/RC5_TRANSPORT_DECISION_ADDENDUM.md` | `4158dd0acfec01912fa6b23e048a18d816c1011fd96ac36646d656c48388a498` |
+| `docs/RC6_FIREBASE_RULES_DEFECT.md` | `20bb1985209093daa1137aea0dc8a70e8e15994bb7913994f911a751771ac535` |
+| `docs/RC6_TEAM_MODE_SOUND_UNDO_UI.md` | `ef214d3fdd1df0e123675069426f1fe514a57f1fd12eeb10a947b6fd065395f4` |
+| `docs/RC7_TEAM_MODE_SOUND_RESTORE_FIX.md` | `3280cb9fd86a51320dc9af4d37bab91cdea4b4c18e81b753f66acc7066cd36e6` |
+| `docs/RC8_FALSE_REVISION_CONFLICT.md` | `693774eca01a1fa8291cf2eaccc3056b1bde4484e4331c72acb562510d85d148` |
+| `docs/RC9_PENDING_RELEASE_REBASE.md` | `08d5bc7bac1df813824deb2c19180838aa10898ac460f13f30ae3bb8336bc510` |
+| `docs/RELEASE_NOTES.md` | `ba514272883ef67221d045477e33f4e56679df69d394651c46b7539e64849082` |
+| `docs/RELEASE_NOTES_INHERITED_v0.10.0.md` | `94667e6a7ba25d754eb3d5ddd059f300845658dcc4db28fecab88fc00c6cfc7f` |
+| `docs/REPORT_BACKUP_AND_PUBLISHED_REPORT.md` | `a29800c96aa3a7ce5bd69344820127be9a8af9aed9f097f9db14434d67052e17` |
+| `docs/TEAM_LEVEL_UNDO.md` | `aa3e337701d17a5b283fa9f95ab635c02fb2d6e0087d00afe0e56c3e80d25467` |
+| `docs/TTSCORE_TEAM_CHANGELOG.md` | `c403a6d89ff4c029fa01876539e99505b608fc2e0612ea31747c87135a408303` |
+| `docs/TTSCORE_TEAM_README_v0.10.0.md` | `f71db9531d98f590e363d0b556cf27043caca946aadfa28f8a58695f66dbf816` |
+| `docs/TTSCORE_TEAM_README_v0.11.0.md` | `3ea66ba0323cb257a0853f603ac92f668d96d2eed3df069624e1a56b3e8fc7b9` |
+| `docs/VERSIONS.md` | `fc0bfadfc749cebcc8f029cb6246b529598262ec627af17b6621f00fb08309d4` |
+| `evidence/baselines/ttScore_0.3.5_baseline.html` | `5421978a14ba640d2f6b500fca62a8fa4894be1514900903abed581b465567e7` |
+| `evidence/browser-autonomous-result.json` | `37bdd1ab9df798c701940f77da7cdc70f95adc7da1a5b4304e24fd5e0e3c8bfa` |
+| `evidence/browser-e2e-result.json` | `c4afebc8ea030930b9c198c0341bc88090c15ec177a203deeb0882a5ec7a2d17` |
+| `evidence/harness/browser-autonomous-fixture.html` | `d50f7b981678ea5f3f50eb90ef77b5a9e5465fbf8617337ef2b83bddd874a4fa` |
+| `evidence/harness/browser-e2e-fixture.html` | `439bde0f5b76b947623b75adfc2aa5ef364974dbbbded2a44ba5891388164aef` |
+| `evidence/harness/browser-pending-rebase-fixture.html` | `a8d34050aef43eebea83fc633e0760b268d037bdfd1bf9f78aa64be11828f271` |
+| `evidence/harness/realtime-editor/states.json` | `bd067e4d414c458db30e334b4da8ab1f6fcfc28eb2ccc8d228ae552db5f76e21` |
+| `evidence/harness/run_autonomous_smoke_playwright.py` | `9fef0cb7997fa5f9ab2afcd8632bd85883c7c962dc84baf7b49e447fe55cdddb` |
+| `evidence/harness/run_browser_e2e.py` | `356e1eb3261589c1f6d40ffdd164c0aa930fde37a74c1710bda7c7a3d77f6565` |
+| `evidence/harness/run_pending_rebase_playwright.py` | `2578e6e1c65686b3518df0eae87956743610781aeb01750578dc192637b27e2d` |
+| `evidence/harness/run_report_backup_playwright.py` | `c023c0450b4c7e857fbe0605d0a22d378a2cedaada09b141500adc78b7262885` |
+| `evidence/harness/run_same_client_write_race_playwright.py` | `65b5dfd9416f841332c5737efcb9b9598455050bd5f4776628c01433f25b90d9` |
+| `evidence/harness/run_team_editor_realtime_playwright.py` | `ec9acbf8e13bb23fd30cc88b18164d52ba8ed74c6bb1c5b5dc6854a01389e3d9` |
+| `evidence/harness/run_team_editor_revision_guard_playwright.py` | `27b67791c5691bf078e0eaceeb4dad4316548d0055e5b3c700a4e1f6acdc4b55` |
+| `evidence/logs/browser_autonomous_smoke.log` | `844357ece8587652f95bc99680b10f82febded1ada7cd23ba4ec0fa370ada630` |
+| `evidence/logs/browser_pending_rebase.log` | `cca9c070efc47cf62e8ed12fcdda3a187fdcd0e337fc77ab32d5868c28c22d56` |
+| `evidence/logs/browser_report_backup.log` | `87030b70bd719f3de703eaa9aad1f5e78dc3b31ca1a2755dfe35885475c550d2` |
+| `evidence/logs/browser_same_client_write_race.log` | `f2a82b4b38081358a4dcdf33beba1fdbe68f1a2859594cad2a88a34271849b99` |
+| `evidence/logs/browser_team_e2e.log` | `42c9852cef3c34f08966a463e042abf8abaf752ef58a6a340c7558d6b15ccd3e` |
+| `evidence/logs/browser_team_editor_realtime.log` | `2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7` |
+| `evidence/logs/browser_team_editor_revision_guard.log` | `b6dcc8807528fa86a0d8babde6262fe8abc57b5b32a30c9699478168c4cec864` |
+| `evidence/logs/checksums.log` | `b0563eec37e5b06f897d0c3176e92204e91f5093566abb7a0ab9a359ba4cc33e` |
+| `evidence/logs/paired_url_resolution.log` | `dcf095edbebde84c3b36b0b8d47b7895b1c5f45f292c38175584703829c4ff42` |
+| `evidence/logs/rc2_node_tests.log` | `6f565ac2dbbcff1a67fd3ba97f1171a264ccc5a09f097f55c241e5cca51a7282` |
+| `evidence/logs/rc2_runtime.diff` | `b56a32b935aa62718e27fb2bee953dc395735445be5491498be350078d094895` |
+| `evidence/logs/rc2_syntax_checks.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `evidence/logs/rc3_node_tests.log` | `acbebde024453624ac9e1d6e6e45771fd7775c5f13bc07ac61916f7d4ae22060` |
+| `evidence/logs/rc3_rc7_runtime.diff` | `9f1a91ca633a202e02c00904c77482a5f26ee4d546aed8ebab25d9f73a2a290a` |
+| `evidence/logs/rc3_syntax.log` | `7fdb615d30b7ca601e5b1e126688e4d4f9df6240e3eda3df9fc4b99c6bab0314` |
+| `evidence/logs/rc6_node_tests.log` | `71d1b53ede5463e9b95836198899483b2a8bd6b622df3f998b3139b6ef5573ff` |
+| `evidence/logs/rc6_rc7_runtime.diff` | `e3c6cff54a87da70473c334785a33ca1698119185829fa7046551cb1e12e3e87` |
+| `evidence/logs/rc6_runtime.diff` | `a80d90f5661003a77575a9d1400bfcd225f2bb963a56685239f19ec541484586` |
+| `evidence/logs/rc6_syntax.log` | `a1bfa900948fbffc3ed34a3709415be5ff4761ac2f6731774fa78ea5c8ad9dbc` |
+| `evidence/logs/rc7_node_tests.log` | `bcccd04c7ed0dc2f03497e56087e5f7ef2f11019d1811e9a97d69a0d14b1a2d2` |
+| `evidence/logs/rc7_runtime_scope.log` | `3d775e536b98ad43f69a4213b3e9b3dde6d631c616d9701a7187d209f26b1f17` |
+| `evidence/logs/rc7_syntax.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `evidence/logs/rc7_ttscore_inline_runtime.js` | `474f61b47c725a2529d6d3575d48fdfe73cbf947b57391a0540c7a5e5c290b61` |
+| `evidence/logs/rc9_browser_autonomous.log` | `844357ece8587652f95bc99680b10f82febded1ada7cd23ba4ec0fa370ada630` |
+| `evidence/logs/rc9_browser_team_e2e.log` | `ee2d8e9cdf6862ecb06a6a709c34ca75a13c5bd4eb662188398f093c7b495111` |
+| `evidence/logs/rc9_node_tests.log` | `1acc2cc88c44fc98094abe2887baed9f14ef0c6808debc1185c39603509b2811` |
+| `evidence/logs/rc9_pending_rebase.log` | `e308654f271a2955d1fa25ff376ebdcfa0eb72402d2f63912492e651da265a87` |
+| `evidence/logs/rc9_runtime_scope.log` | `49e1544d35f659c9ed7c94a2e8d198cb13a2753897d8febb241e615290bd3842` |
+| `evidence/logs/rc9_same_client_write_race.log` | `f2a82b4b38081358a4dcdf33beba1fdbe68f1a2859594cad2a88a34271849b99` |
+| `evidence/logs/rc9_team_editor_realtime.log` | `2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7` |
+| `evidence/logs/rc9_team_editor_revision_guard.log` | `b6dcc8807528fa86a0d8babde6262fe8abc57b5b32a30c9699478168c4cec864` |
+| `evidence/logs/rc9_team_node_tests.log` | `ba5c31f16df8f4c00f6ad2c8362956820f6e3efe1a10fd933497bcccbf0b6f2c` |
+| `evidence/logs/rc9_ttscore_node_tests.log` | `a4368db6b746e95884c312e0e79fd57892461e561bdf5d0555425412f9229f35` |
+| `evidence/logs/rc9_verification_summary.log` | `c843a9a98c79fc96c448de21e151e64959ba01fd48126546ba20d8dcbab45f59` |
+| `evidence/logs/runtime_diff_rc4_rc5.log` | `fca789644a398be2e69a984797838b24a625cf1c7735b4693fedbb2401e722c3` |
+| `evidence/logs/runtime_diff_rc5_rc6.log` | `eee6b5ac788382c5e5f0e2a3b94957b64b3dfe3e38f8ae64aadea6d1f27e1fb2` |
+| `evidence/logs/runtime_diff_rc6_rc8.log` | `7312a4f201469a368770e0f7f131067e3d3ba41914a72bc95c82ff6b8b3ca958` |
+| `evidence/logs/runtime_diff_rc8_rc9_adapter.diff` | `0f7bfe12e7beee35fff41728cdba78d57c93239e5e3aebcee4b43b73cef9e4c4` |
+| `evidence/logs/runtime_diff_rc8_rc9_contract.diff` | `ef31e26f773c0dfef81acefa9cd8fcb5d66847b7507bf38e1c6b0cc0544ec0c0` |
+| `evidence/logs/runtime_diff_rc8_rc9_ttscore.html.diff` | `b9e0db5f003ea71d87c8c8d675da136e1c2a4944dec041c76e334dec2c0249f0` |
+| `evidence/logs/syntax_checks.log` | `c80e6ea5ec5d718d423e0df9164364100f5c5540619c075ad8ead94190538cb2` |
+| `evidence/logs/team-level-undo-team-node.log` | `16c1c1e8a51a6fd7eb9d3498fa01ab167c2a8d401f7552b9905d108af9ed046d` |
+| `evidence/logs/team-level-undo-ttscore-node.log` | `dff09d7d760cb69efb313b5160f26bccc981b9d80f5eeb8a4c54000e4534d311` |
+| `evidence/logs/team_editor_realtime.log` | `2b1346934f3b42a93bc900e07dbcc005d858b06c84bb0ad2243ebc3453ba42a7` |
+| `evidence/logs/ttscore_inline_runtime.js` | `85754623235ac8c29ab7cc331bff321bac1a5fda5eb55e004e3ab96ea76c2e98` |
+| `evidence/logs/ttscore_team_tests.log` | `bd0f3cfa3ce7514300aed10d3996f676ce877fded93b227136436c3dedc24b17` |
+| `evidence/logs/ttscore_tests.log` | `6eb28e532cd679e1f9ff96f970f6069f41b28880f62f62259dcb7cd4b1303155` |
+| `evidence/pending-rebase-result.json` | `d2520303908b23dbd4c1b33b4fadc2a5a5896d00e491f7233e533b21545bbf7b` |
+| `evidence/rc2_duplicate_finish_reconciliation.json` | `df61767b429f077e8280c6e6b45ac8df12c09d389b4ecf0dbdd1be65b08d776a` |
+| `evidence/report-backup-result.json` | `c1e2d40e7efc727a9c051f66faf4addf0533543f6deeaf7c31daa19c389d951f` |
+| `evidence/same-client-write-race-result.json` | `3baad35a35cd33f959096e1b70e21fce75c2a03f5f6e80fb89cc12cd09b54089` |
+| `evidence/team-editor-realtime-result.json` | `235d89f91dd6b6e8ae6f9765d84adb6737e77e9b4aa905d644a80dfd33ef47e4` |
+| `evidence/team-editor-revision-guard-result.json` | `2324f0d00fd371f3f67a77df31ad04fc26b77a0a64c138d002ea3d281a4456a3` |
+| `evidence/team-level-undo-result.json` | `afb106f5587289aff5d88d0f6aca07cb86f89cc1b93b8867f6331e26a28cec7a` |
+| `firebase-database-rules.json` | `6f256cd0fcd1f33d30f4d7f5c263b32a48b6635e0a77937ad6edbc36430ada4e` |
+| `team/assets/0.10.0/app.mjs` | `973cc74805de33d0f150d5e1d37ff9b941924cdc9bbc5c5c360600bf8e8cad93` |
+| `team/assets/0.10.0/archive-source.mjs` | `707eecd5014e6b4433e4c32e41d16875ce883168f28a629f68fc1fc2bf55ae8a` |
+| `team/assets/0.10.0/creator.mjs` | `c1e26b193dc2fdd444e943b831145f4b60c582c6da3c258e337679bbb4992500` |
+| `team/assets/0.10.0/editor.mjs` | `4b10c0bd1c5ddb35e33ee79c99307cd3d0779a3db52d1c6779a7b378d5754e58` |
+| `team/assets/0.10.0/file-save.mjs` | `3ed4ae6ca4b6fad9c61ac9083e9009fe3cbb9c060c6c14a06b047e8082f6c851` |
+| `team/assets/0.10.0/firebase-source.mjs` | `cedecb961fb76af6f3269f21c6814cbfcb0d2881d4aa6ba0873a25fe8d083bc6` |
+| `team/assets/0.10.0/matches-source.mjs` | `857a3291e447a5039cac43740d09ce7eb67cafc663f2416c967e11dede22ade0` |
+| `team/assets/0.10.0/model.mjs` | `976d55383c54610985fc4e5e04cb175e4ce41b0497ad1ef42afc91000fff5f0e` |
+| `team/assets/0.10.0/styles.css` | `e5ca03d5986b2e91226f11671ea75d13c69198204c4e7a03f55a03d6542afb01` |
+| `team/assets/0.10.0/team-integration-contract.mjs` | `0f15c1f10e875e8636de713fa2478a099ce1e7ec78c8209174e90c05a4de9068` |
+| `team/assets/0.10.0/team-report-contract.mjs` | `0ad490997ec331b1cf5c20e8238a1fc6ac5b7e18338c4553f2411a4938517f79` |
+| `team/assets/0.10.0/ttscore-integration.mjs` | `6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d` |
+| `team/assets/0.10.0/ttscore-team-adapter.mjs` | `22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b` |
+| `team/assets/0.10.0/ui-state.mjs` | `b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931` |
+| `team/assets/0.11.0/app.mjs` | `48649f546880403dfefffe640a6933faac991a1e342c5cccc44520086917dd3e` |
+| `team/assets/0.11.0/archive-source.mjs` | `707eecd5014e6b4433e4c32e41d16875ce883168f28a629f68fc1fc2bf55ae8a` |
+| `team/assets/0.11.0/creator.mjs` | `c1e26b193dc2fdd444e943b831145f4b60c582c6da3c258e337679bbb4992500` |
+| `team/assets/0.11.0/editor.mjs` | `5f7762cf3489e11c74c6b299409ada5bf8b10e5064fd72f7bcc6338b74d45e68` |
+| `team/assets/0.11.0/file-save.mjs` | `3ed4ae6ca4b6fad9c61ac9083e9009fe3cbb9c060c6c14a06b047e8082f6c851` |
+| `team/assets/0.11.0/firebase-source.mjs` | `cedecb961fb76af6f3269f21c6814cbfcb0d2881d4aa6ba0873a25fe8d083bc6` |
+| `team/assets/0.11.0/matches-source.mjs` | `857a3291e447a5039cac43740d09ce7eb67cafc663f2416c967e11dede22ade0` |
+| `team/assets/0.11.0/model.mjs` | `976d55383c54610985fc4e5e04cb175e4ce41b0497ad1ef42afc91000fff5f0e` |
+| `team/assets/0.11.0/styles.css` | `e5ca03d5986b2e91226f11671ea75d13c69198204c4e7a03f55a03d6542afb01` |
+| `team/assets/0.11.0/team-integration-contract.mjs` | `0f15c1f10e875e8636de713fa2478a099ce1e7ec78c8209174e90c05a4de9068` |
+| `team/assets/0.11.0/team-report-contract.mjs` | `0ad490997ec331b1cf5c20e8238a1fc6ac5b7e18338c4553f2411a4938517f79` |
+| `team/assets/0.11.0/ttscore-integration.mjs` | `6ec66a6aa5c3f0977fd0e3154e839348d4cd467f5027eb51632dde9a52ff9b0d` |
+| `team/assets/0.11.0/ttscore-team-adapter.mjs` | `22e83d5b7806d0d45dbcbd14bc5f58c70a826831f33eaf85f44a754acb0b2a5b` |
+| `team/assets/0.11.0/ui-state.mjs` | `b3fe4ff28acc57f5f49e97b6910c1d64da66182f773c3fffeed23c110a907931` |
+| `team/ttscore_team_0.11.0.html` | `a4832b877c0d712ef322c5dfe9cfedcf7e01ace27e76aaf266b8ac471146f996` |
+| `tests/ttscore/ttscore-0.5.0.test.mjs` | `c015e7577503402bc8adaba55dcd57a35edfc293fe08d9749d1a7a0bc812bcf6` |
+| `tests/ttscore_team/archive-source.test.mjs` | `da89c7101fbf9a958aae2f0bdf4a32d0cd58b7d05705eb3547149133ce40dea3` |
+| `tests/ttscore_team/automation-workflow.test.mjs` | `cd45e4c8a9810f43941780e4a3745524a603fe185a99ba4aa901ad550964dedb` |
+| `tests/ttscore_team/creator.test.mjs` | `5c5476b772bc816aecf0b4ea94c78bb268b3da7bf44952312a6a549332574aab` |
+| `tests/ttscore_team/editor.test.mjs` | `f3ded0587e4b76e4edee02c396a67ad62d3c32353393fe9ea44fb1988300c83d` |
+| `tests/ttscore_team/file-save.test.mjs` | `9ee3a32f8b886a2a593f369c92a016762008581c0d46938decf5e22f6ef09cb9` |
+| `tests/ttscore_team/firebase-rules.test.mjs` | `45c68394e8de67bda95e43dd94aef9749662a57fec03470db53a2d33a27ed565` |
+| `tests/ttscore_team/firebase-source.test.mjs` | `1b9b536995b9a7988afa7bd8cb195fc5d9417ce418686d70cce722ba30017724` |
+| `tests/ttscore_team/matches-source.test.mjs` | `1e7e82e37c0ab388bd24697bfadda550cefd9a209524a2c267496034d037ed67` |
+| `tests/ttscore_team/model.test.mjs` | `34d113fa92ef4452b54eac37f98125d4e45a2ff269d16592f1f46b049b20726e` |
+| `tests/ttscore_team/static-structure.test.mjs` | `fa57bc40efa1fbe0693815d81a6d5b26be365a6985e17b913062a836429a75bb` |
+| `tests/ttscore_team/team-integration-contract.test.mjs` | `3ac2ac076ffd677a8f0abfc0afe6949e3950ad93a0101535e0d0dad3965599b8` |
+| `tests/ttscore_team/team-report-contract.test.mjs` | `24d17562c08ed9fb203f78afbb1ec63e9e7c365dffb01c7b669a4e3ffaf7b9a3` |
+| `tests/ttscore_team/ttscore-integration.test.mjs` | `9f6b3865d09dd37a54f0fc66938c9e2b327e552400bbd585d7e6a89a47b1aa14` |
+| `tests/ttscore_team/ui-state.test.mjs` | `b6f87510ef7d318d22914c3d52d58fd407259a98b1ad0e4a136e8a9c0eed0556` |
+| `ttScore_0.5.0.html` | `0b450712c741485558058af857fad8232ed636b4e8c68ff3df0fa38b503c53ff` |
