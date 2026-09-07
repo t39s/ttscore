@@ -1711,6 +1711,43 @@
       transform: translateX(-50%);
       white-space: nowrap;
     }
+    .live-scoreboard-perspective-toggle {
+      position: absolute;
+      z-index: 5;
+      top: auto;
+      right: auto;
+      bottom: clamp(24px, calc(7vh - 24px), 53px);
+      left: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      min-height: 48px;
+      margin: 0;
+      padding: 0;
+      border: 1px solid rgba(0,0,0,.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,.94);
+      color: #222;
+      box-shadow: 0 3px 14px rgba(0,0,0,.14);
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transform: translateX(-50%);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .live-scoreboard-perspective-toggle[aria-pressed="true"] {
+      font-weight: 900;
+      -webkit-text-stroke: .45px currentColor;
+    }
+    .live-scoreboard-perspective-toggle:focus-visible {
+      outline: 3px solid #1f6feb;
+      outline-offset: 2px;
+    }
+    .live-scoreboard-status:not([hidden]) + .live-scoreboard-rotate { display: none; }
     .live-scoreboard-layout {
       display: grid;
       grid-template-columns: 14fr 36fr 10px 36fr 14fr;
@@ -1806,8 +1843,14 @@
     .live-scoreboard-game-right { grid-area: 1 / 4; }
     .live-scoreboard-match-right { grid-area: 1 / 5; }
     .live-scoreboard-server-left { grid-area: 2 / 1; }
-    .live-scoreboard-name-left { grid-area: 2 / 2; }
-    .live-scoreboard-name-right { grid-area: 2 / 4; }
+    .live-scoreboard-name-left {
+      grid-area: 2 / 2;
+      padding-right: 38px;
+    }
+    .live-scoreboard-name-right {
+      grid-area: 2 / 4;
+      padding-left: 38px;
+    }
     .live-scoreboard-server-right { grid-area: 2 / 5; }
     .live-scoreboard-footer {
       position: absolute;
@@ -1821,6 +1864,9 @@
     }
     @media (orientation: portrait) {
       .live-scoreboard-rotate { display: block; }
+      .live-scoreboard-perspective-toggle {
+        bottom: clamp(22px, calc(6vh - 24px), 42px);
+      }
       .live-scoreboard-layout {
         grid-template-columns: 12fr 38fr 7px 38fr 12fr;
         grid-template-rows: minmax(0, 1fr) clamp(92px, 12vh, 132px);
@@ -1828,6 +1874,20 @@
       .live-scoreboard-name { font-size: clamp(20px, 4.6vw, 40px); }
       .live-scoreboard-game-score { font-size: min(58vh, 50vw); }
       .live-scoreboard-match-score { font-size: min(28vh, 20vw); }
+    }
+    @media (orientation: portrait) and (max-width: 440px) {
+      .live-scoreboard-status {
+        top: max(88px, calc(env(safe-area-inset-top) + 80px));
+        right: max(10px, env(safe-area-inset-right));
+        max-width: none;
+      }
+      .live-scoreboard-rotate {
+        top: max(88px, calc(env(safe-area-inset-top) + 80px));
+        right: max(10px, env(safe-area-inset-right));
+        left: max(10px, env(safe-area-inset-left));
+        transform: none;
+        white-space: normal;
+      }
     }
 
     .team-context-panel { gap: 12px; }
@@ -2136,6 +2196,7 @@
         <button class="live-status-copy" id="copyLiveScoreboardErrorButton" type="button" hidden>Скопировать ошибку</button>
       </div>
       <p class="live-scoreboard-rotate">Для крупного табло поверните планшет горизонтально</p>
+      <button class="live-scoreboard-perspective-toggle" id="liveScoreboardPerspectiveToggle" type="button" aria-label="Поменять стороны табло" aria-pressed="false" title="Поменять стороны табло">⇄</button>
       <div class="live-scoreboard-layout" aria-label="Онлайн-табло встречи">
         <div class="live-scoreboard-match-cell live-scoreboard-match-left">
           <span class="live-scoreboard-digit live-scoreboard-match-score" id="liveScoreboardLeftGames" aria-label="Счёт встречи: 0">0</span>
@@ -2184,6 +2245,7 @@
     const LIVE_ENVELOPE_VERSION = 2;
     const LIVE_STATE_SCHEMA_VERSION = 1;
     const LIVE_STATE_MAX_JSON_BYTES = 16 * 1024;
+    const LIVE_SCOREBOARD_PERSPECTIVE_STORAGE_KEY = "ttScore:liveScoreboardPerspective:v1";
     const FIREBASE_SDK_VERSION = "12.17.1";
     const LIVE_FIREBASE_CONFIG = Object.freeze({
       apiKey: "AIzaSyAl_-dvsuM7g4hvuUZtt3mNcMc7a0Kztnw",
@@ -2247,6 +2309,28 @@
     const TEAM_MODE_REQUESTED = PAGE_MODE === "score" && requestedTeamMatchId !== null;
     const TEAM_MATCH_ID = TEAM_MODE_REQUESTED && TEAM_MATCH_ID_PATTERN.test(requestedTeamMatchId || "") ? requestedTeamMatchId : "";
     const IS_TEAM_MODE = TEAM_MODE_REQUESTED;
+
+    function normalizeLiveScoreboardPerspective(value) {
+      return value === "reversed" ? "reversed" : "normal";
+    }
+
+    function loadLiveScoreboardPerspective() {
+      if (!IS_SCOREBOARD_PAGE) return "normal";
+      try {
+        return normalizeLiveScoreboardPerspective(localStorage.getItem(LIVE_SCOREBOARD_PERSPECTIVE_STORAGE_KEY));
+      } catch (_) {
+        return "normal";
+      }
+    }
+
+    function storeLiveScoreboardPerspective(value) {
+      const normalized = normalizeLiveScoreboardPerspective(value);
+      if (!IS_SCOREBOARD_PAGE) return normalized;
+      try {
+        localStorage.setItem(LIVE_SCOREBOARD_PERSPECTIVE_STORAGE_KEY, normalized);
+      } catch (_) {}
+      return normalized;
+    }
 
     function localDateValue(date = new Date()) {
       const year = date.getFullYear();
@@ -2360,6 +2444,7 @@
     let liveReportLoading = IS_LIVE_REPORT;
     let teamReportLoading = IS_TEAM_REPORT;
     let liveScoreboardLoading = IS_LIVE_SCOREBOARD;
+    let liveScoreboardPerspective = loadLiveScoreboardPerspective();
     let liveViewerRevision = 0;
     let liveViewerCheckpointRevision = 0;
     let liveViewerCheckpointState = null;
@@ -2421,6 +2506,7 @@
       liveScoreboardStatus: $("liveScoreboardStatus"),
       liveScoreboardStatusText: $("liveScoreboardStatusText"),
       copyLiveScoreboardErrorButton: $("copyLiveScoreboardErrorButton"),
+      liveScoreboardPerspectiveToggle: $("liveScoreboardPerspectiveToggle"),
       liveScoreboardLeftPlayer: $("liveScoreboardLeftPlayer"),
       liveScoreboardRightPlayer: $("liveScoreboardRightPlayer"),
       liveScoreboardLeftName: $("liveScoreboardLeftName"),
@@ -4126,6 +4212,31 @@
         }),
         server: pendingGame ? null : currentServerForState(snapshot)
       });
+    }
+
+    function orientLiveScoreboardViewModel(view, perspective = liveScoreboardPerspective) {
+      if (!view || normalizeLiveScoreboardPerspective(perspective) !== "reversed") return view;
+      return Object.freeze({
+        left: view.right,
+        right: view.left,
+        server: view.server
+      });
+    }
+
+    function renderLiveScoreboardPerspectiveControl() {
+      if (!els.liveScoreboardPerspectiveToggle) return;
+      const reversed = liveScoreboardPerspective === "reversed";
+      const label = reversed ? "Вернуть обычное расположение сторон" : "Поменять стороны табло";
+      els.liveScoreboardPerspectiveToggle.setAttribute("aria-pressed", String(reversed));
+      els.liveScoreboardPerspectiveToggle.setAttribute("aria-label", label);
+      els.liveScoreboardPerspectiveToggle.title = label;
+    }
+
+    function toggleLiveScoreboardPerspective() {
+      liveScoreboardPerspective = storeLiveScoreboardPerspective(
+        liveScoreboardPerspective === "reversed" ? "normal" : "reversed"
+      );
+      renderLiveScoreboard();
     }
 
     function pointsUntilServeChange() {
@@ -7181,11 +7292,14 @@ ${buildStandaloneReportRoot().outerHTML}
     }
 
     function renderLiveScoreboard() {
-      const view = buildLiveScoreboardViewModel(state);
+      const tableView = buildLiveScoreboardViewModel(state);
+      const view = orientLiveScoreboardViewModel(tableView);
       document.title = "Онлайн-табло — ttScore";
+      renderLiveScoreboardPerspectiveControl();
       if (!view) {
-        els.liveScoreboardLeftName.textContent = "Спортсмен A";
-        els.liveScoreboardRightName.textContent = "Спортсмен B";
+        const reversed = liveScoreboardPerspective === "reversed";
+        els.liveScoreboardLeftName.textContent = reversed ? "Спортсмен B" : "Спортсмен A";
+        els.liveScoreboardRightName.textContent = reversed ? "Спортсмен A" : "Спортсмен B";
         els.liveScoreboardLeftGames.textContent = "0";
         els.liveScoreboardRightGames.textContent = "0";
         els.liveScoreboardLeftScore.textContent = "0";
@@ -7350,6 +7464,7 @@ ${buildStandaloneReportRoot().outerHTML}
     els.copyLiveScoreboardErrorButton.addEventListener("click", event => {
       void copyLiveDiagnostic("онлайн-табло", liveViewerError || els.liveScoreboardStatusText.textContent, event.currentTarget);
     });
+    els.liveScoreboardPerspectiveToggle.addEventListener("click", toggleLiveScoreboardPerspective);
     els.selectSavedReportButton.addEventListener("click", openImportJsonPicker);
     els.selectAnotherReportButton.addEventListener("click", openImportJsonPicker);
     els.importJsonInput.addEventListener("change", handleImportJsonSelection);

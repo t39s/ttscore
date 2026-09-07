@@ -195,3 +195,131 @@ test('ручное включение/выключение звука во вр�
   assert.match(block, /render\(\);/);
   assert.doesNotMatch(block, /IS_TEAM_MODE/);
 });
+
+test('онлайн-табло имеет постоянный device-local переключатель стороны просмотра', () => {
+  assert.match(source, /id="liveScoreboardPerspectiveToggle"/);
+  assert.match(source, /aria-label="Поменять стороны табло"/);
+  assert.match(source, /const LIVE_SCOREBOARD_PERSPECTIVE_STORAGE_KEY = "ttScore:liveScoreboardPerspective:v1"/);
+  assert.match(source, /liveScoreboardPerspectiveToggle\.addEventListener\("click", toggleLiveScoreboardPerspective\)/);
+});
+
+test('side perspective normal/reversed меняет местами целостные presentation-side модели, не server identity', () => {
+  const normalize = functionBlock(source, 'normalizeLiveScoreboardPerspective');
+  const orient = functionBlock(source, 'orientLiveScoreboardViewModel');
+  const context = { liveScoreboardPerspective: 'normal', Object, result: null };
+  runInNewContext(`${normalize}\n${orient}\nconst view = Object.freeze({\n  left: Object.freeze({ player: 'A', name: 'A Name', gameScore: 7, matchScore: 2 }),\n  right: Object.freeze({ player: 'B', name: 'B Name', gameScore: 4, matchScore: 1 }),\n  server: 'A'\n});\nresult = { normal: orientLiveScoreboardViewModel(view, 'normal'), reversed: orientLiveScoreboardViewModel(view, 'reversed'), original: view };`, context);
+  assert.equal(context.result.normal, context.result.original);
+  assert.equal(context.result.reversed.left.player, 'B');
+  assert.equal(context.result.reversed.left.name, 'B Name');
+  assert.equal(context.result.reversed.left.gameScore, 4);
+  assert.equal(context.result.reversed.left.matchScore, 1);
+  assert.equal(context.result.reversed.right.player, 'A');
+  assert.equal(context.result.reversed.right.name, 'A Name');
+  assert.equal(context.result.reversed.right.gameScore, 7);
+  assert.equal(context.result.reversed.right.matchScore, 2);
+  assert.equal(context.result.reversed.server, 'A');
+  assert.equal(context.result.original.left.player, 'A');
+});
+
+test('perspective persistence допускает только normal/reversed и fail-safe возвращает normal', () => {
+  const normalize = functionBlock(source, 'normalizeLiveScoreboardPerspective');
+  const load = functionBlock(source, 'loadLiveScoreboardPerspective');
+  const store = functionBlock(source, 'storeLiveScoreboardPerspective');
+  const createContext = ({ scoreboard = true, stored = null, throwRead = false, throwWrite = false } = {}) => {
+    const writes = [];
+    const context = {
+      IS_SCOREBOARD_PAGE: scoreboard,
+      LIVE_SCOREBOARD_PERSPECTIVE_STORAGE_KEY: 'test:key',
+      localStorage: {
+        getItem() { if (throwRead) throw new Error('blocked'); return stored; },
+        setItem(key, value) { if (throwWrite) throw new Error('blocked'); writes.push([key, value]); }
+      },
+      writes,
+      result: null
+    };
+    runInNewContext(`${normalize}\n${load}\n${store}\nresult = { loaded: loadLiveScoreboardPerspective(), storedReversed: storeLiveScoreboardPerspective('reversed'), storedInvalid: storeLiveScoreboardPerspective('broken') };`, context);
+    return context;
+  };
+
+  const normal = createContext({ stored: null });
+  assert.equal(normal.result.loaded, 'normal');
+  assert.equal(normal.result.storedReversed, 'reversed');
+  assert.equal(normal.result.storedInvalid, 'normal');
+  assert.deepEqual(normal.writes, [['test:key', 'reversed'], ['test:key', 'normal']]);
+
+  assert.equal(createContext({ stored: 'reversed' }).result.loaded, 'reversed');
+  assert.equal(createContext({ stored: 'other' }).result.loaded, 'normal');
+  assert.equal(createContext({ throwRead: true }).result.loaded, 'normal');
+  assert.equal(createContext({ scoreboard: false, stored: 'reversed' }).result.loaded, 'normal');
+  assert.doesNotThrow(() => createContext({ throwWrite: true }));
+});
+
+test('переключатель perspective меняет только local presentation preference и перерисовывает табло', () => {
+  const toggle = functionBlock(source, 'toggleLiveScoreboardPerspective');
+  const context = {
+    liveScoreboardPerspective: 'normal',
+    stored: [],
+    renders: 0,
+    storeLiveScoreboardPerspective(value) { this.stored.push(value); return value; },
+    renderLiveScoreboard() { this.renders += 1; },
+    result: null
+  };
+  // VM top-level functions do not preserve method `this`; expose arrays via closures instead.
+  context.storeLiveScoreboardPerspective = value => { context.stored.push(value); return value; };
+  context.renderLiveScoreboard = () => { context.renders += 1; };
+  runInNewContext(`${toggle}\ntoggleLiveScoreboardPerspective();\ntoggleLiveScoreboardPerspective();\nresult = { perspective: liveScoreboardPerspective };`, context);
+  assert.deepEqual(context.stored, ['reversed', 'normal']);
+  assert.equal(context.renders, 2);
+  assert.equal(context.result.perspective, 'normal');
+  assert.doesNotMatch(toggle, /state\.|leftPlayer|Firebase|liveReportsV2/);
+});
+
+test('renderLiveScoreboard ориентирует готовый table-side view перед записью в visual left/right DOM', () => {
+  const start = source.indexOf('    function renderLiveScoreboard() {');
+  const end = source.indexOf('\n    function render()', start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const block = source.slice(start, end);
+  assert.match(block, /const tableView = buildLiveScoreboardViewModel\(state\);/);
+  assert.match(block, /const view = orientLiveScoreboardViewModel\(tableView\);/);
+  assert.ok(block.indexOf('orientLiveScoreboardViewModel(tableView)') < block.indexOf('els.liveScoreboardLeftName.textContent = view.left.name'));
+  assert.match(block, /view\.server === view\.left\.player/);
+  assert.match(block, /view\.server === view\.right\.player/);
+});
+
+test('новая side-perspective функция не изменяет спортивную side-change и live publication baseline', () => {
+  for (const name of ['applyScoreboardSide','maybeHandleSideChange','swapSides','buildCompactLiveState']) {
+    assert.equal(functionBlock(source, name), functionBlock(baseline, name), `${name} changed`);
+  }
+});
+
+
+
+
+test('perspective toggle размещён по центру экрана на уровне строки фамилий', () => {
+  const baseRule = source.match(/\.live-scoreboard-perspective-toggle\s*\{([^}]*)\}/s);
+  assert.ok(baseRule, 'base perspective CSS rule missing');
+  const css = baseRule[1];
+  assert.match(css, /left\s*:\s*50%/);
+  assert.match(css, /right\s*:\s*auto/);
+  assert.match(css, /top\s*:\s*auto/);
+  assert.match(css, /bottom\s*:\s*clamp\(24px,\s*calc\(7vh - 24px\),\s*53px\)/);
+  assert.match(css, /transform\s*:\s*translateX\(-50%\)/);
+
+  assert.match(source, /\.live-scoreboard-name-left \{[\s\S]*padding-right:\s*38px;/);
+  assert.match(source, /\.live-scoreboard-name-right \{[\s\S]*padding-left:\s*38px;/);
+  assert.match(source, /@media \(orientation:\s*portrait\)[\s\S]*\.live-scoreboard-perspective-toggle \{\s*bottom:\s*clamp\(22px,\s*calc\(6vh - 24px\),\s*42px\);/);
+});
+test('perspective toggle индицирует reversed только увеличенной толщиной стрелок без тёмного active-фона', () => {
+  const activeRule = source.match(/\.live-scoreboard-perspective-toggle\[aria-pressed="true"\]\s*\{([^}]*)\}/s);
+  assert.ok(activeRule, 'active perspective CSS rule missing');
+  const css = activeRule[1];
+  assert.match(css, /font-weight\s*:\s*900/);
+  assert.match(css, /-webkit-text-stroke\s*:\s*\.45px\s+currentColor/);
+  assert.doesNotMatch(css, /background\s*:/);
+  assert.doesNotMatch(css, /color\s*:/);
+
+  const baseRule = source.match(/\.live-scoreboard-perspective-toggle\s*\{([^}]*)\}/s);
+  assert.ok(baseRule, 'base perspective CSS rule missing');
+  assert.match(baseRule[1], /font-weight\s*:\s*700/);
+});
