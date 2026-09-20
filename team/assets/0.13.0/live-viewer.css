@@ -1,0 +1,97 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f4f6f8;
+  color: #17202a;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; }
+body { min-height: 100dvh; }
+.viewer { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; background: #f4f6f8; }
+.viewer__header { display: grid; gap: 4px; padding: 10px 16px; background: #fff; border-bottom: 1px solid #d8dee4; z-index: 1; }
+.viewer__eyebrow { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #52606d; }
+.viewer__title { margin: 0; font-size: clamp(18px, 3vw, 26px); line-height: 1.15; }
+.viewer__meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; color: #52606d; font-size: 14px; }
+.viewer__body { min-height: 0; position: relative; }
+.viewer__status { min-height: 100%; display: grid; place-content: center; gap: 10px; padding: 24px; text-align: center; }
+.viewer__status h2 { margin: 0; font-size: clamp(22px, 5vw, 34px); }
+.viewer__status p { margin: 0 auto; max-width: 720px; color: #52606d; line-height: 1.5; }
+.viewer__frame { width: 100%; height: 100%; min-height: calc(100dvh - 86px); border: 0; display: block; background: #fff; }
+.viewer__signature { display: none; }
+
+/* Active permanent Live should look like the existing direct viewer.
+   The only parent-page affordance is a quiet version-like signature. */
+.viewer[data-state="live"] { grid-template-rows: 1fr; background: #fff; }
+.viewer[data-state="live"] .viewer__header { display: none; }
+.viewer[data-state="live"] .viewer__body { min-height: 100dvh; }
+.viewer[data-state="live"] .viewer__frame { height: 100dvh; min-height: 100dvh; }
+.viewer[data-state="live"] .viewer__signature {
+  position: fixed;
+  z-index: 6;
+  top: max(8px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  display: block;
+  margin: 0;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.72);
+  color: rgba(90,98,110,.72);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.15;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Waiting is deliberately the opposite: it must be obvious from a distance
+   that there is no current Live publication yet. */
+.viewer[data-state="waiting"] .viewer__body {
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vw, 48px);
+  background: #eef1f5;
+}
+.viewer[data-state="waiting"] .viewer__status {
+  min-height: 0;
+  width: min(760px, 100%);
+  padding: clamp(30px, 6vw, 58px) clamp(22px, 6vw, 64px);
+  border: 2px solid #e0a31a;
+  border-radius: 18px;
+  background: #fff7df;
+  box-shadow: 0 18px 46px rgba(53,63,78,.14);
+}
+.viewer[data-state="waiting"] .viewer__status h2 {
+  color: #704900;
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 800;
+  letter-spacing: -.025em;
+  line-height: 1.05;
+}
+.viewer[data-state="waiting"] .viewer__status p {
+  max-width: 620px;
+  color: #4f5661;
+  font-size: clamp(16px, 2.4vw, 20px);
+  line-height: 1.45;
+}
+
+.viewer[data-view="scoreboard"] .viewer__header { padding-block: 7px; }
+.viewer[data-view="scoreboard"] .viewer__frame { min-height: calc(100dvh - 72px); }
+.viewer[data-view="scoreboard"][data-state="live"] .viewer__frame { min-height: 100dvh; }
+.viewer[data-state="disconnected"] .viewer__status,
+.viewer[data-state="error"] .viewer__status { background: #fff6f5; }
+.viewer[data-state="completed"] .viewer__status { background: #f2f8f3; }
+@media (max-width: 640px) {
+  .viewer__header { padding: 8px 10px; }
+  .viewer__meta { font-size: 12px; gap: 3px 10px; }
+  .viewer__status { padding: 18px; }
+  .viewer__frame { min-height: calc(100dvh - 76px); }
+  .viewer[data-state="live"] .viewer__frame { min-height: 100dvh; }
+  .viewer[data-state="waiting"] .viewer__body { padding: 14px; }
+  .viewer[data-state="waiting"] .viewer__status { padding: 30px 18px; border-radius: 14px; }
+  .viewer[data-state="live"] .viewer__signature {
+    top: max(6px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+    font-size: 11px;
+  }
+}
