@@ -1,78 +1,62 @@
-# ttScore
+# ttScore suite 0.1.7
 
-**ttScore** — счётчик для настольного тенниса. Он помогает вести счёт встречи в реальном времени или во время просмотра видео, а затем формирует подробный статистический отчёт.
+Integrated table-tennis scoring suite.
 
-Разработчик — ChatGPT (GPT-5.6 Sol):
+Components:
 
-- до v0.2.0 — в режиме «Чат» (AI-ассистент в диалоговом интерфейсе, интеллект средний);
-- начиная с v0.2.0 — в режиме «Работа» (AI-агент в диалоговом интерфейсе, интеллект высокий).
+- **ttScore 0.8.7** — individual-match scoring, reporting and Team-bound handoff;
+- **ttscore_team 0.11.9** — team-match creation, administration, public view and Firebase persistence.
 
-Текущая принятая версия: **v0.2.28**.
+## Entrypoints
 
-[Открыть ttScore v0.2.28](https://t39s.github.io/ttscore/ttScore_0.2.28.html)
+- `index.html` — current ttScore entrypoint; byte-identical to `ttscore_0.8.7.html`.
+- `team/index.html` — current Team entrypoint; byte-identical to `team/ttscore_team_0.11.9.html`.
 
-## Возможности
+The release artifact contains only the current executable versions and the current Team dependency closure. Older deployable runtime versions used for rollback belong on hosting, not inside this release ZIP.
 
-- ведение счёта встреч из 3, 5 или 7 партий;
-- объявление счёта (генерация речи);
-- `Undo`;
-- получение одним из спортсменов форы;
-- подробный отчёт со счётом по партиям, результативностью на своей подаче и приёме, графиком разницы в счёте и журналом розыгрышей;
-- просмотр отчёта с позиции любого из спортсменов;
-- сохранение данных встречи в каноническом JSON Schema v1;
-- повторное открытие JSON и построение отчёта без повторного ввода счёта;
-- автономный HTML-отчёт, который можно открыть без ttScore.
+## Team control-tab policy
 
-## Основной сценарий
+Within one browser profile, only one **controlling** `ttscore_team` tab may be active at a time:
 
-1. Откройте приложение в браузере.
-2. Укажите дату встречи, имена спортсменов, формат (количество партий во встрече), первого подающего, расположение и при необходимости фору.
-3. Нажмите **«Начать встречу»**.
-4. После каждого розыгрыша нажимайте на сторону спортсмена, выигравшего очко.
-5. Откройте отчёт во время встречи или после её завершения.
-6. Нажмите кнопку с пиктограммой системной передачи, чтобы сохранить или отправить файлы встречи.
+- `mode=create` — exclusive control lock required;
+- `mode=edit` — exclusive control lock required;
+- public `view` — no control lock; any number of read-only views may be opened in parallel.
 
-Для просмотра ранее сохранённых данных нажмите **«Посмотреть сохранённый отчёт»** и выберите соответствующий JSON-файл.
+The control lock is implemented with the Web Locks API. If the API is unavailable, `create/edit` fail closed instead of starting without the invariant.
 
-## Данные и отчёт
+This browser-local rule does not replace Firebase cross-client concurrency protection. Writes from different browsers/devices remain guarded by `_writeRevision` rules.
 
-Для каждой встречи ttScore создаёт два файла с общей основой имени:
+## Team integration boundary
 
-```text
-tts_YYYY-MMDD-xxxx.json
-tts_YYYY-MMDD-xxxx.html
-```
+Automatic Team result/Live mutation requires an exact current Team binding (`teamMatchId`, `individualMatchId`, assignment generation and `ttScoreMatchId`). Names/date/format similarity is not authority.
 
-- **JSON** — канонический долговременный источник данных встречи.
-- **HTML** — автономный снимок подробного отчёта на момент его создания.
+A standalone/offline ttScore match without a valid Team binding is an emergency workflow. Its score/report/Live are not imported automatically into Team. Administrator restores the final Team score and report manually if required.
 
-Если браузер не умеет передавать два файла одновременно, приложение использует ZIP с теми же JSON и HTML. Возможность системной передачи файлов зависит от браузера и операционной системы.
+## Durable handoff
 
-Сохранённый JSON позволяет позднее заново построить актуальное представление отчёта. В v0.2.28 реализовано одно подробное представление; архитектура данных допускает добавление других представлений в будущих версиях.
+Team-bound completion uses one durable `pendingRelease` in the ttScore Team session and one Team-side `pendingFinishedMatch` record. Writes and deletes are verified against `localStorage`; failure is fail-closed and remains visible for retry/recovery.
 
-## Приватность и хранение
+Undo and reassignment advance assignment identity. A delayed report from an older attempt cannot be attached to a later same-score attempt unless the generation proves it is the same lifecycle.
 
-ttScore работает полностью в браузере:
+## Current limitations
 
-- серверная часть отсутствует;
-- данные встречи не отправляются на сервер;
-- незавершённая встреча хранится в `localStorage` текущего браузера;
-- импортированный JSON временно хранится в `sessionStorage` вкладки отчёта.
+Two limitations are consciously accepted for this version:
 
-`localStorage` не является архивом. Данные могут быть потеряны при очистке данных сайта, смене браузера, устройства или адреса публикации. Для долговременного хранения сохраняйте JSON-файл встречи.
+- **KI-001 — dynamic browser-storage failure during an already-running match.** In the rare sequence where `localStorage` becomes unwritable after a successful start and the page then reloads/crashes before a later successful save, the durable local score may lag behind the visible in-memory score. Product risk: **LOW**; decision: **ACCEPT**.
+- **KI-002 — legacy v1 pending after Team Undo and a new same-score attempt.** A legacy RC16-format pending can be cleared without modern attempt proof in a narrow manual-Undo sequence. Team sporting state remains correct and no stale result/report is applied. Product risk: **VERY LOW**; decision: **ACCEPT**.
 
-История `Undo` действует только в текущей сессии и после перезагрузки страницы не восстанавливается.
+`KNOWN_ISSUES.md` is the normative record with the complete scenarios and assessments.
 
-## Запуск
+## Release contents and evidence
 
-Приложение состоит из одного HTML-файла и не требует установки или сборки.
+- `VERSIONS.md` — compact version history/current component map;
+- `RELEASE_NOTES.md` — release changes;
+- `KNOWN_ISSUES.md` — normative known limitations;
+- `VERIFICATION.md` — verification provenance and rebuild status;
+- `docs/GENERAL_REVIEW.md` — completed internal product review summary;
+- `docs/` — current product/release documentation;
+- `tests/` — test suite used for the reviewed product state;
+- `evidence/` — preserved test/static evidence, internal review and rebuild record;
+- `MANIFEST_SHA256.txt` — integrity manifest for the release contents.
 
-Рекомендуемый вариант — публикация на GitHub Pages или другом статическом HTTPS-хостинге. Это обеспечивает постоянный origin, необходимый для корректного восстановления текущей встречи из браузерного хранилища.
-
-Также файл можно открыть локально для ознакомления, но поведение хранилища и системной передачи файлов в таком режиме зависит от браузера.
-
-## Разработка
-
-Проект развивается от последней принятой версии. Каждая рабочая версия содержит одно логически изолированное изменение, проходит зафиксированные проверки и становится новой базой только после пользовательской приёмки.
-
-Подробности и ограничения конкретных версий приведены в `ttScore_version_history.md`.
+Publication and rollback rules are documented in `docs/PUBLICATION_AND_ROLLBACK.md`.
