@@ -2,29 +2,27 @@
 
 Artifact stage is represented by the outer archive filename and is not a separate product version.
 
-## Current target — 0.2.0
+## Current target — suite 0.3.0
 
 | Component | Version | Change |
 |---|---:|---|
-| ttScore suite | 0.2.0 | Release 2 target |
-| ttScore | 0.8.7 | unchanged bytes and accepted 0.11.9 Team-adapter dependency closure |
-| ttscore_team | 0.12.0 | permanent Team Live viewers |
+| ttScore suite | 0.3.0 | Release 3 target: automatic Team-bound Live |
+| ttScore | 0.9.6 | automatic Live controller + foreground/server-fresh Team-context recovery |
+| ttscore_team | 0.12.1 | foreground/server-fresh recovery for Team view and permanent Live viewers |
 
 Current dependency closure:
 
-- `index.html` = `ttscore_0.8.7.html` byte-for-byte;
-- ttScore still imports `team/assets/0.11.9/ttscore-team-adapter.mjs`;
-- the complete `team/assets/0.11.9/` directory is restored byte-for-byte from accepted suite 0.1.7, so the versioned 0.11.9 URLs keep their original identity;
-- `team/index.html` = `team/ttscore_team_0.12.0.html` byte-for-byte;
-- active Team 0.12.0 and permanent viewers use `team/assets/0.12.0/`;
-- no 0.11.9 asset forwards to 0.12.0.
+- `index.html` = `ttscore_0.9.6.html` byte-for-byte;
+- ttScore imports `team/assets/0.12.1/ttscore-team-adapter.mjs`;
+- current Team entrypoints use `team/assets/0.12.1/`;
+- the 0.12.1 closure is derived from 0.12.0: 15/18 modules are byte-identical; changed modules are `app.mjs`, `live-viewer-app.mjs`, and `ttscore-team-adapter.mjs`;
+- only the current 0.12.1 Team runtime closure is packaged; superseded runtime closures are not carried forward;
+- Firebase Team schema/rules are unchanged.
 
-## Accepted baseline — 0.1.7
+## Accepted input baseline
 
-| Component | Version |
-|---|---:|
-| ttScore suite | 0.1.7 |
-| ttScore | 0.8.7 |
-| ttscore_team | 0.11.9 |
+`ttscore_suite_0.2.0-rc.7.zip`
 
-Accepted baseline exact ZIP SHA-256: `c9fa770716923aab25d62d73a98c3618ec7f061bec29ca7698a38b88dfc6a54a`.
+SHA-256: `9be552696b718d874fc977dd95c6fa1a3f23551ecc2069e9c50f90f18df9c842`
+
+Components: ttScore 0.8.7 + ttscore_team 0.12.0.

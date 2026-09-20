@@ -1,37 +1,41 @@
-# ttScore suite 0.2.0 — Release Candidate 7
+# ttScore suite 0.3.0
 
-Integrated table-tennis scoring suite.
+Release 3 adds automatic Live publication for a started personal match that has a valid current Team binding.
 
 ## Components
 
-- **ttScore 0.8.7** — unchanged from accepted 0.1.7 baseline.
-- **ttscore_team 0.12.0** — Team administration plus permanent public Team Live viewers.
+- **ttScore 0.9.6** — scoring, reports and Live; Team mode starts/resumes Live automatically, safely retires the previous source, and server-revalidates Team context after browser foreground/reconnect events.
+- **ttscore_team 0.12.1** — permanent Team scoreboard/report plus public Team view with server-fresh recovery after foreground/reconnect.
 
-## Entrypoints
+Baseline for this cycle: accepted `ttscore_suite_0.2.0-rc.7.zip`, SHA-256 `9be552696b718d874fc977dd95c6fa1a3f23551ecc2069e9c50f90f18df9c842`.
 
-- `index.html` — ttScore.
-- `team/index.html` — Team create/edit/view.
-- `team/live.html?match=<team-id>&view=scoreboard` — permanent public Team scoreboard.
-- `team/live.html?match=<team-id>&view=report` — permanent public Team report.
+## Team-mode Auto Live
 
-## RC7 UI/UX refinement
+After Umpire starts the current assigned personal match and its Team binding/local state are saved successfully, ttScore automatically creates or resumes the existing Live publication. After the first Firebase Live snapshot is confirmed, direct scoreboard/report URLs are synchronized to Team and the permanent Team viewer URLs follow the current personal match.
 
-RC7 is built on the field-verified RC6 behavior and changes only permanent-viewer presentation.
+Repeated start/auth/online/reload events converge on the existing publication instead of creating another source. Temporary publication or Team-link handoff failures retry without changing the sporting result. There is no user-facing Team Live pause: interruption of Live is a technical failure/recovery state.
 
-When Live is active, the permanent scoreboard/report no longer presents a separate Team header. The embedded direct viewer fills the page and differs only by a quiet version-like signature: `Постоянная ссылка · ttScore Team`.
+When a finished personal match is finalized, its Live source is retired from the local publisher lifecycle before the next personal match can auto-publish. Physical deletion of the old Firebase source is cleanup: after ownership is confirmed it may be deferred, including when an old Firebase write is still pending. Any late completion of the retired source is isolated from the new source and queued for cleanup.
 
-When the current personal-match Live has not yet been published, the waiting state is deliberately prominent: `Ожидание live-трансляции` is shown as a large central notice with the current pair.
+## Foreground / stale-realtime recovery
 
-No Firebase transport, Team write path, scoring logic, assignment logic or iframe target-selection logic is changed in RC7.
+Field testing of RC6 showed an intermittent stale-page failure during Team transitions: Team view, the permanent scoreboard and ttScore could sometimes require manual reload. RC7 addresses that dependency by adding explicit server-fresh recovery; exact field confirmation remains required before finalization. Realtime remains the fast path, but each affected page now performs a no-store server-fresh Team read on relevant foreground/reconnect lifecycle events. Realtime callbacks are coalesced with server confirmation so a late cached callback cannot permanently leave the page on an older assignment.
+
+For the permanent viewer, a successful server-fresh read is sufficient to restore the current viewer even if the RTDB `.info/connected` state has not yet recovered; while RTDB still reports disconnected, a short REST retry watchdog keeps the viewer current.
+
+Standalone mode remains manual and no Team Result/Live write is inferred without a valid Team binding. The accepted single controlling Team-context model remains unchanged.
+
+Intermediate RCs are prototypes, not deployed production versions. Independent RC validation should start from a clean prototype browser state; browser state must not be cleared inside one Team-match/recovery run.
+
+## Entry points
+
+- `index.html` — ttScore 0.9.6
+- `ttscore_0.9.6.html` — versioned ttScore entrypoint; byte-identical to `index.html`
+- `team/index.html` — ttscore_team 0.12.1
+- `team/live.html?match=<team-id>&view=scoreboard|report` — permanent Team viewers
 
 ## Verification
 
-- full Node regression: **179/179 PASS**;
-- focused Release-2 tests: **23/23 PASS**;
-- shipped JavaScript syntax: PASS;
-- UI/UX browser rendering: PASS for active desktop, waiting desktop and waiting mobile states;
-- exact RC6 → RC7 runtime diff is limited to `team/live.html`, `live-viewer.css` and `live-viewer-contract.mjs`.
+See `VERIFICATION.md`, `docs/GENERAL_REVIEW.md`, `docs/OWNER_SCOPE_UPDATE.md`, `docs/RESEARCH.md`, `docs/PLAN.md`, and `evidence/`.
 
-## Known issues
-
-`KNOWN_ISSUES.md` is the sole normative registry of accepted product limitations.
+`KNOWN_ISSUES.md` is the sole normative registry of accepted current limitations.
