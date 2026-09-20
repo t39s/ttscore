@@ -1,77 +1,19 @@
-# ttScore integration v0.5.0 + v0.11.0 RC16
+# ttScore 0.8.2 + ttscore_team 0.11.1 RC16
 
-RC16 is a targeted positioning refinement of the online-scoreboard side-perspective control, derived from RC15 and ultimately based on the owner-accepted **RC10** baseline.
+## Status
 
-RC11/RC12 were experimental candidates for a different whole-screen 180° rotation interpretation and are **not** the implementation basis of this feature. RC14 corrected table-tennis terminology and evidence portability. RC15 changed only the visual indication of the perspective control. RC16 moves that existing control to the agreed center/name-row position; perspective behavior is unchanged.
+Owner-device stabilization of RC15 after real iOS verification.
 
-## Side-perspective feature
+RC15 was reported as generally functional, but two defects were confirmed on the owner device:
+1. the speech-language mode reset to `Ru` after page reload;
+2. the native iOS range control left visible endpoint gaps at 0% and 100%.
 
-The public online scoreboard now has a device-local side-perspective mode:
+RC16 fixes both defects without changing Team runtime or Firebase Rules.
 
-- `normal`: athlete on the current left side of the table is shown on display-left;
-- `reversed`: athlete on the current left side of the table is shown on display-right.
+- Speech mode is now a device-local preference under `ttScore:speechMode:v1` and survives reload/new match/reset.
+- Volume sliders use explicit WebKit range geometry; the visible track terminates at the thumb centers for 0% and 100%.
+- Speech Voice Profiles architecture remains the RC14/RC15 reset architecture.
+- Stable owner-accepted baseline remains RC4 until explicit owner acceptance.
+- Engineering decision: `ESCALATE` only for owner-controlled iOS/iPadOS re-verification of the two fixes and the existing voice-profile checklist.
 
-The display remains upright. There is no whole-screen rotation or mirrored text.
-
-The complete side payload moves together: athlete name, current game score, match/game count, and server indicator.
-
-## Control and persistence
-
-- Permanent `⇄` touch control on the live scoreboard.
-- 48×48 CSS px target.
-- Last selected perspective is stored in `localStorage` under `ttScore:liveScoreboardPerspective:v1`.
-- Invalid/unavailable storage fails safe to `normal`.
-
-## Architecture boundary
-
-`state.leftPlayer` remains the real sports/table-side state and is unchanged by the display preference.
-
-Firebase/live schema, Team JSON, scoring, Undo and lifecycle are unchanged.
-
-## Runtime scope
-
-Relative to accepted RC10, exactly one runtime file differs:
-
-- `ttScore_0.5.0.html`
-
-`team/` and `firebase-database-rules.json` are byte-identical to RC10.
-
-## RC15 visual refinement
-
-- Active/reversed mode no longer uses a black button background.
-- Normal mode keeps the existing arrow thickness.
-- Reversed mode is indicated only by a bolder `⇄` glyph.
-- Runtime diff RC14 → RC15 is CSS-only inside `ttScore_0.5.0.html`.
-
-## RC16 position refinement
-
-- The perspective toggle is centered horizontally on the scoreboard.
-- Vertically it is centered in the athlete-name row, directly on the central divider.
-- Left/right name cells reserve symmetric space around the 48×48 control to prevent text overlap.
-- Placement is responsive for landscape and portrait, including 320×568.
-- Runtime diff RC15 → RC16 is CSS-only inside `ttScore_0.5.0.html`.
-
-## Verification
-
-- Full Node regression: **269/269 PASS**.
-- Chromium functional side-perspective test: **6/6 PASS**.
-- RC15 toggle computed-style check: PASS (same neutral background/color; 700 → 900 + 0.45px stroke).
-- Chromium viewport geometry matrix: **5/5 PASS**, including exact center/name-row alignment and no name-text overlap.
-- Inline JavaScript syntax: PASS.
-- Team `.mjs` syntax: PASS.
-
-See:
-
-- `docs/RC16_PERSPECTIVE_TOGGLE_CENTER_POSITION.md`
-- `docs/RC15_PERSPECTIVE_TOGGLE_VISUAL_PATCH.md`
-
-- `docs/PRODUCT_GOAL_SCOREBOARD_SIDE_PERSPECTIVE.md`
-- `docs/RC14_SCOREBOARD_SIDE_PERSPECTIVE.md`
-- `docs/GENERAL_REVIEW_RC14.md`
-- `docs/OWNER_ACCEPTANCE_CHECKLIST_RC14.md`
-- `docs/NEXT_CYCLE_BRIEF_RC14.md`
-- `docs/RC14_TABLE_SIDE_TERMINOLOGY_FIX.md`
-
-## Decision
-
-**STABILIZE** pending owner visual acceptance of RC16.
+See `docs/GENERAL_REVIEW.md`, `docs/EVIDENCE.md`, `docs/OWNER_ACCEPTANCE_CHECKLIST.md`, and `docs/RC16_OWNER_DEVICE_DEFECT_STABILIZATION.md`.
