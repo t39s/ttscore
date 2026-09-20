@@ -1,12 +1,23 @@
-# ttScore suite 0.4.8
+# ttScore suite 0.4.0
 
 Release 4 adds explicit personal-match / counter phases shared by ttScore, Team and Live while preserving the accepted Release-3 identity, Auto-Live and recovery model.
 
 ## Components
 
-- **ttScore 0.10.0** — durable counter phase, separate preparation/start actions, blank-vs-zero display, held final-game indication, explicit completion intent, one-step durable Undo across reload, and phase-aware Live state.
-- **ttscore_team 0.13.0** — attempt-scoped public `livePhase`, cross-attempt stale-write rejection, phase-aware Team UI, explicit-completion recovery, and clearing of stale phase on transition/Undo/assignment change.
+- **ttScore 0.10.2** — durable counter phase, separate preparation/start actions, blank-vs-zero display, held final-game indication, explicit completion intent, one-step durable Undo across reload, and phase-aware Live state.
+- **ttscore_team 0.13.2** — attempt-scoped public `livePhase`, cross-attempt stale-write rejection, phase-aware Team UI, explicit-completion recovery, and clearing of stale phase on transition/Undo/assignment change.
 - Product baseline: accepted `ttscore_suite_0.3.0-rc.7.zip`, SHA-256 `1109e3ed10029b1d2da9398e74ab0a5cbaf7d99165884ca13cc2b9e534428ecf`.
+
+
+## Team match start lifecycle
+
+Team creation/publication is now separate from Team start. A newly created Team has every personal match `planned`; this derived state is `scheduled`. Its public Team page and permanent viewer URLs can be distributed in advance and explicitly say that the Team match has not started.
+
+Administrator starts the Team only from the Firebase Team editor through **«Начать командную встречу»** plus a confirmation step. The guarded Start changes only the first personal match in current order from `planned` to `current`. It does not start a ttScore personal match, a game, or Auto Live.
+
+`teamAssignment()` exposes scheduled Team as non-authoritative `status: scheduled`; ttScore binding/start still requires `status: current`. After confirmed Start, the existing Team-bound ttScore/Auto-Live lifecycle continues unchanged. Team schemaVersion remains 4 and Firebase Team Rules are unchanged.
+
+RC11 hardens the confirmation boundary found defective in independent RC10 review: Team Start is unavailable while the editor has unpublished changes, and the confirmation is bound to the exact Firebase source revision and first personal match that the Administrator reviewed. If the source changes before Confirm is committed, Start fails closed and requires a new confirmation.
 
 ## Counter lifecycle
 
@@ -56,10 +67,10 @@ There is no user-facing Pause Live in the accepted baseline. Network interruptio
 
 ## Entry points
 
-- `index.html` — ttScore 0.10.0.
-- `ttscore_0.10.0.html` — byte-identical versioned ttScore entrypoint.
-- `team/index.html` — ttscore_team 0.13.0.
-- `team/ttscore_team_0.13.0.html` — versioned Team entrypoint.
+- `index.html` — ttScore 0.10.2.
+- `ttscore_0.10.2.html` — byte-identical versioned ttScore entrypoint.
+- `team/index.html` — ttscore_team 0.13.2.
+- `team/ttscore_team_0.13.2.html` — versioned Team entrypoint.
 - `team/live.html?match=<team-id>&view=scoreboard|report` — unchanged permanent Team viewer URL format.
 
 See `VERIFICATION.md`, `docs/RESEARCH.md`, `docs/PLAN.md`, `docs/GENERAL_REVIEW.md`, and `DECISION.md`. `KNOWN_ISSUES.md` is the sole normative registry of accepted product limitations.
