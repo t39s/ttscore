@@ -1,4 +1,4 @@
-# ttScore suite 0.4.0
+# ttScore suite 0.4.8
 
 Release 4 adds explicit personal-match / counter phases shared by ttScore, Team and Live while preserving the accepted Release-3 identity, Auto-Live and recovery model.
 
